@@ -9,10 +9,12 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.StrSubstitutor;
 
 /**
  * Manages a page hosted by the Weebly site. Given a URL to a page, can
@@ -33,6 +35,11 @@ public class WeeblyPage {
 
 	/** Contents of the Weebly page */
 	private List<String> lines;
+
+	public static enum SubstitutePolicy {
+		keep, remove, comment
+	};
+	private SubstitutePolicy unresolvedVariablePolicy = SubstitutePolicy.comment;
 
 	/**
 	 * Constructs a page by downloading a page from the Weebly servers.
@@ -169,6 +176,32 @@ public class WeeblyPage {
 	public void printPage(PrintStream out) {
 		for (String line : lines)
 			out.println(line);
+	}
+
+	/** The policy for handling unresolved variables */
+	public SubstitutePolicy getUnresolvedVariablePolicy() {
+		return unresolvedVariablePolicy;
+	}
+
+	/** Change the policy for handling unresolved variables */
+	public void setUnresolvedVariablePolicy(SubstitutePolicy unresolvedVariablePolicy) {
+		this.unresolvedVariablePolicy = unresolvedVariablePolicy;
+	}
+
+	/**
+	 * Finds variables and replaces them with their values. Variables start with "${" and end with "}", and between is
+	 * the variable name. Varible names must contain no spaces, and be limited to alphanumeric characters. Disposition
+	 * of unresolved variables is controlled by the {@link #setUnresolvedVariablePolicy()} setting
+	 * 
+	 * @param map Map of variable names to values
+	 */
+	public void substituteVariables(Map<String, String> map) {
+		StrSubstitutor substitutor = new StrSubstitutor(map);
+		for (ListIterator<String> iter = lines.listIterator(); iter.hasNext();) {
+			String line = iter.next();
+			String updated = substitutor.replace(line);
+			if (!updated.equals(line)) iter.set(updated);
+		}
 	}
 
 }

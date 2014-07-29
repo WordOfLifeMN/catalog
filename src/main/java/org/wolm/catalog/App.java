@@ -5,6 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -68,6 +71,14 @@ public class App {
 		URL url = new URL("http://www.wordoflifemn.org/media-catalog.html");
 		WeeblyPage weeblyCatalogPage = new WeeblyPage(url);
 		weeblyCatalogPage.preparePageForRemoteHosting();
+
+		// create a map of content to substitute
+		Map<String, String> content = new HashMap<>();
+		content.put("Date", new Date().toString());
+		content.put("Title", "Word of Life Ministries Online Catalog");
+
+		// insert the content
+		weeblyCatalogPage.substituteVariables(content);
 
 		// output to the designated file
 		if (outputFileName == null) weeblyCatalogPage.printPage(System.out);
