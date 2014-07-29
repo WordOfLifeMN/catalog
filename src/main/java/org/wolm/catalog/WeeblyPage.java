@@ -28,7 +28,10 @@ import org.apache.commons.lang3.StringUtils;
 public class WeeblyPage {
 	public static final String DEV_NULL_URL = "file:///dev/null";
 
+	/** URL of the page being loaded */
 	private final URL url;
+
+	/** Contents of the Weebly page */
 	private List<String> lines;
 
 	/**

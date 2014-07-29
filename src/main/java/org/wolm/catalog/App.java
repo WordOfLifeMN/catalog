@@ -1,6 +1,9 @@
 package org.wolm.catalog;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 
 import com.beust.jcommander.JCommander;
@@ -31,6 +34,9 @@ public class App {
 	@Parameter(names = { "-v", "--verbose" }, description = "Print more output.")
 	private boolean verbose = false;
 
+	@Parameter(names = { "-o", "--out" }, description = "Output file name.")
+	private String outputFileName = null;
+
 	/** Construct the application */
 	private App() {
 		super();
@@ -58,9 +64,17 @@ public class App {
 	 * @throws IOException
 	 */
 	public void catalog() throws Exception {
+		// read the Weebly template page
 		URL url = new URL("http://www.wordoflifemn.org/media-catalog.html");
 		WeeblyPage weeblyCatalogPage = new WeeblyPage(url);
 		weeblyCatalogPage.preparePageForRemoteHosting();
-		weeblyCatalogPage.printPage(System.out);
+
+		// output to the designated file
+		if (outputFileName == null) weeblyCatalogPage.printPage(System.out);
+		else {
+			try (PrintStream outStream = new PrintStream(new FileOutputStream(new File(outputFileName)))) {
+				weeblyCatalogPage.printPage(outStream);
+			}
+		}
 	}
 }
