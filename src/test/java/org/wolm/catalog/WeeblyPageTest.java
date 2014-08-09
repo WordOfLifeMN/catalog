@@ -96,6 +96,20 @@ public class WeeblyPageTest {
 			assertThat(page.getLines().get(2)).contains("<base ");
 			assertThat(page.getLines().get(3)).contains("</head>");
 		}
+
+		@Test
+		public void variablesInHeadShouldBeSuppressed() throws Exception {
+			WeeblyPage page = new WeeblyPage(asList(new String[] { "<html>", "<head>",
+					"<title>Media Catalog - Word of Life Ministries</title>",
+					"<meta property='og:description' content='${Content}' />", "</head>", "<body>",
+					"<div><${Content}</div>", "</body>" }));
+
+			page.preparePageForRemoteHosting();
+
+			assertThat(page.getLines().get(4)).doesNotContain("${Content}");
+			assertThat(page.getLines().get(4)).contains("Content");
+			assertThat(page.getLines().get(7)).contains("${Content}");
+		}
 	}
 
 	public static class ConvertRelativeLinkHrefToAbsolute {

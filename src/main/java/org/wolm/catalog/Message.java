@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 /**
  * Stores one message from the message log
  * 
@@ -169,54 +171,71 @@ public class Message {
 
 	public boolean isValid(PrintStream s) {
 		boolean valid = true;
+		boolean needsHeader = true;
 
 		if (getTitle() == null) {
-			printValidationError(s, "has no title");
+			printValidationError(s, needsHeader, "has no title");
 			valid = false;
+			needsHeader = false;
 		}
 
 		if (getDate() == null) {
-			printValidationError(s, "has no date");
+			printValidationError(s, needsHeader, "has no date");
 			valid = false;
+			needsHeader = false;
 		}
 
 		int seriesCount = getSeries() == null ? 0 : getSeries().size();
 		int trackCount = getTrackNumbers() == null ? 0 : getTrackNumbers().size();
 		if (seriesCount != trackCount) {
-			printValidationError(s, "is in " + seriesCount + " series, but has track data for " + trackCount);
+			printValidationError(s, needsHeader, "is in " + seriesCount + " series, but has track data for "
+					+ trackCount);
 			valid = false;
+			needsHeader = false;
 		}
 
 		if (getType() != null && !TYPES.contains(getType())) {
-			printValidationError(s, "has an unknown type '" + getType() + "'");
+			printValidationError(s, needsHeader, "has an unknown type '" + getType() + "'");
 			// this is not a validation problem, just a warning that there might be a typo
+			needsHeader = false;
 		}
 
 		if (audioLinkError != null) {
-			printValidationError(s, audioLinkError);
+			printValidationError(s, needsHeader, audioLinkError);
 			valid = false;
+			needsHeader = false;
 		}
 
 		if (videoLinkError != null) {
-			printValidationError(s, videoLinkError);
+			printValidationError(s, needsHeader, videoLinkError);
 			valid = false;
+			needsHeader = false;
 		}
 
 		if (visibilityError != null) {
-			printValidationError(s, visibilityError);
+			printValidationError(s, needsHeader, visibilityError);
 			valid = false;
+			needsHeader = false;
 		}
 
 		return valid;
 	}
 
-	private void printValidationError(PrintStream s, String error) {
-		if (s != null) s.println("Message '" + getTitle() + "' " + error + ".");
+	private void printValidationError(PrintStream s, boolean needsHeader, String error) {
+		if (s == null) return;
+
+		if (needsHeader) s.println("Message '" + getTitle() + "' has the following problems:");
+		s.println("    * " + error);
 	}
 
 	@Override
 	public String toString() {
 		DateFormat fmt = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM);
-		return title + " (" + fmt.format(date) + ")";
+		return getTitle() + " (" + fmt.format(getDate()) + ")";
+	}
+
+	public String toHtml() {
+		DateFormat fmt = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM);
+		return "<b>" + StringEscapeUtils.escapeHtml4(getTitle()) + "</b> (" + fmt.format(getDate()) + ")";
 	}
 }

@@ -143,6 +143,7 @@ public class WeeblyPage {
 	 * Handles converting all relative references in the web page to absolute
 	 */
 	void preparePageForRemoteHosting() {
+		boolean inHead = false;
 		for (ListIterator<String> iter = lines.listIterator(); iter.hasNext();) {
 			String line = iter.next();
 
@@ -152,7 +153,16 @@ public class WeeblyPage {
 			// add a base href in the header
 			if (line.matches("\\s*<head>\\s*")) {
 				iter.add("<base href=\"http://www.wordoflifemn.org/\" />");
+				inHead = true;
 			}
+
+			if (inHead) {
+				// replace variables with non-variable string
+				String newLine = line.replaceAll("\\$\\{([^\\}]*)\\}", "$1");
+				if (newLine != line) iter.set(newLine);
+			}
+
+			if (line.matches("\\s*</head>\\s*")) inHead = false;
 		}
 	}
 

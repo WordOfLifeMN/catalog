@@ -10,10 +10,27 @@ import org.wolm.google.GoogleSpreadsheet;
 import org.wolm.google.GoogleWorksheet;
 
 public class Catalog {
+	private String messageSpreadsheetName = "Messages";
 	private List<Message> messages;
 
 	public Catalog() {
 		super();
+	}
+
+	public String getMessageSpreadsheetName() {
+		return messageSpreadsheetName;
+	}
+
+	public void setMessageSpreadsheetName(String messageSpreadsheetName) {
+		this.messageSpreadsheetName = messageSpreadsheetName;
+	}
+
+	public List<Message> getMessages() {
+		return messages;
+	}
+
+	public void setMessages(List<Message> messages) {
+		this.messages = messages;
 	}
 
 	/**
@@ -34,8 +51,9 @@ public class Catalog {
 	 * @return A list of all messages read from the message logs
 	 */
 	private List<Message> initMessages(GoogleHelper google) throws Exception {
-		GoogleSpreadsheet spreadsheet = google.getSpreadsheet("Messages");
-		if (spreadsheet == null) throw new Exception("Cannot find spreadsheet called 'Messages' on Google.");
+		GoogleSpreadsheet spreadsheet = google.getSpreadsheet(messageSpreadsheetName);
+		if (spreadsheet == null) throw new Exception("Cannot find spreadsheet called '" + messageSpreadsheetName
+				+ "' on Google.");
 
 		GoogleWorksheet worksheet = spreadsheet.getWorksheet("Media Log");
 		if (worksheet == null) throw new Exception("Cannot find worksheet called 'Media Log' in the spreadsheet.");
@@ -67,7 +85,7 @@ public class Catalog {
 					series.add(s.trim());
 				msg.setSeries(series);
 			}
-			value = row.getValue("track#");
+			value = row.getValue("track");
 			if (value != null) {
 				String[] trackArray = value.split(";");
 				List<Integer> tracks = new ArrayList<>(trackArray.length);
@@ -117,10 +135,24 @@ public class Catalog {
 	public String toString() {
 		StringBuffer b = new StringBuffer();
 
-		if (messages != null) {
-			for (Message m : messages) {
+		if (getMessages() != null) {
+			for (Message m : getMessages()) {
 				b.append(m).append('\n');
 			}
+		}
+
+		return b.toString();
+	}
+
+	public String toHtml() {
+		StringBuffer b = new StringBuffer();
+
+		if (getMessages() != null) {
+			b.append("<div><ul>\n");
+			for (Message m : getMessages()) {
+				b.append("<li>").append(m.toHtml()).append("</li>\n");
+			}
+			b.append("</ul></div>\n");
 		}
 
 		return b.toString();

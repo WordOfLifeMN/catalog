@@ -79,7 +79,7 @@ public class App {
 
 		Catalog catalog = new Catalog();
 		catalog.init();
-		content.put("Content", catalog.toString());
+		content.put("Content", catalog.toHtml());
 
 		// insert the content
 		weeblyCatalogPage.substituteVariables(content);
