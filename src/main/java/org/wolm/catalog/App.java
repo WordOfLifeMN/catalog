@@ -18,18 +18,6 @@ import com.beust.jcommander.Parameters;
  */
 @Parameters(separators = "=")
 public class App {
-	public static void main(String[] args) throws Exception {
-		App app = new App();
-
-		JCommander cmd = new JCommander(app, args);
-		if (app.isHelpRequested()) {
-			cmd.usage();
-			System.exit(0);
-		}
-
-		app.catalog();
-	}
-
 	/* Command line parameters */
 	@Parameter(names = { "-h", "--help" }, description = "This help page.", help = true)
 	private boolean helpRequested = false;
@@ -43,6 +31,18 @@ public class App {
 	/** Construct the application */
 	private App() {
 		super();
+	}
+
+	public static void main(String[] args) throws Exception {
+		App app = new App();
+
+		JCommander cmd = new JCommander(app, args);
+		if (app.isHelpRequested()) {
+			cmd.usage();
+			System.exit(0);
+		}
+
+		app.catalog();
 	}
 
 	public boolean isHelpRequested() {
@@ -76,6 +76,10 @@ public class App {
 		Map<String, String> content = new HashMap<>();
 		content.put("Date", new Date().toString());
 		content.put("Title", "Word of Life Ministries Online Catalog");
+
+		Catalog catalog = new Catalog();
+		catalog.init();
+		content.put("Content", catalog.toString());
 
 		// insert the content
 		weeblyCatalogPage.substituteVariables(content);
