@@ -245,7 +245,7 @@ public class Series {
 
 	public String toHtml() {
 		DateFormat fmt = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM);
-		return "<b>" + getTitle() + "</b> - " + getMessageCount() + " messages (" + fmt.format(getStartDate()) + "-"
+		return "<b>!!" + getTitle() + "</b> - " + getMessageCount() + " messages (" + fmt.format(getStartDate()) + "-"
 				+ (getEndDate() == null ? "" : fmt.format(getEndDate())) + ")";
 	}
 
