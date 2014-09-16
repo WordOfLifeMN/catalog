@@ -1,11 +1,15 @@
 package org.wolm.google;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,17 +21,32 @@ import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
+/**
+ * Helps access data on the Google Drive.
+ * <p>
+ * To configure this by default, create a file ~/.wolm/googledrive.properties that contains:
+ * <ul>
+ * <li>username=
+ * <li>password=
+ * </ul>
+ * If this file exists, this class will be initialized with the values found therein. If this file does not exist, then
+ * you must configure this object manually with {@code setUserName()} and {@code setPassword()} before using it.
+ * 
+ * @author wolm
+ */
 public class GoogleHelper {
 	private final String applicationName;
 	private final URL feedUrl;
 
 	private SpreadsheetService service;
-	private String userName = "wordoflife.mn@gmail.com";
-	private String password = "Minn2004";
+	private String userName;
+	private String password;
 
 	public GoogleHelper(String applicationName) {
 		super();
 		this.applicationName = applicationName;
+
+		configure();
 
 		URL feed = null;
 		try {
@@ -62,6 +81,8 @@ public class GoogleHelper {
 	/** @return List of all spreadsheets that the user has access to */
 	@Nonnull
 	public List<GoogleSpreadsheet> getAllSpreadsheets() throws AuthenticationException, IOException, ServiceException {
+		isConfigured();
+
 		try {
 			SpreadsheetFeed feed = getService().getFeed(feedUrl, SpreadsheetFeed.class);
 			List<SpreadsheetEntry> entries = feed.getEntries();
@@ -87,6 +108,7 @@ public class GoogleHelper {
 	 */
 	@Nullable
 	public GoogleSpreadsheet getSpreadsheet(@Nonnull String name) throws IOException, ServiceException {
+		isConfigured();
 
 		SpreadsheetQuery query = new SpreadsheetQuery(feedUrl);
 		query.setTitleQuery(name);
@@ -95,6 +117,37 @@ public class GoogleHelper {
 		SpreadsheetFeed feed = getService().getFeed(query, SpreadsheetFeed.class);
 		List<SpreadsheetEntry> spreadsheets = feed.getEntries();
 		return spreadsheets.isEmpty() ? null : new GoogleSpreadsheet(this, spreadsheets.get(0));
+	}
+
+	/**
+	 * Configures this class from a properties file on disk
+	 * 
+	 */
+	private void configure() {
+		File propertiesFile = new File(System.getenv("HOME") + "/.wolm/googledrive.properties");
+		if (!propertiesFile.exists()) return;
+
+		try (Reader reader = new FileReader(propertiesFile)) {
+			Properties properties = new Properties();
+			properties.load(reader);
+			setUserName(properties.getProperty("username"));
+			setPassword(properties.getProperty("password"));
+		}
+		catch (IOException e) {
+			// just ignore, the class must be manually configured
+		}
+	}
+
+	/**
+	 * Checks configuration
+	 * 
+	 * @return <code>true</code> if the class is configured correctly
+	 * @throws IllegalStateException if it is not configured correctly
+	 */
+	private boolean isConfigured() {
+		if (userName == null) throw new IllegalStateException("GoogleHelper has no user name configured");
+		if (password == null) throw new IllegalStateException("GoogleHelper has no password configured");
+		return true;
 	}
 
 }

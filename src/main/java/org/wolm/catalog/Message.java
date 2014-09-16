@@ -34,7 +34,7 @@ public class Message {
 	private transient String visibilityError;
 
 	enum Visibility {
-		publicAccess, privateAccess, unedited
+		PUBLIC, PROTECTED, PRIVATE, UNEDITED
 	}
 
 	private static final List<String> TYPES = Arrays.asList(new String[] { "C.O.R.E.", "Message", "Prayer", "Q&A",
@@ -110,13 +110,20 @@ public class Message {
 
 		switch (visibility) {
 		case "Public":
-			this.visibility = Visibility.publicAccess;
+		case "public":
+			this.visibility = Visibility.PUBLIC;
+			break;
+		case "Protected":
+		case "protected":
+			this.visibility = Visibility.PROTECTED;
 			break;
 		case "Private":
-			this.visibility = Visibility.privateAccess;
+		case "private":
+			this.visibility = Visibility.PRIVATE;
 			break;
 		case "Private (Raw)":
-			this.visibility = Visibility.unedited;
+		case "private (raw)":
+			this.visibility = Visibility.UNEDITED;
 			break;
 		default:
 			this.visibility = null;
@@ -175,14 +182,12 @@ public class Message {
 
 		if (getTitle() == null) {
 			printValidationError(s, needsHeader, "has no title");
-			valid = false;
-			needsHeader = false;
+			valid = needsHeader = false;
 		}
 
 		if (getDate() == null) {
 			printValidationError(s, needsHeader, "has no date");
-			valid = false;
-			needsHeader = false;
+			valid = needsHeader = false;
 		}
 
 		int seriesCount = getSeries() == null ? 0 : getSeries().size();
@@ -190,8 +195,7 @@ public class Message {
 		if (seriesCount != trackCount) {
 			printValidationError(s, needsHeader, "is in " + seriesCount + " series, but has track data for "
 					+ trackCount);
-			valid = false;
-			needsHeader = false;
+			valid = needsHeader = false;
 		}
 
 		if (getType() != null && !TYPES.contains(getType())) {
@@ -202,20 +206,17 @@ public class Message {
 
 		if (audioLinkError != null) {
 			printValidationError(s, needsHeader, audioLinkError);
-			valid = false;
-			needsHeader = false;
+			valid = needsHeader = false;
 		}
 
 		if (videoLinkError != null) {
 			printValidationError(s, needsHeader, videoLinkError);
-			valid = false;
-			needsHeader = false;
+			valid = needsHeader = false;
 		}
 
 		if (visibilityError != null) {
 			printValidationError(s, needsHeader, visibilityError);
-			valid = false;
-			needsHeader = false;
+			valid = needsHeader = false;
 		}
 
 		return valid;

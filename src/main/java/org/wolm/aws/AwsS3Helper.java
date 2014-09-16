@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
+import com.amazonaws.auth.PropertiesFileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
@@ -19,12 +19,24 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
+/**
+ * Helper for accessing Amazon's S3 content.
+ * <p>
+ * To configure, you must have a properties file at ~/.wolm/aws.s3.properties that contains at least the following
+ * values, one per line in 'name=value' format:
+ * <ul>
+ * <li>accessKey=
+ * <li>secretKey=
+ * </ul>
+ * 
+ * @author wolm
+ */
 public class AwsS3Helper {
 
 	@Nonnull
 	private AmazonS3 getS3Client() {
-		AmazonS3Client s3 = new AmazonS3Client(new ClasspathPropertiesFileCredentialsProvider(
-				"org/wolm/aws/AwsCredentials.properties"));
+		AmazonS3Client s3 = new AmazonS3Client(new PropertiesFileCredentialsProvider(System.getenv("HOME")
+				+ "/.wolm/aws.s3.properties"));
 		s3.setRegion(Region.getRegion(Regions.US_WEST_2));
 		return s3;
 	}

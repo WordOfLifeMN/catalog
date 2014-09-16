@@ -13,6 +13,9 @@ public class Catalog {
 	private String messageSpreadsheetName = "Messages";
 	private List<Message> messages;
 
+	private String seriesSpreadsheetName = "Series";
+	private List<Series> series;
+
 	public Catalog() {
 		super();
 	}
@@ -33,6 +36,14 @@ public class Catalog {
 		this.messages = messages;
 	}
 
+	public List<Series> getSeries() {
+		return series;
+	}
+
+	public void setSeries(List<Series> series) {
+		this.series = series;
+	}
+
 	/**
 	 * Reads the entire catalog from the Google message archive. validates and organizes the contents
 	 * 
@@ -41,6 +52,7 @@ public class Catalog {
 	public void init() throws Exception {
 		GoogleHelper google = new GoogleHelper("org-wolm-catalog");
 
+		this.series = initSeries(google);
 		this.messages = initMessages(google);
 	}
 
@@ -56,13 +68,15 @@ public class Catalog {
 				+ "' on Google.");
 
 		GoogleWorksheet worksheet = spreadsheet.getWorksheet("Media Log");
-		if (worksheet == null) throw new Exception("Cannot find worksheet called 'Media Log' in the spreadsheet.");
+		if (worksheet == null) throw new Exception("Cannot find worksheet called 'Media Log' in the '"
+				+ messageSpreadsheetName + "' spreadsheet.");
 
 		List<String> columns = worksheet.getColumnNames();
 		for (String columnName : new String[] { "date", "name", "speaker", "audiolink", "videolink", "type",
 				"visibility", "seriesname", "track", "description" })
 			if (!columns.contains(columnName)) {
-				throw new Exception("Cannot find column '" + columnName + "' in the spreadsheet");
+				throw new Exception("Cannot find column '" + columnName + "' in the spreadsheet '"
+						+ messageSpreadsheetName + "'");
 			}
 
 		// create message objects
@@ -131,6 +145,81 @@ public class Catalog {
 		return messages;
 	}
 
+	/**
+	 * Reads the series logs and instantiates a list of all series. Does not auto-wire the series to the messages
+	 * 
+	 * @param google Google Helper to use
+	 * @return A list of all series read from the series log
+	 */
+	private List<Series> initSeries(GoogleHelper google) throws Exception {
+		GoogleSpreadsheet spreadsheet = google.getSpreadsheet(seriesSpreadsheetName);
+		if (spreadsheet == null) throw new Exception("Cannot find spreadsheet called '" + seriesSpreadsheetName
+				+ "' on Google.");
+
+		GoogleWorksheet worksheet = spreadsheet.getWorksheet("Series Log");
+		if (worksheet == null) throw new Exception("Cannot find worksheet called 'Series Log' in the '"
+				+ seriesSpreadsheetName + "' spreadsheet.");
+
+		List<String> columns = worksheet.getColumnNames();
+		for (String columnName : new String[] { "name", "datestarted", "dateended", "messages", "speaker",
+				"description", "visibility", "coverart", "coverimage", "studyguide" })
+			if (!columns.contains(columnName)) {
+				throw new Exception("Cannot find column '" + columnName + "' in the spreadsheet '"
+						+ seriesSpreadsheetName + "'");
+			}
+
+		// create series objects
+		List<Series> serieses = new ArrayList<>(100);
+		for (GoogleRow row : worksheet.getRows()) {
+			Series series = new Series();
+
+			// title/name
+			series.setTitle(row.getValue("name"));
+
+			// date
+			series.setStartDate(row.getDateValue("datestarted"));
+			series.setEndDate(row.getDateValue("dateended"));
+
+			// messages
+			series.setMessageCount(row.getLongValue("messages"));
+
+			// speakers
+			String value = row.getValue("speaker");
+			if (value != null) {
+				String[] speakerArray = value.split(";");
+				List<String> speakers = new ArrayList<>(speakerArray.length);
+				for (String s : speakerArray)
+					speakers.add(s.trim());
+				series.setSpeakers(speakers);
+			}
+
+			// description
+			series.setDescription(row.getValue("description"));
+
+			// visibility
+			series.setVisibilityAsString(row.getValue("visibility"));
+
+			// cover
+			series.setCoverArtLinkAsString(row.getValue("coverart"));
+			series.setCoverImageLinkAsString(row.getValue("coverimage"));
+
+			// study guide
+			series.setStudyGuideLinksAsString(row.getValue("studyguide"));
+
+			/*
+			 * validate the message is ok to process
+			 */
+			if (!series.isValid(System.out)) {
+				System.out.println("WARNING: Ignoring series due to preceeding problems");
+				continue;
+			}
+
+			serieses.add(series);
+		}
+
+		return serieses;
+	}
+
 	@Override
 	public String toString() {
 		StringBuffer b = new StringBuffer();
@@ -147,12 +236,22 @@ public class Catalog {
 	public String toHtml() {
 		StringBuffer b = new StringBuffer();
 
+		if (getSeries() != null) {
+			b.append("<p>Series</p>");
+			b.append("<ul>\n");
+			for (Series s : getSeries()) {
+				b.append("<li>").append(s.toHtml()).append("</li>\n");
+			}
+			b.append("</ul>\n");
+		}
+
 		if (getMessages() != null) {
-			b.append("<div><ul>\n");
+			b.append("<p>Messages</p>");
+			b.append("<ul>\n");
 			for (Message m : getMessages()) {
 				b.append("<li>").append(m.toHtml()).append("</li>\n");
 			}
-			b.append("</ul></div>\n");
+			b.append("</ul>\n");
 		}
 
 		return b.toString();

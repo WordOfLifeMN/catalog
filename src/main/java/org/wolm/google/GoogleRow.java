@@ -39,7 +39,8 @@ public class GoogleRow {
 
 	public String getValue(String columnName) {
 		String value = row.getCustomElements().getValue(columnName);
-		if (columnName.indexOf("date") != -1 && value.matches("\\d+/\\d+/\\d+")) {
+
+		if (value != null && columnName.indexOf("date") != -1 && value.matches("\\d+/\\d+/\\d+")) {
 			try {
 				value = convertDateToYearMonthDay(value);
 			}
