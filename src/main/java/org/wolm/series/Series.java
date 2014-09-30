@@ -1,4 +1,4 @@
-package org.wolm.catalog;
+package org.wolm.series;
 
 import java.io.PrintStream;
 import java.net.MalformedURLException;
@@ -16,6 +16,7 @@ import java.util.List;
  * @author wolm
  */
 public class Series {
+	private String id;
 	private String title;
 	private Date startDate;
 	private Date endDate;
@@ -37,6 +38,14 @@ public class Series {
 
 	enum Visibility {
 		PUBLIC, PROTECTED, PRIVATE,
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getTitle() {
@@ -187,6 +196,11 @@ public class Series {
 		boolean valid = true;
 		boolean needsHeader = true;
 
+		if (getId() == null) {
+			printValidationError(s, needsHeader, "has no identifier");
+			valid = needsHeader = false;
+		}
+
 		if (getTitle() == null) {
 			printValidationError(s, needsHeader, "has no title");
 			valid = needsHeader = false;
@@ -241,12 +255,6 @@ public class Series {
 		DateFormat fmt = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM);
 		return getTitle() + " (" + fmt.format(getStartDate()) + "-"
 				+ (getEndDate() == null ? "" : fmt.format(getEndDate())) + ") " + getMessageCount() + " messages.";
-	}
-
-	public String toHtml() {
-		DateFormat fmt = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM);
-		return "<b>" + getTitle() + "</b> - " + getMessageCount() + " messages (" + fmt.format(getStartDate()) + "-"
-				+ (getEndDate() == null ? "" : fmt.format(getEndDate())) + ")";
 	}
 
 }

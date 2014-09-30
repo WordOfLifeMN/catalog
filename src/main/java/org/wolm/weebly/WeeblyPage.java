@@ -1,4 +1,4 @@
-package org.wolm.catalog;
+package org.wolm.weebly;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -41,6 +42,9 @@ public class WeeblyPage {
 	};
 	private SubstitutePolicy unresolvedVariablePolicy = SubstitutePolicy.comment;
 
+	/** Cache of empty pages to use to construct new WeeblyPage objects */
+	transient private static final Map<URL, List<String>> emptyPageCache = new HashMap<>();
+
 	/**
 	 * Constructs a page by downloading a page from the Weebly servers.
 	 * <p>
@@ -53,7 +57,7 @@ public class WeeblyPage {
 	public WeeblyPage(@Nonnull URL weeblyUrl) throws Exception {
 		super();
 		this.url = weeblyUrl;
-		readPage();
+		populatePage();
 	}
 
 	/**
@@ -77,11 +81,32 @@ public class WeeblyPage {
 	}
 
 	/**
+	 * Populates the page with the content from Weebly. First tries to use a cached version of the page, then downloads
+	 * from Weebly only if necessary. This is to be polite to Weebly, and also to keep them from seeing us as an
+	 * attacker.
+	 * 
+	 * @throws Exception
+	 */
+	private void populatePage() throws Exception {
+		if (url == null) throw new NullPointerException("Weebly Page URL must not be null");
+
+		// check the cache
+		if (emptyPageCache.containsKey(url)) {
+			lines = new ArrayList<>(emptyPageCache.get(url));
+			return;
+		}
+
+		// no page cached, read from Weebly
+		downloadEmptyPageFromWeebly();
+		emptyPageCache.put(url, new ArrayList<>(lines));
+	}
+
+	/**
 	 * Reads the page contents from the URL this class was constructed with. Keeps the content in memory
 	 * 
 	 * @throws IOException
 	 */
-	private void readPage() throws Exception {
+	private void downloadEmptyPageFromWeebly() throws Exception {
 		lines = new ArrayList<>(400); // empty Weebly page is about 220 lines
 
 		// create a connection for the page
@@ -142,7 +167,7 @@ public class WeeblyPage {
 	/**
 	 * Handles converting all relative references in the web page to absolute
 	 */
-	void preparePageForRemoteHosting() {
+	public void preparePageForRemoteHosting() {
 		boolean inHead = false;
 		for (ListIterator<String> iter = lines.listIterator(); iter.hasNext();) {
 			String line = iter.next();

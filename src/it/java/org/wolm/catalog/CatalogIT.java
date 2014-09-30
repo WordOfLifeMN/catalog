@@ -3,6 +3,7 @@ package org.wolm.catalog;
 import static org.fest.assertions.Assertions.*;
 
 import org.junit.Test;
+import org.wolm.catalog.catalog.Catalog;
 
 public class CatalogIT {
 

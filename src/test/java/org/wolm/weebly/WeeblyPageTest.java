@@ -1,4 +1,4 @@
-package org.wolm.catalog;
+package org.wolm.weebly;
 
 import static org.fest.assertions.Assertions.*;
 
@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
+import org.wolm.weebly.WeeblyPage;
 
 @RunWith(Enclosed.class)
 public class WeeblyPageTest {

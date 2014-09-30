@@ -1,6 +1,9 @@
-package org.wolm.catalog;
+package org.wolm.catalog.catalog;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
@@ -8,6 +11,8 @@ import org.wolm.google.GoogleHelper;
 import org.wolm.google.GoogleRow;
 import org.wolm.google.GoogleSpreadsheet;
 import org.wolm.google.GoogleWorksheet;
+import org.wolm.message.Message;
+import org.wolm.series.Series;
 
 public class Catalog {
 	private String messageSpreadsheetName = "Messages";
@@ -162,7 +167,7 @@ public class Catalog {
 
 		List<String> columns = worksheet.getColumnNames();
 		for (String columnName : new String[] { "name", "datestarted", "dateended", "messages", "speaker",
-				"description", "visibility", "coverart", "coverimage", "studyguide" })
+				"description", "visibility", "coverart", "coverimage", "studyguide", "webid" })
 			if (!columns.contains(columnName)) {
 				throw new Exception("Cannot find column '" + columnName + "' in the spreadsheet '"
 						+ seriesSpreadsheetName + "'");
@@ -172,6 +177,9 @@ public class Catalog {
 		List<Series> serieses = new ArrayList<>(100);
 		for (GoogleRow row : worksheet.getRows()) {
 			Series series = new Series();
+
+			// unique id
+			series.setId(row.getValue("webid"));
 
 			// title/name
 			series.setTitle(row.getValue("name"));
@@ -207,10 +215,10 @@ public class Catalog {
 			series.setStudyGuideLinksAsString(row.getValue("studyguide"));
 
 			/*
-			 * validate the message is ok to process
+			 * validate the series is ok to process
 			 */
 			if (!series.isValid(System.out)) {
-				System.out.println("WARNING: Ignoring series due to preceeding problems");
+				System.out.println("    WARNING: Ignoring series due to preceeding problems");
 				continue;
 			}
 
@@ -218,6 +226,19 @@ public class Catalog {
 		}
 
 		return serieses;
+	}
+
+	public void sortSeriesByDate() {
+		Collections.sort(series, new Comparator<Series>() {
+			public int compare(Series series1, Series series2) {
+				Date date1 = series1.getStartDate();
+				Date date2 = series2.getStartDate();
+				if (date1 == null && date2 == null) return 0;
+				if (date1 == null) return 1;
+				if (date2 == null) return -1;
+				return date1.before(date2) ? -1 : (date1.equals(date2) ? 0 : 1);
+			}
+		});
 	}
 
 	@Override
@@ -233,26 +254,16 @@ public class Catalog {
 		return b.toString();
 	}
 
-	public String toHtml() {
-		StringBuffer b = new StringBuffer();
+	public String getMessageIndexHtml() {
+		StringBuilder b = new StringBuilder();
+		if (getMessages() == null) return b.toString();
 
-		if (getSeries() != null) {
-			b.append("<p>Series</p>");
-			b.append("<ul>\n");
-			for (Series s : getSeries()) {
-				b.append("<li>").append(s.toHtml()).append("</li>\n");
-			}
-			b.append("</ul>\n");
+		b.append("<p>Messages</p>");
+		b.append("<ul>\n");
+		for (Message m : getMessages()) {
+			b.append("<li>").append(m.getOneLineHtmlSummary()).append("</li>\n");
 		}
-
-		if (getMessages() != null) {
-			b.append("<p>Messages</p>");
-			b.append("<ul>\n");
-			for (Message m : getMessages()) {
-				b.append("<li>").append(m.toHtml()).append("</li>\n");
-			}
-			b.append("</ul>\n");
-		}
+		b.append("</ul>\n");
 
 		return b.toString();
 	}

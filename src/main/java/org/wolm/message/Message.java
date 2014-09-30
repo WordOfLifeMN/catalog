@@ -1,4 +1,4 @@
-package org.wolm.catalog;
+package org.wolm.message;
 
 import java.io.PrintStream;
 import java.net.MalformedURLException;
@@ -194,7 +194,7 @@ public class Message {
 		int trackCount = getTrackNumbers() == null ? 0 : getTrackNumbers().size();
 		if (seriesCount != trackCount) {
 			printValidationError(s, needsHeader, "is in " + seriesCount + " series, but has track data for "
-					+ trackCount);
+					+ trackCount + " series");
 			valid = needsHeader = false;
 		}
 
@@ -235,8 +235,12 @@ public class Message {
 		return getTitle() + " (" + fmt.format(getDate()) + ")";
 	}
 
-	public String toHtml() {
+	public String getOneLineHtmlSummary() {
 		DateFormat fmt = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM);
-		return "<b>" + StringEscapeUtils.escapeHtml4(getTitle()) + "</b> (" + fmt.format(getDate()) + ")";
+		return "<b>" + StringEscapeUtils.escapeHtml4(getTitle()) + "</b> (" + fmt.format(getDate()) + ")"
+		// + "<br/>"
+		// + "<audio controls>" + "<source src=\"" + getAudioLink() + "\" type=\"audio/mpeg\">"
+		// + "Your browser does not support the audio element." + "</audio>"
+		;
 	}
 }

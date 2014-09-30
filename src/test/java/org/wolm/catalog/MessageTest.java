@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
+import org.wolm.message.Message;
 
 @RunWith(Enclosed.class)
 public class MessageTest {
