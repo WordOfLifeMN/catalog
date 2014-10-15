@@ -1,6 +1,6 @@
 package org.wolm.catalog;
 
-import java.net.URL;
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,28 +12,18 @@ import org.wolm.weebly.WeeblyPage;
  * 
  * @author wolm
  */
-public abstract class PageRender {
+public abstract class PageRender extends Render {
 
-	protected URL templateUrl;
-
-	public PageRender(URL templateUrl) {
+	public PageRender() {
 		super();
-		this.templateUrl = templateUrl;
 	}
 
-	public URL getWeeblyTemplatePage() {
-		return templateUrl;
-	}
-
-	public void setWeeblyTemplatePage(URL templateUrl) {
-		this.templateUrl = templateUrl;
-	}
-
-	public abstract WeeblyPage render() throws Exception;
+	/** Render the page to the specified output file */
+	public abstract void render(File outputFileName) throws Exception;
 
 	protected WeeblyPage preparePage() throws Exception {
 		// read the Weebly template page
-		WeeblyPage page = new WeeblyPage(templateUrl);
+		WeeblyPage page = new WeeblyPage(RenderFactory.getWeeblyPageTemplateUrl(getSkinName()));
 		page.preparePageForRemoteHosting();
 
 		return page;

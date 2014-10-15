@@ -8,6 +8,11 @@ import org.wolm.catalog.HtmlRender;
 public class SeriesSummaryHtmlRender extends HtmlRender {
 	private final Series series;
 
+	@Override
+	public String getSkinName() {
+		return "basic-summary";
+	}
+
 	public SeriesSummaryHtmlRender(Series series) {
 		super();
 		this.series = series;

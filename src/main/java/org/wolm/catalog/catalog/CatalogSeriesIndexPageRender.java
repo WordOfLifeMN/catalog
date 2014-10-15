@@ -1,27 +1,32 @@
 package org.wolm.catalog.catalog;
 
-import java.net.URL;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.Map;
 
 import org.wolm.catalog.PageRender;
+import org.wolm.catalog.RenderFactory;
 import org.wolm.series.Series;
-import org.wolm.series.SeriesSummaryHtmlRender;
+import org.wolm.series.SeriesUrlRender;
 import org.wolm.weebly.WeeblyPage;
 
 public class CatalogSeriesIndexPageRender extends PageRender {
 	private final Catalog catalog;
 
-	public CatalogSeriesIndexPageRender(Catalog catalog) throws Exception {
-		this(null, catalog);
-	}
-
-	public CatalogSeriesIndexPageRender(URL templateUrl, Catalog catalog) throws Exception {
-		super(templateUrl);
+	public CatalogSeriesIndexPageRender(Catalog catalog) {
 		this.catalog = catalog;
 	}
 
 	@Override
-	public WeeblyPage render() throws Exception {
+	public String getSkinName() {
+		return "basic";
+	}
+
+	@Override
+	public void render(File pageFile) throws Exception {
+		System.out.println("Writing series index to file " + pageFile.getName() + "…");
+
 		// read the Weebly template page
 		WeeblyPage page = preparePage();
 
@@ -32,7 +37,19 @@ public class CatalogSeriesIndexPageRender extends PageRender {
 		// insert the content
 		page.substituteVariables(content);
 
-		return page;
+		// write the page out
+		try (PrintStream outStream = new PrintStream(new FileOutputStream(pageFile))) {
+			page.printPage(outStream);
+		}
+
+		// write out supporting files (i.e. all the series pages)
+		File pageDirectory = pageFile.getParentFile();
+		for (Series series : catalog.getSeries()) {
+			PageRender seriesRender = RenderFactory.getPageRender(getSkinName(), series);
+			File seriesFile = new File(pageDirectory, new SeriesUrlRender(series).getFileName());
+			seriesRender.render(seriesFile);
+		}
+
 	}
 
 	private String getSeriesIndexHtml() throws Exception {
@@ -42,7 +59,9 @@ public class CatalogSeriesIndexPageRender extends PageRender {
 		b.append("<p>Series</p>");
 		b.append("<ul>\n");
 		for (Series s : catalog.getSeries()) {
-			b.append("<li>").append(new SeriesSummaryHtmlRender(s).render()).append("</li>\n");
+			b.append("<li>");
+			b.append(RenderFactory.getHtmlRender("basic-summary", s).render());
+			b.append("</li>\n");
 		}
 		b.append("</ul>\n");
 
