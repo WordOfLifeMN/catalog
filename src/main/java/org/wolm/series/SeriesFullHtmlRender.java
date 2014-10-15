@@ -29,10 +29,12 @@ public class SeriesFullHtmlRender extends HtmlRender {
 		page.append("<table>");
 
 		// description
-		page.append("<tr>\n");
-		page.append("  <td><b>Description:</b></td>\n");
-		page.append("  <td>").append(series.getDescription()).append("</td>\n");
-		page.append("<tr>\n");
+		if (series.getDescription() != null) {
+			page.append("<tr>\n");
+			page.append("  <td><b>Description:</b></td>\n");
+			page.append("  <td>").append(series.getDescription()).append("</td>\n");
+			page.append("<tr>\n");
+		}
 
 		// speaker
 		page.append("<tr>\n");
