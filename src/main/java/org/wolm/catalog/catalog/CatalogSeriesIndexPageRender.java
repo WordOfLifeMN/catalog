@@ -1,20 +1,17 @@
 package org.wolm.catalog.catalog;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.util.Map;
 
 import org.wolm.catalog.PageRender;
 import org.wolm.catalog.RenderFactory;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesUrlRender;
-import org.wolm.weebly.WeeblyPage;
 
 public class CatalogSeriesIndexPageRender extends PageRender {
 	private final Catalog catalog;
 
 	public CatalogSeriesIndexPageRender(Catalog catalog) {
+		super("catalog-index");
 		this.catalog = catalog;
 	}
 
@@ -25,22 +22,11 @@ public class CatalogSeriesIndexPageRender extends PageRender {
 
 	@Override
 	public void render(File pageFile) throws Exception {
-		System.out.println("Writing series index to file " + pageFile.getName() + "…");
+		System.out.println("Writing catalog index to file " + pageFile.getName() + "…");
 
-		// read the Weebly template page
-		WeeblyPage page = preparePage();
+		addDataToModel("catalog", catalog);
 
-		// create a map of content to substitute
-		Map<String, String> content = prepareContent("Word of Life Ministries Online Series");
-		content.put("Content", getSeriesIndexHtml());
-
-		// insert the content
-		page.substituteVariables(content);
-
-		// write the page out
-		try (PrintStream outStream = new PrintStream(new FileOutputStream(pageFile))) {
-			page.printPage(outStream);
-		}
+		super.render(pageFile);
 
 		// write out supporting files (i.e. all the series pages)
 		File pageDirectory = pageFile.getParentFile();
