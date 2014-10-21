@@ -45,6 +45,10 @@ public class CatalogSeriesIndexPageRender extends PageRender {
 		// write out supporting files (i.e. all the series pages)
 		File pageDirectory = pageFile.getParentFile();
 		for (Series series : catalog.getSeries()) {
+			if (series.getVisibility() != Series.Visibility.PUBLIC) {
+				System.out.println("Skpping non-Public series " + series.getTitle());
+				continue;
+			}
 			PageRender seriesRender = RenderFactory.getPageRender(getSkinName(), series);
 			File seriesFile = new File(pageDirectory, new SeriesUrlRender(series).getFileName());
 			seriesRender.render(seriesFile);
@@ -59,6 +63,7 @@ public class CatalogSeriesIndexPageRender extends PageRender {
 		b.append("<p>Series</p>");
 		b.append("<ul>\n");
 		for (Series s : catalog.getSeries()) {
+			if (s.getVisibility() != Series.Visibility.PUBLIC) continue;
 			b.append("<li>");
 			b.append(RenderFactory.getHtmlRender("basic-summary", s).render());
 			b.append("</li>\n");

@@ -37,7 +37,7 @@ public class Series {
 	private static final List<String> SPECIAL_LINKS = Arrays.asList(new String[] { "-", "n/a", "n/e", "abrogated",
 			"in progress", "editing", "rendering", "rendered", "flash", "uploading" });
 
-	enum Visibility {
+	public enum Visibility {
 		PUBLIC, PROTECTED, PRIVATE,
 	}
 

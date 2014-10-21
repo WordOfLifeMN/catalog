@@ -29,12 +29,9 @@ public class SeriesFullHtmlRender extends HtmlRender {
 		page.append("<table>");
 
 		// description
-		if (series.getDescription() != null) {
-			page.append("<tr>\n");
-			page.append("  <td><b>Description:</b></td>\n");
-			page.append("  <td>").append(series.getDescription()).append("</td>\n");
-			page.append("<tr>\n");
-		}
+		page.append("<tr>\n");
+		page.append(getDescriptionRow());
+		page.append("<tr>\n");
 
 		// speaker
 		page.append("<tr>\n");
@@ -49,6 +46,14 @@ public class SeriesFullHtmlRender extends HtmlRender {
 		page.append("<tr>\n");
 
 		page.append("</table>");
+
+		// TODO: kmurray
+		// page.append("<table>");
+		// for (Message m : series.getMessages()) {
+		// page.append("<tr><td>").append(m.getTitle()).append("</td></tr>");
+		// }
+		// page.append("/table>");
+
 		return page.toString();
 	}
 
@@ -68,14 +73,63 @@ public class SeriesFullHtmlRender extends HtmlRender {
 		return "Dates";
 	}
 
-	private String getDates() {
-		if (series.getStartDate() == null) return null;
+	@SuppressWarnings("unused")
+	private String getMessageCountAndDates() {
+		StringBuilder b = new StringBuilder();
+
+		// number of messages
+		b.append(series.getMessageCount());
+		b.append(series.getMessageCount() == 1 ? " message" : " messages");
+
+		if (series.getStartDate() == null) return b.toString();
 
 		DateFormat fmt = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM);
 		if (series.getEndDate() == null || series.getEndDate().equals(series.getStartDate())) {
-			return fmt.format(series.getStartDate());
+			b.append(" on ").append(fmt.format(series.getStartDate()));
+			return b.toString();
 		}
-		return fmt.format(series.getStartDate()) + " - " + fmt.format(series.getEndDate());
+
+		b.append(" from ").append(fmt.format(series.getStartDate()));
+		b.append(" to ").append(fmt.format(series.getEndDate()));
+		return b.toString();
 	}
 
+	private String getDates() {
+		// number of messages
+		String messageCount = series.getMessageCount() + (series.getMessageCount() == 1 ? " message" : " messages");
+
+		if (series.getStartDate() == null) return messageCount;
+
+		DateFormat fmt = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM);
+		if (series.getEndDate() == null || series.getEndDate().equals(series.getStartDate())) {
+			return fmt.format(series.getStartDate()) + " (" + messageCount + ")";
+		}
+
+		return fmt.format(series.getStartDate()) + " - " + fmt.format(series.getEndDate()) + " (" + messageCount + ")";
+	}
+
+	private String getDescriptionRow() {
+		StringBuilder b = new StringBuilder();
+
+		if (series.getCoverArtLink() != null) {
+			b.append("  <td valign='top'>");
+			b.append(getCoverArt());
+			b.append("</td>\n");
+		}
+		b.append("  <td valign='top'");
+		if (series.getCoverArtLink() == null) b.append(" colspan='2'");
+		b.append(">");
+		b.append("<b>").append(series.getTitle()).append("</b><br/>");
+		if (series.getDescription() != null) b.append(series.getDescription());
+		b.append("</td>\n");
+
+		return b.toString();
+
+	}
+
+	private String getCoverArt() {
+		if (series.getCoverArtLink() == null) return "&nbsp;";
+
+		return "<img src='" + series.getCoverArtLink() + "' width='128'/>";
+	}
 }

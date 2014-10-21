@@ -59,6 +59,7 @@ public class Catalog {
 
 		this.series = initSeries(google);
 		this.messages = initMessages(google);
+
 	}
 
 	/**
