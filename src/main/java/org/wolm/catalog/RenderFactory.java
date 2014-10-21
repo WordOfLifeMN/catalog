@@ -2,13 +2,6 @@ package org.wolm.catalog;
 
 import java.net.URL;
 
-import org.wolm.catalog.catalog.Catalog;
-import org.wolm.catalog.catalog.CatalogSeriesIndexPageRender;
-import org.wolm.series.Series;
-import org.wolm.series.SeriesFullHtmlRender;
-import org.wolm.series.SeriesPageRender;
-import org.wolm.series.SeriesSummaryHtmlRender;
-
 /**
  * Factory to generate rendering objects
  * 
@@ -16,11 +9,37 @@ import org.wolm.series.SeriesSummaryHtmlRender;
  */
 public class RenderFactory {
 
+	/** Stores the skin currently to use when loading all templates. <code>null</code> is default skin */
+	private static String skin = null;
+
 	/** Stores the default page template */
-	private static URL pageTemplateUrl;
+	private static URL pageTemplateUrl = null;
+
+	/** Initialize the static fields */
 	static {
+		setSkin(null);
+	}
+
+	public static String getSkin() {
+		return skin;
+	}
+
+	/**
+	 * Sets the skin to use when generating all renders. This can affect the weebly page template and the names of all
+	 * the freemarker templates.
+	 * 
+	 * @param skin Name of the skin to use. If <code>null</code> (the default), then all templates will be loaded
+	 * unmodified. If not <code>null</code>, then the skin name will be appended to all template names with an
+	 * underscore. For instance, if you try to load "template", then instead of "template.ftl", we will load
+	 * "template_skin.ftl"
+	 */
+	public static void setSkin(String skin) {
+		RenderFactory.skin = skin;
+
 		try {
-			pageTemplateUrl = new URL("http://www.wordoflifemn.org/media-catalog.html");
+			if (skin == null) {
+				setWeeblyPageTemplateUrl(new URL("http://www.wordoflifemn.org/media-catalog.html"));
+			}
 		}
 		catch (Exception e) {
 			// impossible
@@ -33,7 +52,7 @@ public class RenderFactory {
 	 * @param skin
 	 * @return
 	 */
-	public static URL getWeeblyPageTemplateUrl(String skin) {
+	public static URL getWeeblyPageTemplateUrl() {
 		return pageTemplateUrl;
 	}
 
@@ -42,108 +61,16 @@ public class RenderFactory {
 	 * 
 	 * @param pageTemplateUrl
 	 */
-	public static void setPageTemplateUrl(URL pageTemplateUrl) {
+	public static void setWeeblyPageTemplateUrl(URL pageTemplateUrl) {
 		RenderFactory.pageTemplateUrl = pageTemplateUrl;
 	}
 
 	/**
-	 * Gets the page render for a catalog
-	 * 
-	 * @param skin
-	 * @param templateUrl
-	 * @param catalog
-	 * @return
+	 * Gets the full name of the template to load, including any skin modifications
 	 */
-	public static PageRender getPageRender(String skin, Catalog catalog) {
-		PageRender render = null;
-
-		switch (skin) {
-		case "basic":
-			render = new CatalogSeriesIndexPageRender(catalog);
-			break;
-		}
-
-		// return a validated render
-		if (render != null) {
-			validateRender(skin, render);
-			return render;
-		}
-
-		// return the default
-		System.out.println("WARNING: Unsupported skin '" + skin + "' for catalog, using default.");
-		return new CatalogSeriesIndexPageRender(catalog);
+	public static String getFullTemplateName(String templateName) {
+		if (skin == null) return templateName + ".ftl";
+		return templateName + "_" + skin + ".ftl";
 	}
 
-	/**
-	 * Gets the page render for a series
-	 * 
-	 * @param skin
-	 * @param templateUrl
-	 * @param series
-	 * @return
-	 */
-	public static PageRender getPageRender(String skin, Series series) {
-		PageRender render = null;
-
-		switch (skin) {
-		case "basic":
-			render = new SeriesPageRender(series);
-			break;
-		}
-
-		// return a validated render
-		if (render != null) {
-			validateRender(skin, render);
-			return render;
-		}
-
-		// return the default
-		System.out.println("WARNING: Unsupported skin '" + skin + "' for series, using default.");
-		return new SeriesPageRender(series);
-	}
-
-	/**
-	 * Gets a html render for a series
-	 * 
-	 * @param skin
-	 * @param series
-	 * @return
-	 */
-	public static HtmlRender getHtmlRender(String skin, Series series) {
-		HtmlRender render = null;
-
-		switch (skin) {
-		case "basic-summary":
-			render = new SeriesSummaryHtmlRender(series);
-			break;
-		case "basic-full":
-			render = new SeriesFullHtmlRender(series);
-			break;
-		}
-
-		// return a validated
-		if (render != null) {
-			validateRender(skin, render);
-			return render;
-		}
-
-		// return a default render
-		System.out.println("WARNING: Unsupported skin '" + skin + "' for series, using default.");
-		return new SeriesSummaryHtmlRender(series);
-
-	}
-
-	/**
-	 * Validate the the specified render matches the requested skin
-	 * 
-	 * @param skin
-	 * @param render
-	 */
-	private static void validateRender(String skin, Render render) {
-		if (render.getSkinName().equals(skin)) return;
-
-		throw new IllegalStateException("RenderFactory generated a '" + render.getSkinName() + "' render when a '"
-				+ skin + "' render was requested.");
-
-	}
 }

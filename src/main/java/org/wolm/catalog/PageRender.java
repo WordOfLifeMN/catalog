@@ -16,11 +16,12 @@ import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 
 /**
- * Base class for renderers that render weebly pages using Freemarker templates to generate the content
+ * Base class for renderers that render Weebly pages using Freemarker templates to generate the content. You initialize
+ * this class with the name
  * 
  * @author wolm
  */
-public abstract class PageRender extends Render {
+public abstract class PageRender {
 
 	/** The singleton configuration for all Freemarker template processing */
 	private static final Configuration freemarkerConfig = new Configuration(Configuration.VERSION_2_3_21);
@@ -36,25 +37,36 @@ public abstract class PageRender extends Render {
 	private final String templateName;
 	private final Map<String, Object> freemarkerDataModel = new HashMap<>();
 
-	public PageRender(String templateName) {
+	protected PageRender(String templateName) {
 		super();
 		this.templateName = templateName;
 
 		// TODO: How should we set this? can we generate it from Javascript, or is there a special markup that overrides
 		// the base href?
-		addDataToModel("baseRef", "file:///Users/wolm/tmp/");
+		addDataToModel("baseRef", "file:///Users/wolm/tmp");
 	}
 
+	/**
+	 * Adds a bean to the data model that freemarker will use to generate the page
+	 * 
+	 * @param name Name of the bean
+	 * @param value Bean
+	 */
 	protected void addDataToModel(String name, Object value) {
 		freemarkerDataModel.put(name, value);
 	}
 
-	/** Render the page to the specified output file */
+	/**
+	 * Render the page to the specified output file
+	 * 
+	 * @param outputFile Output file to write the page to
+	 * @throws Exception
+	 */
 	public void render(File outputFile) throws Exception {
 		WeeblyPage page = preparePage();
 
 		// get the content
-		Template freemarkerTemplate = freemarkerConfig.getTemplate(templateName + ".ftl");
+		Template freemarkerTemplate = freemarkerConfig.getTemplate(RenderFactory.getFullTemplateName(templateName));
 		Writer out = new StringWriter();
 		try {
 			freemarkerTemplate.process(freemarkerDataModel, out);
@@ -78,7 +90,7 @@ public abstract class PageRender extends Render {
 
 	protected WeeblyPage preparePage() throws Exception {
 		// read the Weebly template page
-		WeeblyPage page = new WeeblyPage(RenderFactory.getWeeblyPageTemplateUrl(getSkinName()));
+		WeeblyPage page = new WeeblyPage(RenderFactory.getWeeblyPageTemplateUrl());
 		page.preparePageForRemoteHosting();
 
 		return page;
@@ -90,4 +102,5 @@ public abstract class PageRender extends Render {
 		content.put("Title", "");
 		return content;
 	}
+
 }

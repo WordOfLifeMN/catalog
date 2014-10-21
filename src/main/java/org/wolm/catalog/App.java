@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.wolm.catalog.catalog.Catalog;
+import org.wolm.catalog.catalog.CatalogSeriesIndexPageRender;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -69,7 +70,7 @@ public class App {
 
 		// generate the catalog index and save it to the output file
 		catalog.sortSeriesByDate();
-		PageRender indexRender = RenderFactory.getPageRender("basic", catalog);
+		PageRender indexRender = new CatalogSeriesIndexPageRender(catalog);
 		indexRender.render(new File(outputFileName));
 
 		System.out.println("Catalog complete at " + outputFileName);

@@ -14,11 +14,6 @@ public class SeriesPageRender extends PageRender {
 	}
 
 	@Override
-	public String getSkinName() {
-		return "basic";
-	}
-
-	@Override
 	public void render(File pageFile) throws Exception {
 		System.out.println("  Writing page for series '" + series.getTitle() + "' to file " + pageFile.getName() + "…");
 
