@@ -6,10 +6,9 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  * Stores one message from the message log
@@ -33,7 +32,7 @@ public class Message {
 	private transient String videoLinkError;
 	private transient String visibilityError;
 
-	enum Visibility {
+	public enum Visibility {
 		PUBLIC, PROTECTED, PRIVATE, UNEDITED
 	}
 
@@ -235,12 +234,27 @@ public class Message {
 		return getTitle() + " (" + fmt.format(getDate()) + ")";
 	}
 
-	public String getOneLineHtmlSummary() {
-		DateFormat fmt = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM);
-		return "<b>" + StringEscapeUtils.escapeHtml4(getTitle()) + "</b> (" + fmt.format(getDate()) + ")"
-		// + "<br/>"
-		// + "<audio controls>" + "<source src=\"" + getAudioLink() + "\" type=\"audio/mpeg\">"
-		// + "Your browser does not support the audio element." + "</audio>"
-		;
-	}
+	/** Comparator that sorts Message by date, oldest to newest (<code>null</code> at end) */
+	public static Comparator<Message> byDate = new Comparator<Message>() {
+		public int compare(Message Message1, Message Message2) {
+			Date date1 = Message1.getDate();
+			Date date2 = Message2.getDate();
+			if (date1 == null && date2 == null) return 0;
+			if (date1 == null) return 1;
+			if (date2 == null) return -1;
+			return date1.before(date2) ? -1 : (date1.equals(date2) ? 0 : 1);
+		}
+	};
+
+	/** Comparator that sorts Message by date, newest to oldest (<code>null</code> at end) */
+	public static Comparator<Message> byDateDescending = new Comparator<Message>() {
+		public int compare(Message Message1, Message Message2) {
+			Date date1 = Message1.getDate();
+			Date date2 = Message2.getDate();
+			if (date1 == null && date2 == null) return 0;
+			if (date1 == null) return 1;
+			if (date2 == null) return -1;
+			return date1.before(date2) ? 1 : (date1.equals(date2) ? 0 : -1);
+		}
+	};
 }

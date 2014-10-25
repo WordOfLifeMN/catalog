@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.wolm.catalog.catalog.Catalog;
-import org.wolm.catalog.catalog.CatalogSeriesIndexPageRender;
+import org.wolm.message.Message;
+import org.wolm.series.Series;
+import org.wolm.series.SeriesPageRender;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -22,8 +24,8 @@ public class App {
 	@Parameter(names = { "-v", "--verbose" }, description = "Print more output.")
 	private boolean verbose = false;
 
-	@Parameter(names = { "-o", "--out" }, description = "Output file name.")
-	private String outputFileName = null;
+	@Parameter(names = { "-o", "--out" }, description = "Output file directory.")
+	private String outputFileDir = null;
 
 	/** Construct the application */
 	private App() throws Exception {
@@ -64,15 +66,25 @@ public class App {
 	 * @throws IOException
 	 */
 	public void catalog() throws Exception {
+		PageRender pageRender;
+		File outputFile;
+
 		System.out.println("Catalog downloading from Google…");
 		Catalog catalog = new Catalog();
 		catalog.init();
 
-		// generate the catalog index and save it to the output file
-		catalog.sortSeriesByDate();
-		PageRender indexRender = new CatalogSeriesIndexPageRender(catalog);
-		indexRender.render(new File(outputFileName));
+		// generate the recent-messages list and save it to a file
+		Series recentMessages = catalog.getRecentMessages(60, Message.Visibility.PUBLIC);
+		pageRender = new SeriesPageRender(recentMessages);
+		outputFile = new File(outputFileDir, "recent-messages.html");
+		pageRender.render(outputFile);
+		System.out.println("Recent messages complete at " + outputFile);
 
-		System.out.println("Catalog complete at " + outputFileName);
+		// // generate the catalog index and save it to a file
+		// catalog.sortSeriesByDate();
+		// pageRender = new CatalogSeriesIndexPageRender(catalog);
+		// outputFile = new File(outputFileDir, "series.html");
+		// pageRender.render(outputFile);
+		// System.out.println("Catalog complete at " + outputFile);
 	}
 }

@@ -8,8 +8,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+
+import org.wolm.message.Message;
 
 /**
  * Stores one series of messages
@@ -33,6 +36,9 @@ public class Series {
 	transient private String coverArtLinkError;
 	transient private String coverImageLinkError;
 	transient private String studyGuideLinkError;
+
+	/** Messages for this series */
+	private List<Message> messages = new ArrayList<>();
 
 	private static final List<String> SPECIAL_LINKS = Arrays.asList(new String[] { "-", "n/a", "n/e", "abrogated",
 			"in progress", "editing", "rendering", "rendered", "flash", "uploading" });
@@ -74,7 +80,7 @@ public class Series {
 	}
 
 	public Long getMessageCount() {
-		return messageCount;
+		return messageCount == null ? messages.size() : messageCount;
 	}
 
 	public void setMessageCount(Long messageCount) {
@@ -194,6 +200,18 @@ public class Series {
 			}
 	}
 
+	public List<Message> getMessages() {
+		return messages;
+	}
+
+	public void setMessages(List<Message> messages) {
+		this.messages = messages;
+	}
+
+	public void addMessage(Message message) {
+		messages.add(message);
+	}
+
 	public boolean isValid(PrintStream s) {
 		boolean valid = true;
 		boolean needsHeader = true;
@@ -259,4 +277,27 @@ public class Series {
 				+ (getEndDate() == null ? "" : fmt.format(getEndDate())) + ") " + getMessageCount() + " messages.";
 	}
 
+	/** Comparator that sorts series by date, oldest to newest (<code>null</code> at end) */
+	public static Comparator<Series> byDate = new Comparator<Series>() {
+		public int compare(Series series1, Series series2) {
+			Date date1 = series1.getStartDate();
+			Date date2 = series2.getStartDate();
+			if (date1 == null && date2 == null) return 0;
+			if (date1 == null) return 1;
+			if (date2 == null) return -1;
+			return date1.before(date2) ? -1 : (date1.equals(date2) ? 0 : 1);
+		}
+	};
+
+	/** Comparator that sorts series by date, newest to oldest (<code>null</code> at end) */
+	public static Comparator<Series> byDateDescending = new Comparator<Series>() {
+		public int compare(Series series1, Series series2) {
+			Date date1 = series1.getStartDate();
+			Date date2 = series2.getStartDate();
+			if (date1 == null && date2 == null) return 0;
+			if (date1 == null) return 1;
+			if (date2 == null) return -1;
+			return date1.before(date2) ? 1 : (date1.equals(date2) ? 0 : -1);
+		}
+	};
 }

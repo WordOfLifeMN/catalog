@@ -1,10 +1,13 @@
 package org.wolm.catalog.catalog;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+
+import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.wolm.google.GoogleHelper;
@@ -229,17 +232,41 @@ public class Catalog {
 		return serieses;
 	}
 
+	/**
+	 * Creates an artificial series for all recent messages.
+	 * 
+	 * @param days How many days old something has to be to no longer be considered "Recent"
+	 * @param visibilityFilter What visibility a message must have to be included
+	 * @return
+	 */
+	public Series getRecentMessages(int days, @Nonnull Message.Visibility visibilityFilter) {
+		// sort the messages by date
+		List<Message> orderedMessages = new ArrayList<>(messages);
+		Collections.sort(orderedMessages, Message.byDateDescending);
+
+		// create series
+		Series series = new Series();
+		series.setTitle("Recent Messages");
+		series.setDescription("Recent messages from the last " + days + " days.");
+
+		// find cutoff
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.add(Calendar.DATE, -1 * days);
+		Date cutoff = cal.getTime();
+
+		// add all the messages newer than the cutoff
+		for (Message message : orderedMessages) {
+			if (message.getDate() == null) break; // nulls are sorted to end
+			if (message.getDate().before(cutoff)) break;
+			if (message.getVisibility() != visibilityFilter) continue;
+			series.addMessage(message);
+		}
+
+		return series;
+	}
+
 	public void sortSeriesByDate() {
-		Collections.sort(series, new Comparator<Series>() {
-			public int compare(Series series1, Series series2) {
-				Date date1 = series1.getStartDate();
-				Date date2 = series2.getStartDate();
-				if (date1 == null && date2 == null) return 0;
-				if (date1 == null) return 1;
-				if (date2 == null) return -1;
-				return date1.before(date2) ? -1 : (date1.equals(date2) ? 0 : 1);
-			}
-		});
+		Collections.sort(series, Series.byDate);
 	}
 
 	@Override
@@ -255,17 +282,4 @@ public class Catalog {
 		return b.toString();
 	}
 
-	public String getMessageIndexHtml() {
-		StringBuilder b = new StringBuilder();
-		if (getMessages() == null) return b.toString();
-
-		b.append("<p>Messages</p>");
-		b.append("<ul>\n");
-		for (Message m : getMessages()) {
-			b.append("<li>").append(m.getOneLineHtmlSummary()).append("</li>\n");
-		}
-		b.append("</ul>\n");
-
-		return b.toString();
-	}
 }
