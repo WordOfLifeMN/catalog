@@ -1,4 +1,4 @@
-<h2>${series.title}</h2>
+<h1>${series.title}</h1>
 <table>
 	<#-- cover art and description -->
 	<tr>
@@ -30,6 +30,7 @@
 		</td>
 		<td>
 			<#if series.startDate??>
+				<#if !(series.endDate??)>Started</#if> <#-- still in progress -->
 				${series.startDate?date}
 				<#if series.endDate?? && series.endDate?date != series.startDate?date>
 					- ${series.endDate?date}
@@ -64,7 +65,9 @@
 				<div onclick="togglePlayer(jQuery(this).parent());" style="display:block;padding:1px;" title="${message.description!}">
 					${message_index + 1}.
 					<b>${message.title}</b>
-					- <#list message.speakers as speaker>${speaker}<#if speaker_has_next>, </#if></#list>
+					<#if message.speakers??>
+						- <#list message.speakers as speaker>${speaker}<#if speaker_has_next>, </#if></#list>
+					</#if>
 					<#if message.date??>(${message.date?date})</#if>
 				</div>
 				<div class="player" style="display:none;">

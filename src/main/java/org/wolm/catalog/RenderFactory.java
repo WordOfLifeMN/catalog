@@ -9,11 +9,14 @@ import java.net.URL;
  */
 public class RenderFactory {
 
-	/** Stores the skin currently to use when loading all templates. <code>null</code> is default skin */
+	/** The skin currently to use when loading all templates. <code>null</code> is default skin */
 	private static String skin = null;
 
-	/** Stores the default page template */
-	private static URL pageTemplateUrl = null;
+	/** The page template */
+	private static URL weeblyPageTemplateUrl = null;
+
+	/** The base reference path for all internally referenced pages */
+	private static String baseRef = null;
 
 	/** Initialize the static fields */
 	static {
@@ -53,7 +56,7 @@ public class RenderFactory {
 	 * @return
 	 */
 	public static URL getWeeblyPageTemplateUrl() {
-		return pageTemplateUrl;
+		return weeblyPageTemplateUrl;
 	}
 
 	/**
@@ -62,7 +65,7 @@ public class RenderFactory {
 	 * @param pageTemplateUrl
 	 */
 	public static void setWeeblyPageTemplateUrl(URL pageTemplateUrl) {
-		RenderFactory.pageTemplateUrl = pageTemplateUrl;
+		RenderFactory.weeblyPageTemplateUrl = pageTemplateUrl;
 	}
 
 	/**
@@ -71,6 +74,14 @@ public class RenderFactory {
 	public static String getFullTemplateName(String templateName) {
 		if (skin == null) return templateName + ".ftl";
 		return templateName + "_" + skin + ".ftl";
+	}
+
+	public static String getBaseRef() {
+		return baseRef;
+	}
+
+	public static void setBaseRef(String baseRef) {
+		RenderFactory.baseRef = baseRef;
 	}
 
 }

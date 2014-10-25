@@ -73,6 +73,19 @@ public class Message {
 		return trackNumbers;
 	}
 
+	/**
+	 * @param seriesName Name of a series that this message is in
+	 * @return Track number of this message in that series. <code>null</code> if not in the specified series
+	 */
+	public Integer getTrackNumber(String seriesName) {
+		if (series == null) return null;
+		if (trackNumbers == null) return null;
+
+		for (int index = 0; index < trackNumbers.size(); index++)
+			if (series.get(index).equalsIgnoreCase(seriesName)) return trackNumbers.get(index);
+		return null;
+	}
+
 	public void setTrackNumbers(List<Integer> trackNumbers) {
 		this.trackNumbers = trackNumbers;
 	}
@@ -257,4 +270,25 @@ public class Message {
 			return date1.before(date2) ? 1 : (date1.equals(date2) ? 0 : -1);
 		}
 	};
+
+	/** Compares two messages by their track number for a given series */
+	public static class ByTrackNumber implements Comparator<Message> {
+		private final String seriesName;
+
+		public ByTrackNumber(String seriesName) {
+			super();
+			this.seriesName = seriesName;
+		}
+
+		public int compare(Message msg1, Message msg2) {
+			Integer trackNumber1 = msg1.getTrackNumber(seriesName);
+			Integer trackNumber2 = msg2.getTrackNumber(seriesName);
+
+			if (trackNumber1 == null && trackNumber2 == null) return 0;
+			if (trackNumber1 == null) return 1;
+			if (trackNumber2 == null) return -1;
+			return trackNumber1 - trackNumber2;
+		}
+
+	}
 }

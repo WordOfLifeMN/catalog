@@ -41,9 +41,7 @@ public abstract class PageRender {
 		super();
 		this.templateName = templateName;
 
-		// TODO: How should we set this? can we generate it from Javascript, or is there a special markup that overrides
-		// the base href?
-		addDataToModel("baseRef", "file:///Users/wolm/tmp");
+		addDataToModel("baseRef", RenderFactory.getBaseRef());
 	}
 
 	/**

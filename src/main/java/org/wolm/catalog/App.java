@@ -2,8 +2,10 @@ package org.wolm.catalog;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.wolm.catalog.catalog.Catalog;
+import org.wolm.catalog.catalog.SeriesIndexPageRender;
 import org.wolm.message.Message;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesPageRender;
@@ -27,6 +29,12 @@ public class App {
 	@Parameter(names = { "-o", "--out" }, description = "Output file directory.")
 	private String outputFileDir = null;
 
+	@Parameter(names = { "-u", "--upload" }, description = "Upload final files to S3.")
+	private boolean upload = false;
+
+	private String s3BucketName = "wordoflife.mn.audio";
+	private String s3ObjectPrefix = "etc";
+
 	/** Construct the application */
 	private App() throws Exception {
 		super();
@@ -41,7 +49,29 @@ public class App {
 			System.exit(0);
 		}
 
+		app.init();
+
 		app.catalog();
+	}
+
+	private void init() {
+		initRenderFactory();
+	}
+
+	/**
+	 * Sets up the global render factory settings based on the configuration options
+	 * 
+	 */
+	private void initRenderFactory() {
+		if (isUpload()) {
+			// uploading to S3: the baseref is the URL to the s3 bucket
+			RenderFactory.setBaseRef("https://s3-us-west-2.amazonaws.com/" + getS3BucketName() + "/"
+					+ getS3ObjectPrefix());
+		}
+		else {
+			// not uploading to S3: the baseref is the file directory we are outputting to
+			RenderFactory.setBaseRef("file://" + outputFileDir.toString());
+		}
 	}
 
 	public boolean isHelpRequested() {
@@ -60,31 +90,68 @@ public class App {
 		this.verbose = verbose;
 	}
 
+	public boolean isUpload() {
+		return upload;
+	}
+
+	public void setUpload(boolean upload) {
+		this.upload = upload;
+	}
+
+	public String getS3BucketName() {
+		return s3BucketName;
+	}
+
+	public void setS3BucketName(String s3BucketName) {
+		this.s3BucketName = s3BucketName;
+	}
+
+	public String getS3ObjectPrefix() {
+		return s3ObjectPrefix;
+	}
+
+	public void setS3ObjectPrefix(String s3ObjectPrefix) {
+		this.s3ObjectPrefix = s3ObjectPrefix;
+	}
+
 	/**
 	 * Generates the catalog of Word of Life Ministries media
 	 * 
 	 * @throws IOException
 	 */
 	public void catalog() throws Exception {
-		PageRender pageRender;
-		File outputFile;
 
 		System.out.println("Catalog downloading from Google…");
 		Catalog catalog = new Catalog();
 		catalog.init();
 
 		// generate the recent-messages list and save it to a file
-		Series recentMessages = catalog.getRecentMessages(60, Message.Visibility.PUBLIC);
-		pageRender = new SeriesPageRender(recentMessages);
-		outputFile = new File(outputFileDir, "recent-messages.html");
-		pageRender.render(outputFile);
-		System.out.println("Recent messages complete at " + outputFile);
+		{
+			Series recentMessages = catalog.getRecentMessages(60, Message.Visibility.PUBLIC);
+			PageRender pageRender = new SeriesPageRender(recentMessages);
+			File outputFile = new File(outputFileDir, "recent-messages.html");
+			pageRender.render(outputFile);
+			System.out.println("Recent messages complete at " + outputFile);
+		}
 
-		// // generate the catalog index and save it to a file
-		// catalog.sortSeriesByDate();
-		// pageRender = new CatalogSeriesIndexPageRender(catalog);
-		// outputFile = new File(outputFileDir, "series.html");
-		// pageRender.render(outputFile);
-		// System.out.println("Catalog complete at " + outputFile);
+		// generate the recent-serieslist and save it to a file
+		{
+			List<Series> recentSeries = catalog.getRecentSeries(60, Series.Visibility.PUBLIC);
+			PageRender pageRender = new SeriesIndexPageRender(recentSeries);
+			((SeriesIndexPageRender) pageRender).setIndexTitle("Recent Series from Word of Life Ministries");
+			File outputFile = new File(outputFileDir, "recent-series.html");
+			pageRender.render(outputFile);
+			System.out.println("Recent series complete at " + outputFile);
+		}
+
+		// generate the catalog index and save it to a file
+		{
+			catalog.sortSeriesByDate();
+			PageRender pageRender = new SeriesIndexPageRender(catalog);
+			((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog");
+			File outputFile = new File(outputFileDir, "catalog.html");
+			pageRender.render(outputFile);
+			System.out.println("Catalog complete at " + outputFile);
+		}
 	}
 }

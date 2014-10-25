@@ -60,8 +60,8 @@ public class Catalog {
 	public void init() throws Exception {
 		GoogleHelper google = new GoogleHelper("org-wolm-catalog");
 
-		this.series = initSeries(google);
 		this.messages = initMessages(google);
+		this.series = initSeries(google);
 
 	}
 
@@ -161,6 +161,9 @@ public class Catalog {
 	 * @return A list of all series read from the series log
 	 */
 	private List<Series> initSeries(GoogleHelper google) throws Exception {
+		// must do messages first so we can record which messages go with each series
+		assert messages != null;
+
 		GoogleSpreadsheet spreadsheet = google.getSpreadsheet(seriesSpreadsheetName);
 		if (spreadsheet == null) throw new Exception("Cannot find spreadsheet called '" + seriesSpreadsheetName
 				+ "' on Google.");
@@ -218,6 +221,9 @@ public class Catalog {
 			// study guide
 			series.setStudyGuideLinksAsString(row.getValue("studyguide"));
 
+			// discover messages for this series
+			series.discoverMessages(messages);
+
 			/*
 			 * validate the series is ok to process
 			 */
@@ -237,7 +243,7 @@ public class Catalog {
 	 * 
 	 * @param days How many days old something has to be to no longer be considered "Recent"
 	 * @param visibilityFilter What visibility a message must have to be included
-	 * @return
+	 * @return List of recent messages sorted newest to oldest
 	 */
 	public Series getRecentMessages(int days, @Nonnull Message.Visibility visibilityFilter) {
 		// sort the messages by date
@@ -246,7 +252,7 @@ public class Catalog {
 
 		// create series
 		Series series = new Series();
-		series.setTitle("Recent Messages");
+		series.setTitle("Recent Messages from Word of Life Ministries");
 		series.setDescription("Recent messages from the last " + days + " days.");
 
 		// find cutoff
@@ -263,6 +269,31 @@ public class Catalog {
 		}
 
 		return series;
+	}
+
+	/**
+	 * Gets a list of recent series. A recent series is any series with a start date but no end date (assumed to be in
+	 * progress still), or any series with a recent end date.
+	 * 
+	 * @param days Number of days that should be considered "recent". Only series ended in the past <code>days</code>
+	 * days will be returned.
+	 * @param visibilityFilter What visibility a series must have to be included
+	 * @return List of recent series, sorted by most recent first. Empty list if none
+	 */
+	public List<Series> getRecentSeries(int days, Series.Visibility visibilityFilter) {
+		List<Series> serieses = new ArrayList<>();
+
+		// find cutoff
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.add(Calendar.DATE, -1 * days);
+		Date cutoff = cal.getTime();
+
+		for (Series series : getSeries()) {
+			if (series.getEndDate() != null && series.getEndDate().before(cutoff)) continue;
+			serieses.add(series);
+		}
+
+		return serieses;
 	}
 
 	public void sortSeriesByDate() {

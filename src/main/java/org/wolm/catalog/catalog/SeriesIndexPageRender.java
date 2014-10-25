@@ -1,31 +1,46 @@
 package org.wolm.catalog.catalog;
 
 import java.io.File;
+import java.util.List;
 
 import org.wolm.catalog.PageRender;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesPageRender;
 import org.wolm.series.SeriesUrlRender;
 
-public class CatalogSeriesIndexPageRender extends PageRender {
-	private final Catalog catalog;
+public class SeriesIndexPageRender extends PageRender {
+	private final List<Series> seriesList;
+	private String indexTitle = null;
 
-	public CatalogSeriesIndexPageRender(Catalog catalog) {
-		super("catalog-index");
-		this.catalog = catalog;
+	public SeriesIndexPageRender(List<Series> seriesList) {
+		super("series-index");
+		this.seriesList = seriesList;
+	}
+
+	public SeriesIndexPageRender(Catalog catalog) {
+		this(catalog.getSeries());
+	}
+
+	public String getIndexTitle() {
+		return indexTitle;
+	}
+
+	public void setIndexTitle(String indexTitle) {
+		this.indexTitle = indexTitle;
 	}
 
 	@Override
 	public void render(File pageFile) throws Exception {
-		System.out.println("Writing catalog index to file " + pageFile.getName() + "…");
+		System.out.println("Writing series index to file " + pageFile.getName() + "…");
 
-		addDataToModel("catalog", catalog);
+		addDataToModel("title", indexTitle);
+		addDataToModel("seriesList", seriesList);
 
 		super.render(pageFile);
 
 		// write out supporting files (i.e. all the series pages)
 		File pageDirectory = pageFile.getParentFile();
-		for (Series series : catalog.getSeries()) {
+		for (Series series : seriesList) {
 			if (series.getVisibility() != Series.Visibility.PUBLIC) {
 				System.out.println("Skpping non-Public series " + series.getTitle());
 				continue;

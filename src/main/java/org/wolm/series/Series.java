@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -38,7 +39,7 @@ public class Series {
 	transient private String studyGuideLinkError;
 
 	/** Messages for this series */
-	private List<Message> messages = new ArrayList<>();
+	private List<Message> messages = null;
 
 	private static final List<String> SPECIAL_LINKS = Arrays.asList(new String[] { "-", "n/a", "n/e", "abrogated",
 			"in progress", "editing", "rendering", "rendered", "flash", "uploading" });
@@ -80,7 +81,9 @@ public class Series {
 	}
 
 	public Long getMessageCount() {
-		return messageCount == null ? messages.size() : messageCount;
+		if (messageCount != null) return messageCount;
+		if (messages != null) return (long) messages.size();
+		return null;
 	}
 
 	public void setMessageCount(Long messageCount) {
@@ -209,6 +212,7 @@ public class Series {
 	}
 
 	public void addMessage(Message message) {
+		if (messages == null) messages = new ArrayList<>();
 		messages.add(message);
 	}
 
@@ -237,6 +241,11 @@ public class Series {
 		}
 		else if (getMessageCount() < 1) {
 			printValidationError(s, needsHeader, "has 0 messages");
+			valid = needsHeader = false;
+		}
+		else if (messages == null || getMessageCount() != messages.size()) {
+			printValidationError(s, needsHeader, "has a message count of " + getMessageCount() + " messages, but "
+					+ (messages == null ? 0 : messages.size()) + " actual messages;");
 			valid = needsHeader = false;
 		}
 
@@ -268,6 +277,28 @@ public class Series {
 
 		if (needsHeader) s.println("Series '" + getTitle() + "' has the following problems:");
 		s.println("    * " + error);
+	}
+
+	/**
+	 * Given the set of all messages, will find all the messages that are in this series and remember them for future
+	 * use
+	 * 
+	 * @param messages Collection of all messages there are
+	 * @return Number of messages found for this series
+	 */
+	public int discoverMessages(Collection<Message> allMessages) {
+		messages = new ArrayList<>();
+
+		// find all messages that are in this series
+		for (Message message : allMessages) {
+			if (message.getTrackNumber(getTitle()) == null) continue;
+			messages.add(message);
+		}
+
+		// sort messages by track number
+		Collections.sort(messages, new Message.ByTrackNumber(getTitle()));
+
+		return messages.size();
 	}
 
 	@Override
