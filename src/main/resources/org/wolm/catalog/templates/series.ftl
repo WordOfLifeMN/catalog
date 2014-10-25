@@ -1,34 +1,24 @@
 <h1>${series.title}</h1>
 <table>
 	<#-- cover art and description -->
+	<#assign artLink = series.coverArtLink!'https://s3-us-west-2.amazonaws.com/wordoflife.mn.audio/etc/WordofLifeLogo-L.png' />
 	<tr>
-		<#if series.coverArtLink??>
-			<td valign="top"><img src="${series.coverArtLink}" width="128"/></td>
+		<#if artLink??>
+			<td valign="top"><img src="${artLink}" width="128"/></td>
 		</#if>
 		<td valign="top" <#if !series.coverArtLink??>colspan="2"</#if>>
-			<b>${series.title}</b><br/>
-			${series.description!}
-		</td>
-	</tr>
-	
-	<#-- speaker -->
-	<#if series.speakers?size &gt; 0>
-		<tr>
-			<td><#if series.speakers?size == 1>Speaker<#else>Speakers</#if>:</td>
-			<td><#list series.speakers as speaker>${speaker}<#if speaker_has_next>, </#if></#list></td>
-		</tr>
-	</#if>
-	
-	<#-- dates -->
-	<tr>
-		<td>
-			<#if !(series.startDate??) || !(series.endDate??) || series.endDate?date == series.startDate?date>
-				Date:
-			<#else>
-				Dates:
+			<b>${series.title}</b>
+			
+			<#if series.speakers?size &gt; 0 || series.StartDate??><br/></#if>
+
+			<#-- speaker -->
+			<#if series.speakers?size &gt; 0>
+				<#list series.speakers as speaker>${speaker}<#if speaker_has_next>, </#if></#list>
 			</#if>
-		</td>
-		<td>
+			
+			<#if (series.speakers?size &gt; 0) && (series.startDate??)>/</#if>
+
+			<#-- dates -->
 			<#if series.startDate??>
 				<#if !(series.endDate??)>Started</#if> <#-- still in progress -->
 				${series.startDate?date}
@@ -37,8 +27,12 @@
 				</#if>
 			</#if>
 			(${series.messageCount} <#if series.messageCount == 1>message<#else>messages</#if>)
+			
+			<br/>
+			${series.description!}
 		</td>
 	</tr>
+	
 </table>
 
 <script type="text/javascript">
@@ -96,4 +90,17 @@
 			</td>
 		</tr>
 	</#list>
+	<#if series.studyGuideLinks??>
+		<tr>
+			<td style="border-style:solid;border-width:1px;border-color:gray">
+				<b>Additional Materials</b>
+					<#list series.studyGuideLinks as guide>
+						<#assign name= guide?replace('.*/','','r') />
+						<#assign name= name?replace('+',' ') />
+						<br/><a href="${guide}" target="wolmGuide" style="padding-left:24px;">${name}</a>
+					</#list>
+			</td>
+		</tr>
+	</#if>
+	
 </table>

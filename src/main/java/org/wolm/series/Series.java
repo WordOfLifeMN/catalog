@@ -13,6 +13,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import org.wolm.catalog.AccessLevel;
+import org.wolm.catalog.RenderFactory;
 import org.wolm.message.Message;
 
 /**
@@ -28,7 +30,7 @@ public class Series {
 	private Long messageCount;
 	private List<String> speakers;
 	private String description;
-	private Visibility visibility;
+	private AccessLevel visibility;
 	private URL coverArtLink;
 	private URL coverImageLink;
 	private List<URL> studyGuideLinks;
@@ -43,10 +45,6 @@ public class Series {
 
 	private static final List<String> SPECIAL_LINKS = Arrays.asList(new String[] { "-", "n/a", "n/e", "abrogated",
 			"in progress", "editing", "rendering", "rendered", "flash", "uploading" });
-
-	public enum Visibility {
-		PUBLIC, PROTECTED, PRIVATE,
-	}
 
 	public String getId() {
 		return id;
@@ -107,11 +105,11 @@ public class Series {
 		this.description = description;
 	}
 
-	public Visibility getVisibility() {
+	public AccessLevel getVisibility() {
 		return visibility;
 	}
 
-	public void setVisibility(Visibility visibility) {
+	public void setVisibility(AccessLevel visibility) {
 		this.visibility = visibility;
 	}
 
@@ -124,15 +122,15 @@ public class Series {
 		switch (visibility) {
 		case "Public":
 		case "public":
-			this.visibility = Visibility.PUBLIC;
+			this.visibility = AccessLevel.PUBLIC;
 			break;
 		case "Protected":
 		case "protected":
-			this.visibility = Visibility.PROTECTED;
+			this.visibility = AccessLevel.PROTECTED;
 			break;
 		case "Private":
 		case "private":
-			this.visibility = Visibility.PRIVATE;
+			this.visibility = AccessLevel.PRIVATE;
 			break;
 		default:
 			this.visibility = null;
@@ -203,8 +201,17 @@ public class Series {
 			}
 	}
 
+	/**
+	 * @return Messages for this series that are visible under the current visibility rules
+	 */
 	public List<Message> getMessages() {
-		return messages;
+		if (messages == null) return null;
+		List<Message> visibleMessages = new ArrayList<>(messages.size());
+
+		for (Message message : messages)
+			if (RenderFactory.isVisible(message.getVisibility())) visibleMessages.add(message);
+
+		return visibleMessages;
 	}
 
 	public void setMessages(List<Message> messages) {
@@ -243,10 +250,13 @@ public class Series {
 			printValidationError(s, needsHeader, "has 0 messages");
 			valid = needsHeader = false;
 		}
-		else if (messages == null || getMessageCount() != messages.size()) {
+		else if (messages == null || getMessageCount() > messages.size()) {
 			printValidationError(s, needsHeader, "has a message count of " + getMessageCount() + " messages, but "
 					+ (messages == null ? 0 : messages.size()) + " actual messages;");
 			valid = needsHeader = false;
+		}
+		else {
+			// TODO: print a warning if the message count is > number of messages with visibility >= the series
 		}
 
 		if (visibilityError != null) {

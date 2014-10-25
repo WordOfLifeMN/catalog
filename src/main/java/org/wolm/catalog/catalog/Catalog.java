@@ -7,9 +7,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.apache.commons.lang3.math.NumberUtils;
+import org.wolm.catalog.RenderFactory;
 import org.wolm.google.GoogleHelper;
 import org.wolm.google.GoogleRow;
 import org.wolm.google.GoogleSpreadsheet;
@@ -36,16 +35,48 @@ public class Catalog {
 		this.messageSpreadsheetName = messageSpreadsheetName;
 	}
 
-	public List<Message> getMessages() {
+	/**
+	 * @return All messages regardless of visibility
+	 */
+	public List<Message> getRawMessages() {
 		return messages;
+	}
+
+	/**
+	 * @return All messages that are visible under the current visibility restrictions
+	 */
+	public List<Message> getMessages() {
+		if (messages == null) return null;
+		List<Message> visibleMessages = new ArrayList<>(messages.size());
+
+		for (Message message : messages)
+			if (RenderFactory.isVisible(message.getVisibility())) visibleMessages.add(message);
+
+		return visibleMessages;
 	}
 
 	public void setMessages(List<Message> messages) {
 		this.messages = messages;
 	}
 
-	public List<Series> getSeries() {
+	/**
+	 * @return All series regardless of current visibility rules
+	 */
+	public List<Series> getRawSeries() {
 		return series;
+	}
+
+	/**
+	 * @return All series that are visible under the current visibility rules
+	 */
+	public List<Series> getSeries() {
+		if (series == null) return null;
+		List<Series> visibleSeries = new ArrayList<>(series.size());
+
+		for (Series s : series)
+			if (RenderFactory.isVisible(s.getVisibility())) visibleSeries.add(s);
+
+		return visibleSeries;
 	}
 
 	public void setSeries(List<Series> series) {
@@ -239,13 +270,58 @@ public class Catalog {
 	}
 
 	/**
+	 * Gets a list of all series that are completed (have a non-<code>null</code> end date)
+	 * <p>
+	 * Honors the global minimum visibility
+	 * 
+	 * @return List of all completed series, sorted in date order (oldest first)
+	 */
+	public List<Series> getCompletedSeries() {
+		List<Series> serieses = new ArrayList<>();
+
+		for (Series series : getSeries()) {
+			if (series.getEndDate() == null) continue;
+			serieses.add(series);
+		}
+
+		return serieses;
+	}
+
+	/**
+	 * Gets a list of recent series. A recent series is any series with a start date but no end date (assumed to be in
+	 * progress still), or any series with a recent end date.
+	 * <p>
+	 * Honors the global minimum visibility
+	 * 
+	 * @param days Number of days that should be considered "recent". Only series ended in the past <code>days</code>
+	 * days will be returned.
+	 * @return List of recent series, sorted by most recent first. Empty list if none
+	 */
+	public List<Series> getRecentSeries(int days) {
+		List<Series> serieses = new ArrayList<>();
+
+		// find cutoff
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.add(Calendar.DATE, -1 * days);
+		Date cutoff = cal.getTime();
+
+		for (Series series : getSeries()) {
+			if (series.getEndDate() != null && series.getEndDate().before(cutoff)) continue;
+			serieses.add(series);
+		}
+
+		return serieses;
+	}
+
+	/**
 	 * Creates an artificial series for all recent messages.
+	 * <p>
+	 * Honors the global minimum visibility
 	 * 
 	 * @param days How many days old something has to be to no longer be considered "Recent"
-	 * @param visibilityFilter What visibility a message must have to be included
 	 * @return List of recent messages sorted newest to oldest
 	 */
-	public Series getRecentMessages(int days, @Nonnull Message.Visibility visibilityFilter) {
+	public Series getRecentMessages(int days) {
 		// sort the messages by date
 		List<Message> orderedMessages = new ArrayList<>(messages);
 		Collections.sort(orderedMessages, Message.byDateDescending);
@@ -264,36 +340,11 @@ public class Catalog {
 		for (Message message : orderedMessages) {
 			if (message.getDate() == null) break; // nulls are sorted to end
 			if (message.getDate().before(cutoff)) break;
-			if (message.getVisibility() != visibilityFilter) continue;
+			if (!RenderFactory.isVisible(message.getVisibility())) continue;
 			series.addMessage(message);
 		}
 
 		return series;
-	}
-
-	/**
-	 * Gets a list of recent series. A recent series is any series with a start date but no end date (assumed to be in
-	 * progress still), or any series with a recent end date.
-	 * 
-	 * @param days Number of days that should be considered "recent". Only series ended in the past <code>days</code>
-	 * days will be returned.
-	 * @param visibilityFilter What visibility a series must have to be included
-	 * @return List of recent series, sorted by most recent first. Empty list if none
-	 */
-	public List<Series> getRecentSeries(int days, Series.Visibility visibilityFilter) {
-		List<Series> serieses = new ArrayList<>();
-
-		// find cutoff
-		GregorianCalendar cal = new GregorianCalendar();
-		cal.add(Calendar.DATE, -1 * days);
-		Date cutoff = cal.getTime();
-
-		for (Series series : getSeries()) {
-			if (series.getEndDate() != null && series.getEndDate().before(cutoff)) continue;
-			serieses.add(series);
-		}
-
-		return serieses;
 	}
 
 	public void sortSeriesByDate() {
@@ -304,8 +355,8 @@ public class Catalog {
 	public String toString() {
 		StringBuffer b = new StringBuffer();
 
-		if (getMessages() != null) {
-			for (Message m : getMessages()) {
+		if (getRawMessages() != null) {
+			for (Message m : getRawMessages()) {
 				b.append(m).append('\n');
 			}
 		}

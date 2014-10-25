@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.wolm.catalog.catalog.Catalog;
 import org.wolm.catalog.catalog.SeriesIndexPageRender;
-import org.wolm.message.Message;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesPageRender;
 
@@ -72,6 +71,8 @@ public class App {
 			// not uploading to S3: the baseref is the file directory we are outputting to
 			RenderFactory.setBaseRef("file://" + outputFileDir.toString());
 		}
+
+		RenderFactory.setMinVisibility(AccessLevel.PUBLIC);
 	}
 
 	public boolean isHelpRequested() {
@@ -127,7 +128,7 @@ public class App {
 
 		// generate the recent-messages list and save it to a file
 		{
-			Series recentMessages = catalog.getRecentMessages(60, Message.Visibility.PUBLIC);
+			Series recentMessages = catalog.getRecentMessages(60);
 			PageRender pageRender = new SeriesPageRender(recentMessages);
 			File outputFile = new File(outputFileDir, "recent-messages.html");
 			pageRender.render(outputFile);
@@ -136,7 +137,7 @@ public class App {
 
 		// generate the recent-serieslist and save it to a file
 		{
-			List<Series> recentSeries = catalog.getRecentSeries(60, Series.Visibility.PUBLIC);
+			List<Series> recentSeries = catalog.getRecentSeries(60);
 			PageRender pageRender = new SeriesIndexPageRender(recentSeries);
 			((SeriesIndexPageRender) pageRender).setIndexTitle("Recent Series from Word of Life Ministries");
 			File outputFile = new File(outputFileDir, "recent-series.html");
@@ -147,7 +148,7 @@ public class App {
 		// generate the catalog index and save it to a file
 		{
 			catalog.sortSeriesByDate();
-			PageRender pageRender = new SeriesIndexPageRender(catalog);
+			PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
 			((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog");
 			File outputFile = new File(outputFileDir, "catalog.html");
 			pageRender.render(outputFile);

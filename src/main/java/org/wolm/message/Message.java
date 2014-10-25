@@ -10,6 +10,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import org.wolm.catalog.AccessLevel;
+
 /**
  * Stores one message from the message log
  * 
@@ -23,7 +25,7 @@ public class Message {
 	private List<Integer> trackNumbers;
 	private String description;
 	private String type;
-	private Visibility visibility;
+	private AccessLevel visibility;
 	private List<String> speakers;
 	private URL audioLink;
 	private URL videoLink;
@@ -31,10 +33,6 @@ public class Message {
 	private transient String audioLinkError;
 	private transient String videoLinkError;
 	private transient String visibilityError;
-
-	public enum Visibility {
-		PUBLIC, PROTECTED, PRIVATE, UNEDITED
-	}
 
 	private static final List<String> TYPES = Arrays.asList(new String[] { "C.O.R.E.", "Message", "Prayer", "Q&A",
 			"Song", "Special Event", "Testimony", "Training", "Word" });
@@ -106,11 +104,11 @@ public class Message {
 		this.type = type;
 	}
 
-	public Visibility getVisibility() {
+	public AccessLevel getVisibility() {
 		return visibility;
 	}
 
-	public void setVisibility(Visibility visibility) {
+	public void setVisibility(AccessLevel visibility) {
 		this.visibility = visibility;
 	}
 
@@ -123,19 +121,19 @@ public class Message {
 		switch (visibility) {
 		case "Public":
 		case "public":
-			this.visibility = Visibility.PUBLIC;
+			this.visibility = AccessLevel.PUBLIC;
 			break;
 		case "Protected":
 		case "protected":
-			this.visibility = Visibility.PROTECTED;
+			this.visibility = AccessLevel.PROTECTED;
 			break;
 		case "Private":
 		case "private":
-			this.visibility = Visibility.PRIVATE;
+			this.visibility = AccessLevel.PRIVATE;
 			break;
 		case "Private (Raw)":
 		case "private (raw)":
-			this.visibility = Visibility.UNEDITED;
+			this.visibility = AccessLevel.RAW;
 			break;
 		default:
 			this.visibility = null;

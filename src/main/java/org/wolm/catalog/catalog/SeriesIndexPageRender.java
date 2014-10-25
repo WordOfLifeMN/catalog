@@ -3,6 +3,7 @@ package org.wolm.catalog.catalog;
 import java.io.File;
 import java.util.List;
 
+import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.PageRender;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesPageRender;
@@ -15,10 +16,6 @@ public class SeriesIndexPageRender extends PageRender {
 	public SeriesIndexPageRender(List<Series> seriesList) {
 		super("series-index");
 		this.seriesList = seriesList;
-	}
-
-	public SeriesIndexPageRender(Catalog catalog) {
-		this(catalog.getSeries());
 	}
 
 	public String getIndexTitle() {
@@ -41,7 +38,7 @@ public class SeriesIndexPageRender extends PageRender {
 		// write out supporting files (i.e. all the series pages)
 		File pageDirectory = pageFile.getParentFile();
 		for (Series series : seriesList) {
-			if (series.getVisibility() != Series.Visibility.PUBLIC) {
+			if (series.getVisibility() != AccessLevel.PUBLIC) {
 				System.out.println("Skpping non-Public series " + series.getTitle());
 				continue;
 			}
