@@ -1,6 +1,9 @@
 package org.wolm.catalog;
 
+import java.io.File;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Factory to generate rendering objects
@@ -18,7 +21,11 @@ public class RenderFactory {
 	/** The base reference path for all internally referenced pages */
 	private static String baseRef = null;
 
+	/** Minimum level of visibility that should be output */
 	private static AccessLevel minVisibility;
+
+	/** List of all pages that have been created */
+	private static Set<File> createdPages = new HashSet<>();
 
 	/** Initialize the static fields */
 	static {
@@ -134,6 +141,18 @@ public class RenderFactory {
 		default:
 			return false;
 		}
+	}
+
+	public static Set<File> getCreatedPages() {
+		return createdPages;
+	}
+
+	public static void setCreatedPages(Set<File> createdPages) {
+		RenderFactory.createdPages = createdPages;
+	}
+
+	public static void addCreatedPage(File createdPage) {
+		createdPages.add(createdPage);
 	}
 
 }

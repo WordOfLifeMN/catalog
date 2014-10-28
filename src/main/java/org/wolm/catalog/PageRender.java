@@ -84,6 +84,9 @@ public abstract class PageRender {
 		try (PrintStream outStream = new PrintStream(new FileOutputStream(outputFile))) {
 			page.printPage(outStream);
 		}
+
+		// register the page with the factory
+		RenderFactory.addCreatedPage(outputFile);
 	}
 
 	protected WeeblyPage preparePage() throws Exception {

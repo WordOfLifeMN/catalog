@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.wolm.aws.AwsS3Helper;
 import org.wolm.catalog.catalog.Catalog;
 import org.wolm.catalog.catalog.SeriesIndexPageRender;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesPageRender;
 
+import com.amazonaws.services.s3.model.Bucket;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
@@ -51,6 +53,8 @@ public class App {
 		app.init();
 
 		app.catalog();
+
+		app.upload();
 	}
 
 	private void init() {
@@ -154,5 +158,25 @@ public class App {
 			pageRender.render(outputFile);
 			System.out.println("Catalog complete at " + outputFile);
 		}
+	}
+
+	/** Upload all pages that have been created to S3 (if requested) */
+	public void upload() throws Exception {
+		// bail if we're not supposed to upload
+		if (!isUpload()) return;
+
+		AwsS3Helper s3Helper = new AwsS3Helper();
+		Bucket catalogBucket = s3Helper.getBucket(getS3BucketName());
+		if (catalogBucket == null) throw new Exception("Cannot find the catalog bucket: '" + getS3BucketName() + "'");
+
+		for (File page : RenderFactory.getCreatedPages()) {
+			System.out.println("Uploading page: " + page);
+			s3Helper.uploadPublicFile(catalogBucket, getS3KeyForFile(page), page);
+		}
+	}
+
+	private String getS3KeyForFile(File file) {
+		if (getS3ObjectPrefix() == null) return file.getName();
+		return getS3ObjectPrefix() + "/" + file.getName();
 	}
 }
