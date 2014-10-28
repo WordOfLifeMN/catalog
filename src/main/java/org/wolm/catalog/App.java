@@ -33,8 +33,8 @@ public class App {
 	@Parameter(names = { "-u", "--upload" }, description = "Upload final files to S3.")
 	private boolean upload = false;
 
-	private String s3BucketName = "wordoflife.mn.audio";
-	private String s3ObjectPrefix = "etc";
+	private String s3BucketName = "wordoflife.mn.catalog";
+	private String s3ObjectPrefix = null;
 
 	/** Construct the application */
 	private App() throws Exception {
@@ -68,8 +68,8 @@ public class App {
 	private void initRenderFactory() {
 		if (isUpload()) {
 			// uploading to S3: the baseref is the URL to the s3 bucket
-			RenderFactory.setBaseRef("https://s3-us-west-2.amazonaws.com/" + getS3BucketName() + "/"
-					+ getS3ObjectPrefix());
+			RenderFactory.setBaseRef("http://s3-us-west-2.amazonaws.com/" + getS3BucketName()
+					+ (getS3ObjectPrefix() == null ? "" : "/" + getS3ObjectPrefix()));
 		}
 		else {
 			// not uploading to S3: the baseref is the file directory we are outputting to

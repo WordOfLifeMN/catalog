@@ -1,7 +1,7 @@
 <h1>${series.title}</h1>
 <table>
 	<#-- cover art and description -->
-	<#assign artLink = series.coverArtLink!'https://s3-us-west-2.amazonaws.com/wordoflife.mn.audio/etc/WordofLifeLogo-L.png' />
+	<#assign artLink = series.coverArtLink!'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XSmall.png' />
 	<tr>
 		<#if artLink??>
 			<td valign="top"><img src="${artLink}" width="128"/></td>
@@ -50,13 +50,27 @@
 //]]>
 </script>
 
+<style>
+	td.message {
+		border: 2px solid #3e713f;
+		border-radius: 5px;
+	}
+	td.message div.title {
+		padding:1px;
+	}
+	
+	td.resources {
+		border: 2px solid lightgray;
+		border-radius: 5px; 
+	}
+</style>
+
 <table width="100%">	
 	<#-- messages -->
 	<#list series.messages as message>
 		<tr>
-			<td onmouseover="mouseEnterMessage(jQuery(this));" onmouseout="mouseExitMessage(jQuery(this));" 
-					style="border-style:solid;border-width:1px;border-color:#3e713f;">
-				<div onclick="togglePlayer(jQuery(this).parent());" style="display:block;padding:1px;" title="${message.description!}">
+			<td class="message"onmouseover="mouseEnterMessage(jQuery(this));" onmouseout="mouseExitMessage(jQuery(this));">
+				<div class="title" onclick="togglePlayer(jQuery(this).parent());" title="${message.description!}">
 					${message_index + 1}.
 					<b>${message.title}</b>
 					<#if message.speakers??>
@@ -80,7 +94,7 @@
 							<#if message.videoLink??>
 								<td width="20%" valign="top" align="right">
 									<a href="${message.videoLink}" target="wolmVideo">
-										<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.audio/etc/YouTubeIcon.jpg" />
+										<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" />
 									</a>
 								</td>
 							</#if>
@@ -92,8 +106,11 @@
 	</#list>
 	<#if series.studyGuideLinks??>
 		<tr>
-			<td style="border-style:solid;border-width:1px;border-color:gray">
-				<b>Additional Materials</b>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td class="resources">
+				<b>Additional Resources</b>
 					<#list series.studyGuideLinks as guide>
 						<#assign name= guide?replace('.*/','','r') />
 						<#assign name= name?replace('+',' ') />
