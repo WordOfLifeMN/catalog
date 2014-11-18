@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.wolm.catalog.AccessLevel;
+import org.wolm.catalog.NamedLink;
 import org.wolm.catalog.RenderFactory;
 import org.wolm.message.Message;
 
@@ -33,12 +34,12 @@ public class Series {
 	private AccessLevel visibility;
 	private URL coverArtLink;
 	private URL coverImageLink;
-	private List<URL> studyGuideLinks;
+	private List<NamedLink> studyGuides;
 
 	transient private String visibilityError;
 	transient private String coverArtLinkError;
 	transient private String coverImageLinkError;
-	transient private String studyGuideLinkError;
+	transient private String studyGuideError;
 
 	/** Messages for this series */
 	private List<Message> messages = null;
@@ -175,29 +176,30 @@ public class Series {
 		}
 	}
 
-	public List<URL> getStudyGuideLinks() {
-		return studyGuideLinks;
+	public List<NamedLink> getStudyGuides() {
+		return studyGuides;
 	}
 
-	public void setStudyGuideLinks(List<URL> studyGuide) {
-		this.studyGuideLinks = studyGuide;
+	public void setStudyGuides(List<NamedLink> studyGuides) {
+		this.studyGuides = studyGuides;
 	}
 
-	public void setStudyGuideLinksAsString(String linkString) {
-		studyGuideLinks = null;
-		if (linkString == null) return;
-		if (SPECIAL_LINKS.contains(linkString)) return;
-		String[] links = linkString.split("\\s*;\\s*");
+	public void setStudyGuidesAsString(String serializedString) {
+		studyGuides = null;
+		if (serializedString == null) return;
+		if (SPECIAL_LINKS.contains(serializedString)) return;
+
+		String[] links = serializedString.split("\\s*;\\s*");
 		if (links == null) return;
 
-		studyGuideLinks = new ArrayList<>();
+		studyGuides = new ArrayList<>();
 		for (String link : links)
 			try {
-				studyGuideLinks.add(new URL(link));
+				studyGuides.add(new NamedLink(link));
 			}
 			catch (MalformedURLException e) {
-				if (studyGuideLinkError == null) studyGuideLinkError = "unable to parse the study guide URLs: ";
-				studyGuideLinkError += "'" + link + "' (" + e.getMessage() + ")";
+				if (studyGuideError == null) studyGuideError = "unable to parse the study guide URLs: ";
+				studyGuideError += "'" + link + "' (" + e.getMessage() + ")";
 			}
 	}
 
@@ -226,6 +228,7 @@ public class Series {
 	public boolean isValid(PrintStream s) {
 		boolean valid = true;
 		boolean needsHeader = true;
+		int tmpCount;
 
 		if (getId() == null) {
 			printValidationError(s, needsHeader, "has no identifier");
@@ -245,6 +248,7 @@ public class Series {
 		if (getMessageCount() == null) {
 			printValidationError(s, needsHeader, "has no message count, will be handled on a best effort basis");
 			// this is not a validation error, just a friendly warning - expected if the series is still in progress
+			needsHeader = false;
 		}
 		else if (getMessageCount() < 1) {
 			printValidationError(s, needsHeader, "has 0 messages");
@@ -252,11 +256,14 @@ public class Series {
 		}
 		else if (messages == null || getMessageCount() > messages.size()) {
 			printValidationError(s, needsHeader, "has a message count of " + getMessageCount() + " messages, but "
-					+ (messages == null ? 0 : messages.size()) + " actual messages;");
+					+ (messages == null ? 0 : messages.size()) + " actual messages");
 			valid = needsHeader = false;
 		}
-		else {
-			// TODO: print a warning if the message count is > number of messages with visibility >= the series
+		else if (getMessageCount() > (tmpCount = countOfMessagesWithLessVisibilityThan(getVisibility()))) {
+			printValidationError(s, needsHeader, "has visibility of " + getVisibility() + ", but " + tmpCount + " of "
+					+ getMessageCount() + " are not visible at that level, some messages may not be displayed");
+			// this is not a validation error, just a friendly warning - expected if the series is still in progress
+			needsHeader = false;
 		}
 
 		if (visibilityError != null) {
@@ -274,12 +281,27 @@ public class Series {
 			valid = needsHeader = false;
 		}
 
-		if (studyGuideLinkError != null) {
-			printValidationError(s, needsHeader, studyGuideLinkError);
+		if (studyGuideError != null) {
+			printValidationError(s, needsHeader, studyGuideError);
 			valid = needsHeader = false;
 		}
 
 		return valid;
+	}
+
+	/**
+	 * Counts the number of messages with less visibility than a specified level
+	 * 
+	 * @param visibilityCutoff
+	 * @return Number of messages with less visibility than the {@code visibilityCutoff}
+	 */
+	private int countOfMessagesWithLessVisibilityThan(AccessLevel visibilityCutoff) {
+		int count = 0;
+
+		for (Message message : messages)
+			if (AccessLevel.isLevelLessVisibleThanCutoff(message.getVisibility(), getVisibility())) count++;
+
+		return count;
 	}
 
 	private void printValidationError(PrintStream s, boolean needsHeader, String error) {

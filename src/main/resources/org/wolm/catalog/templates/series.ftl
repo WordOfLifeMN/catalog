@@ -42,26 +42,35 @@
 		element.children('.player').toggle('puff');
 	}
 	function mouseEnterMessage(element) {
-		element.css('border-color','#ffd700');
+		element.addClass('highlight');
 	}
 	function mouseExitMessage(element) {
-		element.css('border-color','#3e713f');
+		element.removeClass('highlight');
 	}
 //]]>
 </script>
 
 <style>
 	td.message {
-		border: 2px solid #3e713f;
+		border: 2px solid #528d54;
 		border-radius: 5px;
 	}
 	td.message div.title {
 		padding:1px;
 	}
+	td.message div.title.highlight {	
+		border: 0px solid;
+		border-radius: 3px;
+		background-color: #3e713f;
+		color: white;	
+	}
 	
 	td.resources {
-		border: 2px solid lightgray;
+		border: 2px solid #bf9c03;
 		border-radius: 5px; 
+	}
+	td.resources .filename {
+		color: #bf9c03;
 	}
 </style>
 
@@ -69,8 +78,10 @@
 	<#-- messages -->
 	<#list series.messages as message>
 		<tr>
-			<td class="message"onmouseover="mouseEnterMessage(jQuery(this));" onmouseout="mouseExitMessage(jQuery(this));">
-				<div class="title" onclick="togglePlayer(jQuery(this).parent());" title="${message.description!}">
+			<td class="message">
+				<div class="title" title="${message.description!}"
+						onclick="togglePlayer(jQuery(this).parent());"
+						onmouseover="mouseEnterMessage(jQuery(this));" onmouseout="mouseExitMessage(jQuery(this));">
 					${message_index + 1}.
 					<b>${message.title}</b>
 					<#if message.speakers??>
@@ -104,17 +115,18 @@
 			</td>
 		</tr>
 	</#list>
-	<#if series.studyGuideLinks??>
+	<#if series.studyGuides??>
 		<tr>
 			<td>&nbsp;</td>
 		</tr>
 		<tr>
 			<td class="resources">
 				<b>Additional Resources</b>
-					<#list series.studyGuideLinks as guide>
-						<#assign name= guide?replace('.*/','','r') />
-						<#assign name= name?replace('+',' ') />
-						<br/><a href="${guide}" target="wolmGuide" style="padding-left:24px;">${name}</a>
+					<#list series.studyGuides as guide>
+						<br/>
+						<span class="filename" style="float:right;">(${guide.link?replace('.*/','','r')})</span>
+						<a href="${guide.link}" target="wolmGuide" style="padding-left:24px;">${guide.name}</a>
+						<span style="float:clear;" />
 					</#list>
 			</td>
 		</tr>

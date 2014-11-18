@@ -250,7 +250,7 @@ public class Catalog {
 			series.setCoverImageLinkAsString(row.getValue("coverimage"));
 
 			// study guide
-			series.setStudyGuideLinksAsString(row.getValue("studyguide"));
+			series.setStudyGuidesAsString(row.getValue("studyguide"));
 
 			// discover messages for this series
 			series.discoverMessages(messages);
