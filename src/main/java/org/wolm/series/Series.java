@@ -41,6 +41,9 @@ public class Series {
 	transient private String coverImageLinkError;
 	transient private String studyGuideError;
 
+	transient private boolean validationErrorHasBeenPrinted;
+	transient private boolean isValid;
+
 	/** Messages for this series */
 	private List<Message> messages = null;
 
@@ -226,67 +229,54 @@ public class Series {
 	}
 
 	public boolean isValid(PrintStream s) {
-		boolean valid = true;
-		boolean needsHeader = true;
+		isValid = true;
+		validationErrorHasBeenPrinted = false;
 		int tmpCount;
 
 		if (getId() == null) {
-			printValidationError(s, needsHeader, "has no identifier");
-			valid = needsHeader = false;
+			reportValidationError(s, "has no identifier");
 		}
 
 		if (getTitle() == null) {
-			printValidationError(s, needsHeader, "has no title");
-			valid = needsHeader = false;
+			reportValidationError(s, "has no title");
 		}
 
 		if (getStartDate() == null) {
-			printValidationError(s, needsHeader, "has no start date");
-			valid = needsHeader = false;
+			reportValidationError(s, "has no start date");
 		}
 
 		if (getMessageCount() == null) {
-			printValidationError(s, needsHeader, "has no message count, will be handled on a best effort basis");
-			// this is not a validation error, just a friendly warning - expected if the series is still in progress
-			needsHeader = false;
+			reportValidationWarning(s, "has no message count, will be handled on a best effort basis");
 		}
 		else if (getMessageCount() < 1) {
-			printValidationError(s, needsHeader, "has 0 messages");
-			valid = needsHeader = false;
+			reportValidationError(s, "has 0 messages");
 		}
 		else if (messages == null || getMessageCount() > messages.size()) {
-			printValidationError(s, needsHeader, "has a message count of " + getMessageCount() + " messages, but "
+			reportValidationError(s, "has a message count of " + getMessageCount() + " messages, but "
 					+ (messages == null ? 0 : messages.size()) + " actual messages");
-			valid = needsHeader = false;
 		}
 		else if (getMessageCount() > (tmpCount = countOfMessagesWithLessVisibilityThan(getVisibility()))) {
-			printValidationError(s, needsHeader, "has visibility of " + getVisibility() + ", but " + tmpCount + " of "
-					+ getMessageCount() + " are not visible at that level, some messages may not be displayed");
-			// this is not a validation error, just a friendly warning - expected if the series is still in progress
-			needsHeader = false;
+			reportValidationWarning(s, "has visibility of " + getVisibility() + ", but " + tmpCount + " of "
+					+ getMessageCount() + " messages are not visible at that level, some messages may not be displayed");
 		}
 
 		if (visibilityError != null) {
-			printValidationError(s, needsHeader, visibilityError);
-			valid = needsHeader = false;
+			reportValidationError(s, visibilityError);
 		}
 
 		if (coverArtLinkError != null) {
-			printValidationError(s, needsHeader, coverArtLinkError);
-			valid = needsHeader = false;
+			reportValidationError(s, coverArtLinkError);
 		}
 
 		if (coverImageLinkError != null) {
-			printValidationError(s, needsHeader, coverImageLinkError);
-			valid = needsHeader = false;
+			reportValidationError(s, coverImageLinkError);
 		}
 
 		if (studyGuideError != null) {
-			printValidationError(s, needsHeader, studyGuideError);
-			valid = needsHeader = false;
+			reportValidationError(s, studyGuideError);
 		}
 
-		return valid;
+		return isValid;
 	}
 
 	/**
@@ -304,10 +294,32 @@ public class Series {
 		return count;
 	}
 
-	private void printValidationError(PrintStream s, boolean needsHeader, String error) {
+	/**
+	 * Outputs a validation error and flags this series as invalid
+	 * 
+	 * @param s Stream to print error to
+	 * @param error Error string to display. If <code>null</code>, this method does nothing
+	 */
+	private void reportValidationError(PrintStream s, String error) {
+		if (s == null) return;
+		reportValidationWarning(s, error);
+		isValid = false;
+	}
+
+	/**
+	 * Outputs a validation error and flags this series as invalid
+	 * 
+	 * @param s Stream to print error to
+	 * @param error Error string to display. If <code>null</code>, this method does nothing
+	 */
+	private void reportValidationWarning(PrintStream s, String error) {
 		if (s == null) return;
 
-		if (needsHeader) s.println("Series '" + getTitle() + "' has the following problems:");
+		if (!validationErrorHasBeenPrinted) {
+			s.println("Series '" + getTitle() + "' has the following problems:");
+			validationErrorHasBeenPrinted = true;
+		}
+
 		s.println("    * " + error);
 	}
 

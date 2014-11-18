@@ -34,6 +34,9 @@ public class Message {
 	private transient String videoLinkError;
 	private transient String visibilityError;
 
+	private transient boolean isValid;
+	private transient boolean validationErrorHasBeenPrinted;
+
 	private static final List<String> TYPES = Arrays.asList(new String[] { "C.O.R.E.", "Message", "Prayer", "Q&A",
 			"Song", "Special Event", "Testimony", "Training", "Word" });
 	private static final List<String> SPECIAL_LINKS = Arrays.asList(new String[] { "-", "n/a", "n/e", "abrogated",
@@ -187,55 +190,69 @@ public class Message {
 	}
 
 	public boolean isValid(PrintStream s) {
-		boolean valid = true;
-		boolean needsHeader = true;
+		isValid = true;
+		validationErrorHasBeenPrinted = false;
 
 		if (getTitle() == null) {
-			printValidationError(s, needsHeader, "has no title");
-			valid = needsHeader = false;
+			reportValidationError(s, "has no title");
 		}
 
 		if (getDate() == null) {
-			printValidationError(s, needsHeader, "has no date");
-			valid = needsHeader = false;
+			reportValidationError(s, "has no date");
 		}
 
 		int seriesCount = getSeries() == null ? 0 : getSeries().size();
 		int trackCount = getTrackNumbers() == null ? 0 : getTrackNumbers().size();
 		if (seriesCount != trackCount) {
-			printValidationError(s, needsHeader, "is in " + seriesCount + " series, but has track data for "
-					+ trackCount + " series");
-			valid = needsHeader = false;
+			reportValidationError(s, "is in " + seriesCount + " series, but has track data for " + trackCount
+					+ " series");
 		}
 
 		if (getType() != null && !TYPES.contains(getType())) {
-			printValidationError(s, needsHeader, "has an unknown type '" + getType() + "'");
-			// this is not a validation problem, just a warning that there might be a typo
-			needsHeader = false;
+			reportValidationWarning(s, "has an unknown type '" + getType() + "'");
 		}
 
 		if (audioLinkError != null) {
-			printValidationError(s, needsHeader, audioLinkError);
-			valid = needsHeader = false;
+			reportValidationError(s, audioLinkError);
 		}
 
 		if (videoLinkError != null) {
-			printValidationError(s, needsHeader, videoLinkError);
-			valid = needsHeader = false;
+			reportValidationError(s, videoLinkError);
 		}
 
 		if (visibilityError != null) {
-			printValidationError(s, needsHeader, visibilityError);
-			valid = needsHeader = false;
+			reportValidationError(s, visibilityError);
 		}
 
-		return valid;
+		return isValid;
 	}
 
-	private void printValidationError(PrintStream s, boolean needsHeader, String error) {
+	/**
+	 * Outputs a validation error and flags this message as invalid
+	 * 
+	 * @param s Stream to print error to
+	 * @param error Error string to display. If <code>null</code>, this method does nothing
+	 */
+	private void reportValidationError(PrintStream s, String error) {
+		if (s == null) return;
+		reportValidationWarning(s, error);
+		isValid = false;
+	}
+
+	/**
+	 * Outputs a validation error and flags this message as invalid
+	 * 
+	 * @param s Stream to print error to
+	 * @param error Error string to display. If <code>null</code>, this method does nothing
+	 */
+	private void reportValidationWarning(PrintStream s, String error) {
 		if (s == null) return;
 
-		if (needsHeader) s.println("Message '" + getTitle() + "' has the following problems:");
+		if (validationErrorHasBeenPrinted) {
+			s.println("Message '" + getTitle() + "' has the following problems:");
+			validationErrorHasBeenPrinted = true;
+		}
+
 		s.println("    * " + error);
 	}
 
