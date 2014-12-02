@@ -69,7 +69,7 @@
 		border: 2px solid #bf9c03;
 		border-radius: 5px; 
 	}
-	td.resources .filename {
+	td.resources .filename, div.message-resource .filename {
 		color: #bf9c03;
 	}
 </style>
@@ -111,21 +111,30 @@
 							</#if>
 						</tr>
 					</table>
+					<#if message.resources?has_content>
+						<div class="message-resource">
+							<#list message.resources as resource>
+								<span class="filename" style="float:right;">(${resource.link?replace('.*/','','r')})</span>
+								<a href="${resource.link}" target="wolmGuide" style="padding-left:4px;">${resource.name}</a>
+								<span style="float:clear;" />
+							</#list>
+						</div>
+					</#if>
 				</div>
 			</td>
 		</tr>
 	</#list>
-	<#if series.studyGuides??>
+	<#if series.resources?has_content>
 		<tr>
 			<td>&nbsp;</td>
 		</tr>
 		<tr>
 			<td class="resources">
 				<b>Additional Resources</b>
-					<#list series.studyGuides as guide>
+					<#list series.resources as resource>
 						<br/>
-						<span class="filename" style="float:right;">(${guide.link?replace('.*/','','r')})</span>
-						<a href="${guide.link}" target="wolmGuide" style="padding-left:24px;">${guide.name}</a>
+						<span class="filename" style="float:right;">(${resource.link?replace('.*/','','r')})</span>
+						<a href="${resource.link}" target="wolmGuide" style="padding-left:24px;">${resource.name}</a>
 						<span style="float:clear;" />
 					</#list>
 			</td>

@@ -5,12 +5,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import org.wolm.catalog.AccessLevel;
+import org.wolm.catalog.NamedLink;
 
 /**
  * Stores one message from the message log
@@ -29,10 +31,12 @@ public class Message {
 	private List<String> speakers;
 	private URL audioLink;
 	private URL videoLink;
+	private List<NamedLink> resources = new ArrayList<>();
 
 	private transient String audioLinkError;
 	private transient String videoLinkError;
 	private transient String visibilityError;
+	private transient String resourceError;
 
 	private transient boolean isValid;
 	private transient boolean validationErrorHasBeenPrinted;
@@ -40,7 +44,7 @@ public class Message {
 	private static final List<String> TYPES = Arrays.asList(new String[] { "C.O.R.E.", "Message", "Prayer", "Q&A",
 			"Song", "Special Event", "Testimony", "Training", "Word" });
 	private static final List<String> SPECIAL_LINKS = Arrays.asList(new String[] { "-", "n/a", "n/e", "abrogated",
-			"in progress", "editing", "rendering", "rendered", "flash", "uploading" });
+			"in progress", "editing", "edited", "rendering", "rendered", "flash", "uploading" });
 
 	public Message() {
 		super();
@@ -189,6 +193,32 @@ public class Message {
 		}
 	}
 
+	public List<NamedLink> getResources() {
+		return resources;
+	}
+
+	public void setResources(List<NamedLink> resources) {
+		this.resources = resources == null ? new ArrayList<NamedLink>() : resources;
+	}
+
+	public void setResourcesAsString(String serializedString) {
+		resources = new ArrayList<>();
+		if (serializedString == null) return;
+		if (SPECIAL_LINKS.contains(serializedString)) return;
+
+		String[] links = serializedString.split("\\s*;\\s*");
+		if (links == null) return;
+
+		for (String link : links)
+			try {
+				resources.add(new NamedLink(link));
+			}
+			catch (MalformedURLException e) {
+				if (resourceError == null) resourceError = "unable to parse the resource URLs: ";
+				resourceError += "'" + link + "' (" + e.getMessage() + ")";
+			}
+	}
+
 	public boolean isValid(PrintStream s) {
 		isValid = true;
 		validationErrorHasBeenPrinted = false;
@@ -212,17 +242,10 @@ public class Message {
 			reportValidationWarning(s, "has an unknown type '" + getType() + "'");
 		}
 
-		if (audioLinkError != null) {
-			reportValidationError(s, audioLinkError);
-		}
-
-		if (videoLinkError != null) {
-			reportValidationError(s, videoLinkError);
-		}
-
-		if (visibilityError != null) {
-			reportValidationError(s, visibilityError);
-		}
+		if (audioLinkError != null) reportValidationError(s, audioLinkError);
+		if (videoLinkError != null) reportValidationError(s, videoLinkError);
+		if (visibilityError != null) reportValidationError(s, visibilityError);
+		if (resourceError != null) reportValidationError(s, resourceError);
 
 		return isValid;
 	}
@@ -248,7 +271,7 @@ public class Message {
 	private void reportValidationWarning(PrintStream s, String error) {
 		if (s == null) return;
 
-		if (validationErrorHasBeenPrinted) {
+		if (!validationErrorHasBeenPrinted) {
 			s.println("Message '" + getTitle() + "' has the following problems:");
 			validationErrorHasBeenPrinted = true;
 		}

@@ -34,18 +34,18 @@ public class Series {
 	private AccessLevel visibility;
 	private URL coverArtLink;
 	private URL coverImageLink;
-	private List<NamedLink> studyGuides;
+	private List<NamedLink> resources = new ArrayList<>();
 
 	transient private String visibilityError;
 	transient private String coverArtLinkError;
 	transient private String coverImageLinkError;
-	transient private String studyGuideError;
+	transient private String resourceError;
 
 	transient private boolean validationErrorHasBeenPrinted;
 	transient private boolean isValid;
 
 	/** Messages for this series */
-	private List<Message> messages = null;
+	private List<Message> messages = new ArrayList<>();
 
 	private static final List<String> SPECIAL_LINKS = Arrays.asList(new String[] { "-", "n/a", "n/e", "abrogated",
 			"in progress", "editing", "rendering", "rendered", "flash", "uploading" });
@@ -84,8 +84,7 @@ public class Series {
 
 	public Long getMessageCount() {
 		if (messageCount != null) return messageCount;
-		if (messages != null) return (long) messages.size();
-		return null;
+		return (long) messages.size();
 	}
 
 	public void setMessageCount(Long messageCount) {
@@ -179,30 +178,52 @@ public class Series {
 		}
 	}
 
-	public List<NamedLink> getStudyGuides() {
-		return studyGuides;
+	/**
+	 * @return Resources. Empty list if none
+	 */
+	public List<NamedLink> getResources() {
+		return getResources(true);
 	}
 
-	public void setStudyGuides(List<NamedLink> studyGuides) {
-		this.studyGuides = studyGuides;
+	public List<NamedLink> getResources(boolean includeResourcesFromMessages) {
+		if (!includeResourcesFromMessages) return resources;
+
+		List<NamedLink> allResources = new ArrayList<>();
+		if (resources != null) allResources.addAll(resources);
+		if (getMessages() != null) {
+			int messageNumber = 1;
+			for (Message message : getMessages()) {
+				for (NamedLink resource : message.getResources()) {
+					NamedLink messageResource = new NamedLink(resource.getName() + " (from #" + messageNumber + ")",
+							resource.getLink());
+					allResources.add(messageResource);
+				}
+				messageNumber++;
+			}
+		}
+
+		return allResources;
 	}
 
-	public void setStudyGuidesAsString(String serializedString) {
-		studyGuides = null;
+	public void setResources(List<NamedLink> resources) {
+		this.resources = resources == null ? new ArrayList<NamedLink>() : resources;
+	}
+
+	public void setResourcesAsString(String serializedString) {
+		resources = new ArrayList<>();
 		if (serializedString == null) return;
 		if (SPECIAL_LINKS.contains(serializedString)) return;
 
 		String[] links = serializedString.split("\\s*;\\s*");
 		if (links == null) return;
 
-		studyGuides = new ArrayList<>();
 		for (String link : links)
 			try {
-				studyGuides.add(new NamedLink(link));
+				resources.add(new NamedLink(link));
 			}
 			catch (MalformedURLException e) {
-				if (studyGuideError == null) studyGuideError = "unable to parse the study guide URLs: ";
-				studyGuideError += "'" + link + "' (" + e.getMessage() + ")";
+				if (resourceError == null) resourceError = "unable to parse the resource URLs: ";
+				resourceError += "'" + link + "' (" + e.getMessage() + ")";
 			}
 	}
 
@@ -210,7 +231,6 @@ public class Series {
 	 * @return Messages for this series that are visible under the current visibility rules
 	 */
 	public List<Message> getMessages() {
-		if (messages == null) return null;
 		List<Message> visibleMessages = new ArrayList<>(messages.size());
 
 		for (Message message : messages)
@@ -220,11 +240,10 @@ public class Series {
 	}
 
 	public void setMessages(List<Message> messages) {
-		this.messages = messages;
+		this.messages = messages == null ? new ArrayList<Message>() : messages;
 	}
 
 	public void addMessage(Message message) {
-		if (messages == null) messages = new ArrayList<>();
 		messages.add(message);
 	}
 
@@ -251,30 +270,20 @@ public class Series {
 		else if (getMessageCount() < 1) {
 			reportValidationError(s, "has 0 messages");
 		}
-		else if (messages == null || getMessageCount() > messages.size()) {
-			reportValidationError(s, "has a message count of " + getMessageCount() + " messages, but "
-					+ (messages == null ? 0 : messages.size()) + " actual messages");
+		else if (getMessageCount() > messages.size()) {
+			reportValidationError(s,
+					"has a message count of " + getMessageCount() + " messages, but " + messages.size()
+							+ " actual messages");
 		}
-		else if (getMessageCount() > (tmpCount = countOfMessagesWithLessVisibilityThan(getVisibility()))) {
+		else if ((tmpCount = countOfMessagesWithLessVisibilityThan(getVisibility())) > 0) {
 			reportValidationWarning(s, "has visibility of " + getVisibility() + ", but " + tmpCount + " of "
 					+ getMessageCount() + " messages are not visible at that level, some messages may not be displayed");
 		}
 
-		if (visibilityError != null) {
-			reportValidationError(s, visibilityError);
-		}
-
-		if (coverArtLinkError != null) {
-			reportValidationError(s, coverArtLinkError);
-		}
-
-		if (coverImageLinkError != null) {
-			reportValidationError(s, coverImageLinkError);
-		}
-
-		if (studyGuideError != null) {
-			reportValidationError(s, studyGuideError);
-		}
+		if (visibilityError != null) reportValidationError(s, visibilityError);
+		if (coverArtLinkError != null) reportValidationError(s, coverArtLinkError);
+		if (coverImageLinkError != null) reportValidationError(s, coverImageLinkError);
+		if (resourceError != null) reportValidationError(s, resourceError);
 
 		return isValid;
 	}

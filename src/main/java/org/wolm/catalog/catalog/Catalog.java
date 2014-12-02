@@ -113,7 +113,7 @@ public class Catalog {
 
 		List<String> columns = worksheet.getColumnNames();
 		for (String columnName : new String[] { "date", "name", "speaker", "audiolink", "videolink", "type",
-				"visibility", "seriesname", "track", "description" })
+				"visibility", "seriesname", "track", "description", "resources" })
 			if (!columns.contains(columnName)) {
 				throw new Exception("Cannot find column '" + columnName + "' in the spreadsheet '"
 						+ messageSpreadsheetName + "'");
@@ -150,6 +150,9 @@ public class Catalog {
 
 			// description
 			msg.setDescription(row.getValue("description"));
+
+			// resources
+			msg.setResourcesAsString(row.getValue("resources"));
 
 			// type
 			msg.setType(row.getValue("type"));
@@ -205,7 +208,7 @@ public class Catalog {
 
 		List<String> columns = worksheet.getColumnNames();
 		for (String columnName : new String[] { "name", "datestarted", "dateended", "messages", "speaker",
-				"description", "visibility", "coverart", "coverimage", "studyguide", "webid" })
+				"description", "visibility", "coverart", "coverimage", "resources", "webid" })
 			if (!columns.contains(columnName)) {
 				throw new Exception("Cannot find column '" + columnName + "' in the spreadsheet '"
 						+ seriesSpreadsheetName + "'");
@@ -250,7 +253,7 @@ public class Catalog {
 			series.setCoverImageLinkAsString(row.getValue("coverimage"));
 
 			// study guide
-			series.setStudyGuidesAsString(row.getValue("studyguide"));
+			series.setResourcesAsString(row.getValue("resources"));
 
 			// discover messages for this series
 			series.discoverMessages(messages);
