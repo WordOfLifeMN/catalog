@@ -45,6 +45,16 @@ public abstract class PageRender {
 	}
 
 	/**
+	 * Retrieves the current value of a model data element
+	 * 
+	 * @param name Name of the bean to retrieve
+	 * @return Data value of the bean, <code>null</code> if none
+	 */
+	protected Object getDataFromModel(String name) {
+		return freemarkerDataModel.get(name);
+	}
+
+	/**
 	 * Adds a bean to the data model that freemarker will use to generate the page
 	 * 
 	 * @param name Name of the bean

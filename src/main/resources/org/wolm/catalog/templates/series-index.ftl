@@ -1,4 +1,5 @@
 <h1>${title!}</h1>
+<#if description??><p>${description}</p></#if>
 <ul>
 	<#list seriesList as series>
 		<li>

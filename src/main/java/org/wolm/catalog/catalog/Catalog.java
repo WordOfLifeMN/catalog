@@ -181,6 +181,7 @@ public class Catalog {
 				System.out.println("WARNING: Ignoring message due to preceeding problems");
 				continue;
 			}
+			msg.normalize();
 
 			messages.add(msg);
 		}
@@ -266,10 +267,72 @@ public class Catalog {
 				continue;
 			}
 
+			series.normalize();
+
 			serieses.add(series);
 		}
 
 		return serieses;
+	}
+
+	/**
+	 * Gets a list of all non-series messages by year and concatenates all completed series
+	 * 
+	 * @return List of series, starting with years with stand-alone messages followed by all the completed series,
+	 * oldest first
+	 */
+	public List<Series> getCompletedSeriesWithStandAloneMessages() {
+		List<Series> allSeries = new ArrayList<>();
+
+		// add the stand-alone messages
+		for (int year = 2000; year < 2020; year++) {
+			Series series = getStandAloneMessages(year);
+			if (series.getMessageCount() > 0) allSeries.add(series);
+		}
+
+		// add the completed
+		allSeries.addAll(getCompletedSeries());
+		return allSeries;
+	}
+
+	/**
+	 * Gets all the messages from a given year as a series, but only if they are not in a series already
+	 * 
+	 * @param year
+	 * @return
+	 */
+	public Series getStandAloneMessages(int year) {
+		// sort the messages by date
+		List<Message> orderedMessages = new ArrayList<>(messages);
+		Collections.sort(orderedMessages, Message.byDate);
+
+		// create series
+		Series series = new Series();
+		series.setTitle("Messages from " + year);
+		series.setId("WOLS-SA" + year);
+		series.setDescription("Messages from " + year + " that were not part of any series.");
+		series.setVisibility(RenderFactory.getMinVisibility());
+
+		// add all the messages newer than the cutoff
+		GregorianCalendar cal = new GregorianCalendar();
+		for (Message message : orderedMessages) {
+			if (message.getDate() == null) break; // nulls are sorted to end
+
+			// bail if not in the right year
+			cal.setTime(message.getDate());
+			if (cal.get(Calendar.YEAR) != year) continue;
+			if (!RenderFactory.isVisible(message.getVisibility())) continue;
+			if (!message.getSeries().isEmpty()) continue;
+			series.addMessage(message);
+		}
+
+		// fill out the dates
+		if (series.getMessageCount() > 0) {
+			series.setStartDate(series.getMessages().get(0).getDate());
+			series.setEndDate(series.getMessages().get(series.getMessages().size() - 1).getDate());
+		}
+
+		return series;
 	}
 
 	/**

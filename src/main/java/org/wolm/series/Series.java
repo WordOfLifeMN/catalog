@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.NamedLink;
@@ -330,6 +331,22 @@ public class Series {
 		}
 
 		s.println("    * " + error);
+	}
+
+	/**
+	 * Examines the series data, and normalizes (standardizes) anything necessary. You can assume the series is already
+	 * validated by the time this is called.
+	 */
+	public void normalize() {
+		// Update speaker names with titles
+		for (ListIterator<String> iter = getSpeakers().listIterator(); iter.hasNext();) {
+			switch (iter.next()) {
+			case "Vern Peltz":
+				iter.set("Pastor Vern Peltz");
+				break;
+			}
+
+		}
 	}
 
 	/**

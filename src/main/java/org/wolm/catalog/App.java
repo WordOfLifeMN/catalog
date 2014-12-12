@@ -139,7 +139,7 @@ public class App {
 			System.out.println("Recent messages complete at " + outputFile);
 		}
 
-		// generate the recent-serieslist and save it to a file
+		// generate the recent-series list and save it to a file
 		{
 			List<Series> recentSeries = catalog.getRecentSeries(60);
 			PageRender pageRender = new SeriesIndexPageRender(recentSeries);
@@ -152,8 +152,15 @@ public class App {
 		// generate the catalog index and save it to a file
 		{
 			catalog.sortSeriesByDate();
-			PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
+			PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeriesWithStandAloneMessages());
 			((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog");
+			((SeriesIndexPageRender) pageRender)
+					.setIndexDescription("<table><tr>"
+							+ "<td><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/remix.jpeg' width='128'/></td>"
+							+ "<td><h3>We&apos;re currently re-editing and bringing the past 10 years "
+							+ "of messages and study materials up to date. "
+							+ "New content will be added weekly through the winter of 2014-2015, so check back frequently!</h3>"
+							+ "</td></table>");
 			File outputFile = new File(outputFileDir, "catalog.html");
 			pageRender.render(outputFile);
 			System.out.println("Catalog complete at " + outputFile);

@@ -7,9 +7,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.NamedLink;
@@ -67,6 +69,7 @@ public class Message {
 	}
 
 	public List<String> getSeries() {
+		if (series == null) return Collections.emptyList();
 		return series;
 	}
 
@@ -150,6 +153,7 @@ public class Message {
 	}
 
 	public List<String> getSpeakers() {
+		if (speakers == null) return Collections.emptyList();
 		return speakers;
 	}
 
@@ -277,6 +281,22 @@ public class Message {
 		}
 
 		s.println("    * " + error);
+	}
+
+	/**
+	 * Examines the message data, and normalizes (standardizes) anything necessary. You can assume the message is
+	 * already validated by the time this is called.
+	 */
+	public void normalize() {
+		// Update speaker names with titles
+		for (ListIterator<String> iter = getSpeakers().listIterator(); iter.hasNext();) {
+			switch (iter.next()) {
+			case "Vern Peltz":
+				iter.set("Pastor Vern Peltz");
+				break;
+			}
+
+		}
 	}
 
 	@Override
