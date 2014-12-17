@@ -13,8 +13,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.wolm.aws.AwsS3Helper;
 import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.NamedLink;
+import org.wolm.catalog.NamedResourceLink;
 
 /**
  * Stores one message from the message log
@@ -165,6 +167,10 @@ public class Message {
 		return audioLink;
 	}
 
+	public URL getAudioLinkForDownload() {
+		return AwsS3Helper.instance().getSignedUrl(audioLink, AwsS3Helper.Disposition.download);
+	}
+
 	public void setAudioLink(URL audioLink) {
 		this.audioLink = audioLink;
 	}
@@ -215,7 +221,7 @@ public class Message {
 
 		for (String link : links)
 			try {
-				resources.add(new NamedLink(link));
+				resources.add(new NamedResourceLink(link, this));
 			}
 			catch (MalformedURLException e) {
 				if (resourceError == null) resourceError = "unable to parse the resource URLs: ";

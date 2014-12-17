@@ -71,6 +71,15 @@
 	}
 	td.resources .filename, div.message-resource .filename {
 		color: #bf9c03;
+		float: right;
+		font-size: 75%;
+	}
+	td.resources a {
+		padding-left: 24px;
+	}
+	td.resources .source {
+		color: #777;
+		font-size: 85%;
 	}
 </style>
 
@@ -87,13 +96,20 @@
 					<#if message.speakers??>
 						- <#list message.speakers as speaker>${speaker}<#if speaker_has_next>, </#if></#list>
 					</#if>
-					<#if message.date??>(${message.date?date})</#if>
+					<#if message.date??>(${message.date?date?string.full})</#if>
 				</div>
 				<div class="player" style="display:none;">
 					<p>${message.description!}</p>
 					<table width="100%">
 						<tr>
-							<td width="60%" valign="top">
+							<#if message.videoLink??>
+								<td width="50px" valign="top" align="left">
+									<a href="${message.videoLink}" target="wolmVideo">
+										<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24"/>
+									</a>
+								</td>
+							</#if>
+							<td valign="top">
 								<#if message.audioLink??>
 									<audio controls style="width:100%;">
 										<source src="${message.audioLink}" type="audio/mpeg" />
@@ -102,10 +118,11 @@
 									no audio is available for this message
 								</#if>
 							</td>
-							<#if message.videoLink??>
-								<td width="20%" valign="top" align="right">
-									<a href="${message.videoLink}" target="wolmVideo">
-										<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" />
+							<#assign audioDownloadLink = message.audioLinkForDownload! />
+							<#if audioDownloadLink?has_content>
+								<td width="88px" valign="top" align="right">
+									<a href="${audioDownloadLink}">
+										<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/download.png" height="24px"/>
 									</a>
 								</td>
 							</#if>
@@ -114,7 +131,7 @@
 					<#if message.resources?has_content>
 						<div class="message-resource">
 							<#list message.resources as resource>
-								<span class="filename" style="float:right;">(${resource.link?replace('.*/','','r')})</span>
+								<span class="filename">(${resource.link?replace('.*/','','r')})</span>
 								<a href="${resource.link}" target="wolmGuide" style="padding-left:4px;">${resource.name}</a>
 								<span style="float:clear;" />
 							</#list>
@@ -131,12 +148,21 @@
 		<tr>
 			<td class="resources">
 				<b>Additional Resources</b>
-					<#list series.resources as resource>
-						<br/>
-						<span class="filename" style="float:right;">(${resource.link?replace('.*/','','r')})</span>
-						<a href="${resource.link}" target="wolmGuide" style="padding-left:24px;">${resource.name}</a>
-						<span style="float:clear;" />
-					</#list>
+				<#list series.resources as resource>
+					<br/>
+					<span class="filename">(${resource.link?replace('.*/','','r')})</span>
+					<a href="${resource.link}" target="wolmGuide">${resource.name}</a>
+					<#if resource.sourceMessage??>
+						<span class="source">
+							from 
+							<#if (resource.sourceMessage.getTrackNumber(series.title))??>
+								#${resource.sourceMessage.getTrackNumber(series.title)}
+							</#if> 
+							<i>${resource.sourceMessage.title}</i>
+						</span>
+					</#if>
+					<span style="float:clear;" />
+				</#list>
 			</td>
 		</tr>
 	</#if>

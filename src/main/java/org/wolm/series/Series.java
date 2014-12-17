@@ -16,6 +16,7 @@ import java.util.ListIterator;
 
 import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.NamedLink;
+import org.wolm.catalog.NamedResourceLink;
 import org.wolm.catalog.RenderFactory;
 import org.wolm.message.Message;
 
@@ -192,14 +193,15 @@ public class Series {
 		List<NamedLink> allResources = new ArrayList<>();
 		if (resources != null) allResources.addAll(resources);
 		if (getMessages() != null) {
-			int messageNumber = 1;
 			for (Message message : getMessages()) {
 				for (NamedLink resource : message.getResources()) {
-					NamedLink messageResource = new NamedLink(resource.getName() + " (from #" + messageNumber + ")",
-							resource.getLink());
+					// set myself as the owning series, do this in a copy of the resource link so we don't mess up the
+					// original
+					NamedResourceLink messageResource = new NamedResourceLink(resource.getName(), resource.getLink(),
+							message);
+					messageResource.setSourceSeries(this);
 					allResources.add(messageResource);
 				}
-				messageNumber++;
 			}
 		}
 
@@ -220,7 +222,7 @@ public class Series {
 
 		for (String link : links)
 			try {
-				resources.add(new NamedLink(link));
+				resources.add(new NamedResourceLink(link, this));
 			}
 			catch (MalformedURLException e) {
 				if (resourceError == null) resourceError = "unable to parse the resource URLs: ";

@@ -7,6 +7,7 @@ import java.util.List;
 import org.wolm.aws.AwsS3Helper;
 import org.wolm.catalog.catalog.Catalog;
 import org.wolm.catalog.catalog.SeriesIndexPageRender;
+import org.wolm.catalog.catalog.SeriesResourcesPageRender;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesPageRender;
 
@@ -165,6 +166,16 @@ public class App {
 			pageRender.render(outputFile);
 			System.out.println("Catalog complete at " + outputFile);
 		}
+
+		// generate the resource list and save it to a file
+		{
+			List<Series> resourceSeries = catalog.getSeriesWithResources();
+			PageRender pageRender = new SeriesResourcesPageRender(resourceSeries);
+			File outputFile = new File(outputFileDir, "resources.html");
+			pageRender.render(outputFile);
+			System.out.println("Resources complete at " + outputFile);
+		}
+
 	}
 
 	/** Upload all pages that have been created to S3 (if requested) */
@@ -172,14 +183,17 @@ public class App {
 		// bail if we're not supposed to upload
 		if (!isUpload()) return;
 
-		AwsS3Helper s3Helper = new AwsS3Helper();
+		AwsS3Helper s3Helper = AwsS3Helper.instance();
 		Bucket catalogBucket = s3Helper.getBucket(getS3BucketName());
 		if (catalogBucket == null) throw new Exception("Cannot find the catalog bucket: '" + getS3BucketName() + "'");
 
+		System.out.println("Uploading all generated pages to the " + getS3BucketName() + " S3 bucket…");
 		for (File page : RenderFactory.getCreatedPages()) {
-			System.out.println("Uploading page: " + page);
+			System.out.println("  Uploading page: " + page);
 			s3Helper.uploadPublicFile(catalogBucket, getS3KeyForFile(page), page);
 		}
+
+		System.out.println("Uploading complete");
 	}
 
 	private String getS3KeyForFile(File file) {

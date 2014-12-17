@@ -50,7 +50,7 @@ public class Catalog {
 		List<Message> visibleMessages = new ArrayList<>(messages.size());
 
 		for (Message message : messages)
-			if (RenderFactory.isVisible(message.getVisibility())) visibleMessages.add(message);
+			if (isVisible(message)) visibleMessages.add(message);
 
 		return visibleMessages;
 	}
@@ -308,7 +308,7 @@ public class Catalog {
 
 		// create series
 		Series series = new Series();
-		series.setTitle("Messages from " + year);
+		series.setTitle("Messages from " + year + " that are not part of a series");
 		series.setId("WOLS-SA" + year);
 		series.setDescription("Messages from " + year + " that were not part of any series.");
 		series.setVisibility(RenderFactory.getMinVisibility());
@@ -321,7 +321,7 @@ public class Catalog {
 			// bail if not in the right year
 			cal.setTime(message.getDate());
 			if (cal.get(Calendar.YEAR) != year) continue;
-			if (!RenderFactory.isVisible(message.getVisibility())) continue;
+			if (!isVisible(message)) continue;
 			if (!message.getSeries().isEmpty()) continue;
 			series.addMessage(message);
 		}
@@ -347,6 +347,7 @@ public class Catalog {
 
 		for (Series series : getSeries()) {
 			if (series.getEndDate() == null) continue;
+			if (!isVisible(series)) continue;
 			serieses.add(series);
 		}
 
@@ -373,6 +374,7 @@ public class Catalog {
 
 		for (Series series : getSeries()) {
 			if (series.getEndDate() != null && series.getEndDate().before(cutoff)) continue;
+			if (!isVisible(series)) continue;
 			serieses.add(series);
 		}
 
@@ -393,24 +395,60 @@ public class Catalog {
 		Collections.sort(orderedMessages, Message.byDateDescending);
 
 		// create series
-		Series series = new Series();
+		final Series series = new Series();
 		series.setTitle("Recent Messages from Word of Life Ministries");
 		series.setDescription("Recent messages from the last " + days + " days.");
 
 		// find cutoff
 		GregorianCalendar cal = new GregorianCalendar();
 		cal.add(Calendar.DATE, -1 * days);
-		Date cutoff = cal.getTime();
+		final Date cutoff = cal.getTime();
 
 		// add all the messages newer than the cutoff
 		for (Message message : orderedMessages) {
 			if (message.getDate() == null) break; // nulls are sorted to end
 			if (message.getDate().before(cutoff)) break;
-			if (!RenderFactory.isVisible(message.getVisibility())) continue;
+			if (!isVisible(message)) continue;
 			series.addMessage(message);
 		}
 
 		return series;
+	}
+
+	/**
+	 * In order to generate a list of all resources, we need a list of all series that contain resources. This generates
+	 * a list of all visible series that contain resources or that contain visible messages that contain resources.
+	 * 
+	 * @return A list of all series that have resources, or contain messages that have resources
+	 */
+	public List<Series> getSeriesWithResources() {
+		List<Series> serieses = new ArrayList<>();
+
+		for (Series series : getSeries()) {
+			if (!isVisible(series)) continue;
+			if (series.getResources().isEmpty()) continue;
+			serieses.add(series);
+		}
+
+		return serieses;
+	}
+
+	/**
+	 * @param series A series
+	 * @return {@code true} if the series is visible according to the current visibility level defined in the
+	 * RenderFactory
+	 */
+	private boolean isVisible(Series series) {
+		return RenderFactory.isVisible(series.getVisibility());
+	}
+
+	/**
+	 * @param message A message
+	 * @return {@code true} if the message is visible according to the current visibility level defined in the
+	 * RenderFactory
+	 */
+	private boolean isVisible(Message message) {
+		return RenderFactory.isVisible(message.getVisibility());
 	}
 
 	public void sortSeriesByDate() {

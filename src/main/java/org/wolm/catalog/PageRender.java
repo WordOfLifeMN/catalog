@@ -17,7 +17,8 @@ import freemarker.template.TemplateExceptionHandler;
 
 /**
  * Base class for renderers that render Weebly pages using Freemarker templates to generate the content. You initialize
- * this class with the name
+ * this class with the name of the freemarker template to use, like "herkimer". This class will calculate the name of
+ * the ftl file to use based on the template name and any skin using {@link RenderFactory#getFullTemplateName(String)}
  * 
  * @author wolm
  */
