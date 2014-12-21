@@ -138,7 +138,7 @@ public class Catalog {
 				String[] trackArray = value.split(";");
 				List<Integer> tracks = new ArrayList<>(trackArray.length);
 				for (String s : trackArray)
-					tracks.add(NumberUtils.toInt(s));
+					tracks.add(NumberUtils.toInt(s.trim()));
 				msg.setTrackNumbers(tracks);
 			}
 
