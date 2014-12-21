@@ -11,7 +11,7 @@ public class CatalogIT {
 	public void shouldBeAbleToReadCatalog() throws Exception {
 		Catalog catalog = new Catalog();
 		catalog.setMessageSpreadsheetName("zITMessages");
-		catalog.init();
+		catalog.populateFromGoogleSpreadsheets();
 
 		assertThat(catalog.getMessages().size()).isEqualTo(3);
 	}

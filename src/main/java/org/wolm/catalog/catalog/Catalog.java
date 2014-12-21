@@ -8,6 +8,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.wolm.catalog.NamedLink;
 import org.wolm.catalog.RenderFactory;
 import org.wolm.google.GoogleHelper;
 import org.wolm.google.GoogleRow;
@@ -18,10 +19,10 @@ import org.wolm.series.Series;
 
 public class Catalog {
 	private String messageSpreadsheetName = "Messages";
-	private List<Message> messages;
+	private List<Message> messages = new ArrayList<>();
 
 	private String seriesSpreadsheetName = "Series";
-	private List<Series> series;
+	private List<Series> series = new ArrayList<>();
 
 	public Catalog() {
 		super();
@@ -46,17 +47,14 @@ public class Catalog {
 	 * @return All messages that are visible under the current visibility restrictions
 	 */
 	public List<Message> getMessages() {
-		if (messages == null) return null;
 		List<Message> visibleMessages = new ArrayList<>(messages.size());
-
 		for (Message message : messages)
 			if (isVisible(message)) visibleMessages.add(message);
-
 		return visibleMessages;
 	}
 
-	public void setMessages(List<Message> messages) {
-		this.messages = messages;
+	public void add(Message message) {
+		messages.add(message);
 	}
 
 	/**
@@ -70,17 +68,14 @@ public class Catalog {
 	 * @return All series that are visible under the current visibility rules
 	 */
 	public List<Series> getSeries() {
-		if (series == null) return null;
 		List<Series> visibleSeries = new ArrayList<>(series.size());
-
 		for (Series s : series)
 			if (RenderFactory.isVisible(s.getVisibility())) visibleSeries.add(s);
-
 		return visibleSeries;
 	}
 
-	public void setSeries(List<Series> series) {
-		this.series = series;
+	public void add(Series series) {
+		this.series.add(series);
 	}
 
 	/**
@@ -88,11 +83,11 @@ public class Catalog {
 	 * 
 	 * @throws Exception if anything goes wrong
 	 */
-	public void init() throws Exception {
+	public void populateFromGoogleSpreadsheets() throws Exception {
 		GoogleHelper google = new GoogleHelper("org-wolm-catalog");
 
-		this.messages = initMessages(google);
-		this.series = initSeries(google);
+		initMessages(google);
+		initSeries(google);
 
 	}
 
@@ -102,7 +97,7 @@ public class Catalog {
 	 * @param google Google Helper to use
 	 * @return A list of all messages read from the message logs
 	 */
-	private List<Message> initMessages(GoogleHelper google) throws Exception {
+	private void initMessages(GoogleHelper google) throws Exception {
 		GoogleSpreadsheet spreadsheet = google.getSpreadsheet(messageSpreadsheetName);
 		if (spreadsheet == null) throw new Exception("Cannot find spreadsheet called '" + messageSpreadsheetName
 				+ "' on Google.");
@@ -120,7 +115,6 @@ public class Catalog {
 			}
 
 		// create message objects
-		List<Message> messages = new ArrayList<>(1000);
 		for (GoogleRow row : worksheet.getRows()) {
 			Message msg = new Message();
 
@@ -183,10 +177,8 @@ public class Catalog {
 			}
 			msg.normalize();
 
-			messages.add(msg);
+			add(msg);
 		}
-
-		return messages;
 	}
 
 	/**
@@ -195,9 +187,9 @@ public class Catalog {
 	 * @param google Google Helper to use
 	 * @return A list of all series read from the series log
 	 */
-	private List<Series> initSeries(GoogleHelper google) throws Exception {
+	private void initSeries(GoogleHelper google) throws Exception {
 		// must do messages first so we can record which messages go with each series
-		assert messages != null;
+		assert !getRawMessages().isEmpty();
 
 		GoogleSpreadsheet spreadsheet = google.getSpreadsheet(seriesSpreadsheetName);
 		if (spreadsheet == null) throw new Exception("Cannot find spreadsheet called '" + seriesSpreadsheetName
@@ -216,7 +208,6 @@ public class Catalog {
 			}
 
 		// create series objects
-		List<Series> serieses = new ArrayList<>(100);
 		for (GoogleRow row : worksheet.getRows()) {
 			Series series = new Series();
 
@@ -269,10 +260,8 @@ public class Catalog {
 
 			series.normalize();
 
-			serieses.add(series);
+			add(series);
 		}
-
-		return serieses;
 	}
 
 	/**
@@ -348,6 +337,7 @@ public class Catalog {
 		for (Series series : getSeries()) {
 			if (series.getEndDate() == null) continue;
 			if (!isVisible(series)) continue;
+			if (series.isBooklet()) continue;
 			serieses.add(series);
 		}
 
@@ -375,6 +365,7 @@ public class Catalog {
 		for (Series series : getSeries()) {
 			if (series.getEndDate() != null && series.getEndDate().before(cutoff)) continue;
 			if (!isVisible(series)) continue;
+			if (series.isBooklet()) continue;
 			serieses.add(series);
 		}
 
@@ -416,21 +407,29 @@ public class Catalog {
 	}
 
 	/**
-	 * In order to generate a list of all resources, we need a list of all series that contain resources. This generates
-	 * a list of all visible series that contain resources or that contain visible messages that contain resources.
+	 * Finds all resources from any series, message, or that are standalone
 	 * 
-	 * @return A list of all series that have resources, or contain messages that have resources
+	 * @return List of all resources
 	 */
-	public List<Series> getSeriesWithResources() {
-		List<Series> serieses = new ArrayList<>();
+	public List<NamedLink> getResources() {
+		List<NamedLink> resources = new ArrayList<>();
 
+		// find all resources from series, which will include messages in those series
 		for (Series series : getSeries()) {
 			if (!isVisible(series)) continue;
-			if (series.getResources().isEmpty()) continue;
-			serieses.add(series);
+			for (NamedLink resource : series.getResources(true))
+				resources.add(resource);
 		}
 
-		return serieses;
+		// find resources from stand-alone messages that are not part of any series
+		for (Message message : getMessages()) {
+			if (!message.getSeries().isEmpty()) continue;
+			if (!isVisible(message)) continue;
+			for (NamedLink resource : message.getResources())
+				resources.add(resource);
+		}
+
+		return resources;
 	}
 
 	/**

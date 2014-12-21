@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.wolm.aws.AwsS3Helper;
 import org.wolm.catalog.catalog.Catalog;
+import org.wolm.catalog.catalog.ResourcesPageRender;
 import org.wolm.catalog.catalog.SeriesIndexPageRender;
-import org.wolm.catalog.catalog.SeriesResourcesPageRender;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesPageRender;
 
@@ -129,7 +129,7 @@ public class App {
 
 		System.out.println("Catalog downloading from Google…");
 		Catalog catalog = new Catalog();
-		catalog.init();
+		catalog.populateFromGoogleSpreadsheets();
 
 		// generate the recent-messages list and save it to a file
 		{
@@ -169,8 +169,8 @@ public class App {
 
 		// generate the resource list and save it to a file
 		{
-			List<Series> resourceSeries = catalog.getSeriesWithResources();
-			PageRender pageRender = new SeriesResourcesPageRender(resourceSeries);
+			List<NamedLink> resources = catalog.getResources();
+			PageRender pageRender = new ResourcesPageRender(resources);
 			File outputFile = new File(outputFileDir, "resources.html");
 			pageRender.render(outputFile);
 			System.out.println("Resources complete at " + outputFile);

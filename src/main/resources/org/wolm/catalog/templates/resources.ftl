@@ -21,23 +21,23 @@
 </style>
 
 <table class="resources" width="100%">
-	<#list seriesList as series>
-		<#list series.resources as resource>
-			<tr>
-				<td class="resource">
-					<span class="filename">(${resource.link?replace('.*/','','r')})</span>
-					<a href="${resource.link}" target="wolmGuide">${resource.name}</a>
-					<span style="float:clear;" />
+	<#list resourceList as resource>
+		<tr>
+			<td class="resource">
+				<span class="filename">(${resource.link?replace('.*/','','r')})</span>
+				<a href="${resource.link}" target="wolmGuide">${resource.name}</a>
+				<span style="float:clear;" />
 
+				<#if (resource.sourceSeries.id)?? || resource.sourceMessage??>
 					<#-- source of the resource -->
 					<br/>
 					<span class="source">
 						<#-- series and/or message names -->
 						From 
-						<#if resource.sourceSeries??>
+						<#if (resource.sourceSeries.id)??>
 							<a href="${baseRef}/${resource.sourceSeries.id}.html">${resource.sourceSeries.title}</a>
 						</#if>
-						<#if resource.sourceSeries?? && resource.sourceMessage??>:</#if>
+						<#if (resource.sourceSeries.id)?? && resource.sourceMessage??>:</#if>
 						<#if resource.sourceMessage??>
 							${resource.sourceMessage.title}
 						</#if>
@@ -49,8 +49,9 @@
 							<#if resource.sourceSeries.startDate??>(${resource.sourceSeries.startDate?date})</#if>
 						</#if>
 					</span>
-				</td>
-			</tr>
-		</#list>
+				</#if>
+				<#-- <hr/> -->
+			</td>
+		</tr>
 	</#list>
 </table>

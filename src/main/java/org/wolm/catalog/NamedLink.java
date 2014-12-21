@@ -2,6 +2,7 @@ package org.wolm.catalog;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
 
 /**
  * POJO for storing a link URL with a human readable name
@@ -59,6 +60,25 @@ public class NamedLink {
 
 	public URL getLink() {
 		return link;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(link, name);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		NamedLink other = (NamedLink) obj;
+		return Objects.equals(link, other.link) && Objects.equals(name, other.name);
+	}
+
+	@Override
+	public String toString() {
+		return "NamedLink [name=" + name + "]";
 	}
 
 }

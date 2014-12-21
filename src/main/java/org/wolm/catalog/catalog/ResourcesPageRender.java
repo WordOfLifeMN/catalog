@@ -4,26 +4,27 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
+import org.wolm.catalog.NamedLink;
 import org.wolm.catalog.PageRender;
 import org.wolm.series.Series;
 
-public class SeriesResourcesPageRender extends PageRender {
+public class ResourcesPageRender extends PageRender {
 
-	public SeriesResourcesPageRender(List<Series> seriesWithResources) {
+	public ResourcesPageRender(List<NamedLink> resources) {
 		super("resources");
-		setSeriesWithResources(seriesWithResources);
+		setResources(resources);
 	}
 
-	public List<Series> getSeriesWithResources() {
+	public List<Series> getResources() {
 		@SuppressWarnings("unchecked")
-		List<Series> seriesList = (List<Series>) getDataFromModel("seriesList");
+		List<Series> seriesList = (List<Series>) getDataFromModel("resourceList");
 
 		if (seriesList == null) return Collections.emptyList();
 		return Collections.unmodifiableList(seriesList);
 	}
 
-	private void setSeriesWithResources(List<Series> seriesWithResources) {
-		addDataToModel("seriesList", seriesWithResources);
+	private void setResources(List<NamedLink> seriesWithResources) {
+		addDataToModel("resourceList", seriesWithResources);
 	}
 
 	@Override

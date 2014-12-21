@@ -191,7 +191,7 @@ public class Series {
 		if (!includeResourcesFromMessages) return resources;
 
 		List<NamedLink> allResources = new ArrayList<>();
-		if (resources != null) allResources.addAll(resources);
+		allResources.addAll(resources);
 		if (getMessages() != null) {
 			for (Message message : getMessages()) {
 				for (NamedLink resource : message.getResources()) {
@@ -250,17 +250,38 @@ public class Series {
 		messages.add(message);
 	}
 
+	/**
+	 * Determines if this series represents only a booklet and no messages. Series like this have no start date, no
+	 * message count but do have a resource
+	 * 
+	 * @return {@code true} if this series is just a booklet, {@code false} if it includes messages
+	 */
+	public boolean isBooklet() {
+		if (getTitle() == null) return false;
+		if (getResources(false).isEmpty()) return false;
+		if (getStartDate() != null) return false;
+		if (getMessageCount() > 0) return false;
+		return true;
+	}
+
 	public boolean isValid(PrintStream s) {
 		isValid = true;
 		validationErrorHasBeenPrinted = false;
-		int tmpCount;
 
-		if (getId() == null) {
-			reportValidationError(s, "has no identifier");
-		}
+		if (visibilityError != null) reportValidationError(s, visibilityError);
+		if (coverArtLinkError != null) reportValidationError(s, coverArtLinkError);
+		if (coverImageLinkError != null) reportValidationError(s, coverImageLinkError);
+		if (resourceError != null) reportValidationError(s, resourceError);
 
 		if (getTitle() == null) {
 			reportValidationError(s, "has no title");
+		}
+
+		// some series are just booklets and nothing else, so don't check stuff that doesn't matter for these
+		if (isBooklet()) return isValid;
+
+		if (getId() == null) {
+			reportValidationError(s, "has no identifier");
 		}
 
 		if (getStartDate() == null) {
@@ -278,15 +299,14 @@ public class Series {
 					"has a message count of " + getMessageCount() + " messages, but " + messages.size()
 							+ " actual messages");
 		}
-		else if ((tmpCount = countOfMessagesWithLessVisibilityThan(getVisibility())) > 0) {
-			reportValidationWarning(s, "has visibility of " + getVisibility() + ", but " + tmpCount + " of "
-					+ getMessageCount() + " messages are not visible at that level, some messages may not be displayed");
+		else {
+			int tmpCount = countOfMessagesWithLessVisibilityThan(getVisibility());
+			if (tmpCount > 0) {
+				reportValidationWarning(s, "has visibility of " + getVisibility() + ", but " + tmpCount + " of "
+						+ getMessageCount()
+						+ " messages are not visible at that level, some messages may not be displayed");
+			}
 		}
-
-		if (visibilityError != null) reportValidationError(s, visibilityError);
-		if (coverArtLinkError != null) reportValidationError(s, coverArtLinkError);
-		if (coverImageLinkError != null) reportValidationError(s, coverImageLinkError);
-		if (resourceError != null) reportValidationError(s, resourceError);
 
 		return isValid;
 	}
@@ -313,7 +333,6 @@ public class Series {
 	 * @param error Error string to display. If <code>null</code>, this method does nothing
 	 */
 	private void reportValidationError(PrintStream s, String error) {
-		if (s == null) return;
 		reportValidationWarning(s, error);
 		isValid = false;
 	}
@@ -376,10 +395,20 @@ public class Series {
 	@Override
 	public String toString() {
 		DateFormat fmt = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM);
-		return getTitle() + " (" + fmt.format(getStartDate()) + "-"
-				+ (getEndDate() == null ? "" : fmt.format(getEndDate())) + ") " + getMessageCount() + " messages.";
-	}
+		StringBuilder b = new StringBuilder();
 
+		b.append(getTitle());
+		b.append(" ");
+		if (getStartDate() != null) {
+			b.append("(");
+			b.append(fmt.format(getStartDate()));
+			b.append("-");
+			if (getEndDate() != null) b.append(fmt.format(getEndDate()));
+			b.append(") ");
+		}
+		b.append(getMessageCount()).append(" messages.");
+		return b.toString();
+	}
 	/** Comparator that sorts series by date, oldest to newest (<code>null</code> at end) */
 	public static Comparator<Series> byDate = new Comparator<Series>() {
 		public int compare(Series series1, Series series2) {
