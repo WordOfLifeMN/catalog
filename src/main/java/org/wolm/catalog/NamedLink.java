@@ -62,6 +62,41 @@ public class NamedLink {
 		return link;
 	}
 
+	/**
+	 * @return The file name extracted from the URL. If this is a document ({@link #isDocumentForDownload()}), then this
+	 * will be the downloadable file name, if not, then this will either be null or a human-readable description like
+	 * "YouTube video" or "Website"
+	 */
+	public String getFileName() {
+		String path = link.getPath();
+
+		if (isDocumentForDownload()) {
+			return path.substring(path.lastIndexOf('/') + 1); // works if lastIndexOf() returns -1
+		}
+
+		if (link.getHost().contains("youtu")) return "YouTube video";
+
+		if (path.isEmpty() || path.equals("/")) return "Website";
+
+		return null;
+	}
+
+	/**
+	 * Examines the link and determines if this looks like a document that someone could download from our site (like a
+	 * picture or PDF). The alternative is that this might be an online resource (like a YouTube video or a guest
+	 * speaker's website)
+	 * <p>
+	 * Heuristic: assume it is a document if it is in one of our Amazon AWS buckets (like
+	 * "https://s3-us-west-2.amazonaws.com/wordoflife.mn.audio/StudyGuide/Pastors+1990+Dream.pdf") by looking for
+	 * "amazonaws" and one of our bucket names
+	 * 
+	 * @return {@code true} if this looks like something that could be downloaded from our site. {@code false} otherwise
+	 */
+	public boolean isDocumentForDownload() {
+		String url = link.toString();
+		return url.contains("amazonaws") && url.contains("/wordoflife.mn.");
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(link, name);

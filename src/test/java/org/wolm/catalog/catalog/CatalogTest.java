@@ -170,10 +170,22 @@ public class CatalogTest {
 			assertThat(resources).containsOnly(seriesBooklet, seriesMessageBooklet, messageBooklet);
 		}
 
+		@Test
+		public void youtubeLinksShouldNotBeIncluded() {
+			Message message = createMessageWithBooklet();
+			message.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/MSG-BOOKLET.PDF;http://youtu.be/blahblah");
+			catalogUnderTest.add(message);
+
+			List<NamedLink> resources = catalogUnderTest.getResources();
+
+			NamedLink document = message.getResources().get(0);
+			assertThat(resources).containsOnly(document);
+		}
+
 		private Series createBookletSeries() {
 			Series booklet = new Series();
 			booklet.setTitle("BOOKLET");
-			booklet.setResourcesAsString("http://org.wolm.com/BOOKLET.PDF");
+			booklet.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/BOOKLET.PDF");
 			booklet.setVisibility(AccessLevel.PUBLIC);
 			return booklet;
 		}
@@ -183,7 +195,7 @@ public class CatalogTest {
 			series.setTitle("SERIES WITH BOOKLET");
 			series.setMessageCount(1L);
 			series.setStartDate(new Date());
-			series.setResourcesAsString("http://org.wolm.com/BOOKLET.PDF");
+			series.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/SERIES-BOOKLET.PDF");
 			series.setVisibility(AccessLevel.PUBLIC);
 			return series;
 		}
@@ -192,7 +204,7 @@ public class CatalogTest {
 			Message message = new Message();
 			message.setTitle("MESSAGE WITH BOOKLET");
 			message.setVisibility(AccessLevel.PUBLIC);
-			message.setResourcesAsString("http://org.wolm.com/MSG-BOOKLET.PDF");
+			message.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/MSG-BOOKLET.PDF");
 
 			return message;
 		}
@@ -202,11 +214,11 @@ public class CatalogTest {
 			series.setTitle("SERIES WITH MESSAGE WITH BOOKLET");
 			series.setMessageCount(1L);
 			series.setStartDate(new Date());
-			series.setResourcesAsString("http://org.wolm.com/SERIES-BOOKLET.PDF");
+			series.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/SERIES-BOOKLET.PDF");
 			series.setVisibility(AccessLevel.PUBLIC);
 
 			Message message = createMessageWithBooklet();
-			message.setResourcesAsString("http://org.wolm.com/SERIES-MSG-BOOKLET.PDF");
+			message.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/SERIES-MSG-BOOKLET.PDF");
 			series.addMessage(message);
 
 			return series;

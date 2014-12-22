@@ -407,7 +407,7 @@ public class Catalog {
 	}
 
 	/**
-	 * Finds all resources from any series, message, or that are standalone
+	 * Finds all downloadable (document) resources from any series, message, or that are standalone
 	 * 
 	 * @return List of all resources
 	 */
@@ -417,16 +417,20 @@ public class Catalog {
 		// find all resources from series, which will include messages in those series
 		for (Series series : getSeries()) {
 			if (!isVisible(series)) continue;
-			for (NamedLink resource : series.getResources(true))
+			for (NamedLink resource : series.getResources(true)) {
+				if (!resource.isDocumentForDownload()) continue;
 				resources.add(resource);
+			}
 		}
 
 		// find resources from stand-alone messages that are not part of any series
 		for (Message message : getMessages()) {
 			if (!message.getSeries().isEmpty()) continue;
 			if (!isVisible(message)) continue;
-			for (NamedLink resource : message.getResources())
+			for (NamedLink resource : message.getResources()) {
+				if (!resource.isDocumentForDownload()) continue;
 				resources.add(resource);
+			}
 		}
 
 		return resources;

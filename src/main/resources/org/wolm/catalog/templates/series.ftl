@@ -131,7 +131,9 @@
 					<#if message.resources?has_content>
 						<div class="message-resource">
 							<#list message.resources as resource>
-								<span class="filename">(${resource.link?replace('.*/','','r')})</span>
+								<#if resource.fileName??>
+									<span class="filename">(${resource.fileName!})</span>
+								</#if>
 								<a href="${resource.link}" target="wolmGuide" style="padding-left:4px;">${resource.name}</a>
 								<span style="float:clear;" />
 							</#list>
@@ -150,7 +152,9 @@
 				<b>Additional Resources</b>
 				<#list series.resources as resource>
 					<br/>
-					<span class="filename">(${resource.link?replace('.*/','','r')})</span>
+					<#if resource.fileName??>
+						<span class="filename">(${resource.fileName!})</span>
+					</#if>
 					<a href="${resource.link}" target="wolmGuide">${resource.name}</a>
 					<#if resource.sourceMessage??>
 						<span class="source">

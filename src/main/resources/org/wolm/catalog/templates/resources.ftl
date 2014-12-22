@@ -24,7 +24,9 @@
 	<#list resourceList as resource>
 		<tr>
 			<td class="resource">
-				<span class="filename">(${resource.link?replace('.*/','','r')})</span>
+				<#if resource.fileName??>
+					<span class="filename">(${resource.fileName})</span>
+				</#if>
 				<a href="${resource.link}" target="wolmGuide">${resource.name}</a>
 				<span style="float:clear;" />
 
