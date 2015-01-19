@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wolm.aws.AwsS3Helper;
 import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.NamedLink;
@@ -27,8 +28,8 @@ public class Message {
 
 	private Date date;
 	private String title;
-	private List<String> series;
-	private List<Integer> trackNumbers;
+	private List<String> series = new ArrayList<>();
+	private List<Integer> trackNumbers = new ArrayList<>();
 	private String description;
 	private String type;
 	private AccessLevel visibility;
@@ -71,12 +72,19 @@ public class Message {
 	}
 
 	public List<String> getSeries() {
-		if (series == null) return Collections.emptyList();
 		return series;
 	}
 
 	public void setSeries(List<String> series) {
-		this.series = series;
+		if (series == null) series = Collections.emptyList();
+		this.series = new ArrayList<>(series.size());
+
+		for (String seriesName : series) {
+			seriesName = StringUtils.trimToNull(seriesName);
+			if (seriesName == null) continue;
+			if (seriesName.equals("-")) continue;
+			this.series.add(seriesName);
+		}
 	}
 
 	public List<Integer> getTrackNumbers() {
@@ -88,16 +96,13 @@ public class Message {
 	 * @return Track number of this message in that series. <code>null</code> if not in the specified series
 	 */
 	public Integer getTrackNumber(String seriesName) {
-		if (series == null) return null;
-		if (trackNumbers == null) return null;
-
 		for (int index = 0; index < trackNumbers.size(); index++)
 			if (series.get(index).equalsIgnoreCase(seriesName)) return trackNumbers.get(index);
 		return null;
 	}
 
 	public void setTrackNumbers(List<Integer> trackNumbers) {
-		this.trackNumbers = trackNumbers;
+		this.trackNumbers = trackNumbers == null ? new ArrayList<Integer>() : trackNumbers;
 	}
 
 	public String getDescription() {
@@ -241,8 +246,8 @@ public class Message {
 			reportValidationError(s, "has no date");
 		}
 
-		int seriesCount = getSeries() == null ? 0 : getSeries().size();
-		int trackCount = getTrackNumbers() == null ? 0 : getTrackNumbers().size();
+		int seriesCount = getSeries().size();
+		int trackCount = getTrackNumbers().size();
 		if (seriesCount != trackCount) {
 			reportValidationError(s, "is in " + seriesCount + " series, but has track data for " + trackCount
 					+ " series");

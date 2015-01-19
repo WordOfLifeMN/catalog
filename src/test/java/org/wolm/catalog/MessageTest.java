@@ -81,6 +81,13 @@ public class MessageTest {
 		}
 
 		@Test
+		public void hyphenSeriesShouldValidateWithoutTrack() {
+			messageUnderTest.setSeries(Arrays.asList(new String[] { "-" }));
+			messageUnderTest.setTrackNumbers(null);
+			assertThat(messageUnderTest.isValid(outStream)).isTrue();
+		}
+
+		@Test
 		public void shouldHaveValidType() {
 			messageUnderTest.setType("TESTING");
 			assertThat(messageUnderTest.isValid(outStream)).isTrue(); // bad type is a warning, not an error
@@ -129,6 +136,7 @@ public class MessageTest {
 			assertThat(messageUnderTest.isValid(outStream)).isFalse();
 			assertThat(validationMessage.toString()).contains("no protocol");
 		}
+
 	}
 
 }

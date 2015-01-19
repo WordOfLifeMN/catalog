@@ -1,24 +1,56 @@
 #!/bin/bash
 
-# Find the wolm-podcast directory
-# ... first try the script folder
-cd "$(dirname "$0")"
-if [ $(basename "$(pwd)") != wolm-catalog ]; then
-	# ... try kevin's personal eclipse directory
-	cd /Volumes/KMPersonal/eclipse-km/wolm-catalog || {
-		echo "ERROR: cannot find the wolm-catalog directory"
-		exit 1
-	}
-fi
+recompile=true
+artifactName=wolm-catalog
+
+realpath() {
+	local p=$1
+	while [ -L "$p" ]; do
+		p=$(readlink "$p")
+	done
+	echo "$p"
+}
+
+findJar() {
+	local self=$1
+
+	# check same directory as this script
+	ls "$(dirname "$self")"/${artifactName}-*-jar-with-dependencies.jar 2>/dev/null && return 0
+
+	# check target directory
+	ls "$(dirname "$self")"/target/${artifactName}-*-jar-with-dependencies.jar 2>/dev/null && return 0
+
+	return 1
+}
+
+recompile() {
+	local mvnHome=$1
+
+	cd "$mvnHome"
+	[ -f pom.xml ] && mvn package
+	cd - >/dev/null
+}
+
+# find the original file
+self=$(realpath "$0")
+
+# recompile if necessary
+[ "$recompile" ] && recompile "$(dirname "$self")"
+
+# find the jar
+jar=$(findJar "$self")
+[ -f "$jar" ] || recompile "$(dirname "$self")"
+jar=$(findJar "$self")
+[ -f "$jar" ] || {
+	echo "ERROR: Cannot find the ${artifactName} jar"
+	exit 1
+}
+
+# start tracking time for later reporting
 startTime=$(date +%s)
 
-# build the package if it doesn't exist
-#test -s target/wolm-catalog-1.0-SNAPSHOT-jar-with-dependencies.jar || mvn package 1>&2 || exit 1
-# DEBUG: always update the package
-mvn package 1>&2 || exit 1
-
 # run the package, passing through parameters
-java -jar target/wolm-catalog-1.0-SNAPSHOT-jar-with-dependencies.jar --verbose "$@"
+java -jar "$jar" --out=/Users/wolm/tmp --upload "$@"
 
-echo "Completed in $(( $(date +%s) - $startTime )) seconds" >>/dev/stderr
-#sleep 5
+echo "Completed in $(( $(date +%s) - $startTime )) seconds"
+sleep 5
