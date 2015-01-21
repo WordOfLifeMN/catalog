@@ -138,11 +138,11 @@ public class App {
 
 		// generate the recent-messages list and save it to a file
 		{
+			System.out.println("Writing series to file 'recent-messages.html'…");
 			Series recentMessages = catalog.getRecentMessages(60);
 			PageRender pageRender = new SeriesPageRender(recentMessages);
 			File outputFile = new File(outputFileDir, "recent-messages.html");
 			pageRender.render(outputFile);
-			System.out.println("Recent messages complete at " + outputFile);
 		}
 
 		// generate the recent-series list and save it to a file
@@ -152,7 +152,6 @@ public class App {
 			((SeriesIndexPageRender) pageRender).setIndexTitle("Recent Series from Word of Life Ministries");
 			File outputFile = new File(outputFileDir, "recent-series.html");
 			pageRender.render(outputFile);
-			System.out.println("Recent series complete at " + outputFile);
 		}
 
 		// generate the catalog index and save it to a file
@@ -169,7 +168,6 @@ public class App {
 							+ "</td></table>");
 			File outputFile = new File(outputFileDir, "catalog.html");
 			pageRender.render(outputFile);
-			System.out.println("Catalog complete at " + outputFile);
 		}
 
 		// generate the resource list and save it to a file
@@ -178,9 +176,9 @@ public class App {
 			PageRender pageRender = new ResourcesPageRender(resources);
 			File outputFile = new File(outputFileDir, "resources.html");
 			pageRender.render(outputFile);
-			System.out.println("Resources complete at " + outputFile);
 		}
 
+		System.out.println("Catalog file generation is complete");
 	}
 
 	/** Upload all pages that have been created to S3 (if requested) */

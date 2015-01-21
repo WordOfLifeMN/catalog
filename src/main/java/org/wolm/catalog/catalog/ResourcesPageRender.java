@@ -29,7 +29,7 @@ public class ResourcesPageRender extends PageRender {
 
 	@Override
 	public void render(File pageFile) throws Exception {
-		System.out.println("Writing resources to file " + pageFile.getName() + "…");
+		System.out.println("Writing resources to file '" + pageFile.getName() + "'…");
 
 		super.render(pageFile);
 	}

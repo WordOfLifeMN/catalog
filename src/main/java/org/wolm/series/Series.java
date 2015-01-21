@@ -280,6 +280,9 @@ public class Series {
 		// some series are just booklets and nothing else, so don't check stuff that doesn't matter for these
 		if (isBooklet()) return isValid;
 
+		// if a series has no visibility, then it has not been fully defined yet, so needs no further validation
+		if (getVisibility() == null) return isValid;
+
 		if (getId() == null) {
 			reportValidationError(s, "has no identifier");
 		}
@@ -303,7 +306,7 @@ public class Series {
 			int tmpCount = countOfMessagesWithLessVisibilityThan(getVisibility());
 			if (tmpCount > 0) {
 				reportValidationWarning(s, "has visibility of " + getVisibility() + ", but " + tmpCount + " of "
-						+ getMessageCount()
+						+ countOfMessagesWithAnyVisibility()
 						+ " messages are not visible at that level, some messages may not be displayed");
 			}
 		}
@@ -324,6 +327,10 @@ public class Series {
 			if (AccessLevel.isLevelLessVisibleThanCutoff(message.getVisibility(), getVisibility())) count++;
 
 		return count;
+	}
+
+	private int countOfMessagesWithAnyVisibility() {
+		return messages.size();
 	}
 
 	/**
