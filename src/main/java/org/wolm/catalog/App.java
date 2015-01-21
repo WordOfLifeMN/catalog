@@ -2,7 +2,12 @@ package org.wolm.catalog;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.wolm.aws.AwsS3Helper;
 import org.wolm.catalog.catalog.Catalog;
@@ -188,10 +193,22 @@ public class App {
 		if (catalogBucket == null) throw new Exception("Cannot find the catalog bucket: '" + getS3BucketName() + "'");
 
 		System.out.println("Uploading all generated pages to the " + getS3BucketName() + " S3 bucket…");
+		List<Future<Boolean>> futures = new ArrayList<>();
+		ExecutorService pool = Executors.newFixedThreadPool(8);
 		for (File page : RenderFactory.getCreatedPages()) {
-			System.out.println("  Uploading page: " + page);
-			s3Helper.uploadPublicFile(catalogBucket, getS3KeyForFile(page), page);
+			// new UploadFileToS3Callable(catalogBucket, getS3KeyForFile(page), page).call();
+			futures.add(pool.submit(new UploadFileToS3Callable(catalogBucket, getS3KeyForFile(page), page)));
 		}
+		for (Future<Boolean> future : futures) {
+			try {
+				future.get();
+			}
+			catch (Exception e) {
+				System.out.println("Unable to complete upload.");
+				e.printStackTrace();
+			}
+		}
+		pool.shutdown();
 
 		System.out.println("Uploading complete");
 	}
@@ -199,5 +216,31 @@ public class App {
 	private String getS3KeyForFile(File file) {
 		if (getS3ObjectPrefix() == null) return file.getName();
 		return getS3ObjectPrefix() + "/" + file.getName();
+	}
+
+	/**
+	 * Uploads a file to a specific S3 bucket and object key
+	 * 
+	 * @author wolm
+	 */
+	private static class UploadFileToS3Callable implements Callable<Boolean> {
+		static final AwsS3Helper s3Helper = AwsS3Helper.instance();
+		final Bucket bucket;
+		final String key;
+		final File file;
+
+		public UploadFileToS3Callable(Bucket bucket, String key, File file) {
+			super();
+			this.bucket = bucket;
+			this.key = key;
+			this.file = file;
+		}
+
+		public Boolean call() throws Exception {
+			System.out.println("  Uploading page: " + file);
+			s3Helper.uploadPublicFile(bucket, key, file);
+			return Boolean.TRUE;
+		}
+
 	}
 }
