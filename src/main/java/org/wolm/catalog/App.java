@@ -195,22 +195,6 @@ public class App {
 		pageRender.render(outputFile);
 	}
 
-	private String computeCatalogTitle() {
-		switch (RenderFactory.getMinVisibility()) {
-		case PRIVATE:
-			return "Word of Life Ministries Catalog (STAFF ONLY)";
-		case PROTECTED:
-			return "Word of Life Ministries Catalog For Covenant Partners";
-		default:
-			return "Word of Life Ministries Catalog";
-		}
-	}
-
-	private String computeCatalogName() {
-		if (RenderFactory.getMinVisibility() == AccessLevel.PUBLIC) return "catalog.html";
-		return "catalog-" + RenderFactory.getMinVisibility().toString().toLowerCase() + ".html";
-	}
-
 	private void buildResources(Catalog catalog) throws Exception {
 		List<NamedLink> resources = catalog.getResources();
 		PageRender pageRender = new ResourcesPageRender(resources);
