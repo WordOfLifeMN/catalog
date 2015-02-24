@@ -25,7 +25,7 @@ public class SeriesTest {
 		@Test
 		public void resourceOnlyShouldBeValidBooklet() {
 			assertThat(bookletUnderTest.isBooklet()).isTrue();
-			assertThat(bookletUnderTest.isValid(System.out)).isTrue();
+			assertThat(bookletUnderTest.isValid(System.out, null)).isTrue();
 		}
 
 		@Test

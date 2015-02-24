@@ -13,8 +13,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import org.wolm.catalog.AccessLevel;
+import org.wolm.catalog.App;
 import org.wolm.catalog.NamedLink;
 import org.wolm.catalog.NamedResourceLink;
 import org.wolm.catalog.RenderFactory;
@@ -264,7 +266,15 @@ public class Series {
 		return true;
 	}
 
-	public boolean isValid(PrintStream s) {
+	/**
+	 * Determins if this series is valid or not
+	 * 
+	 * @param s Series to validate
+	 * @param seriesIds List of IDs of all the series. If this series' ID is in the list, then it is not unique and
+	 * should be considered invalid. Upon return, this series' ID will be added to the list
+	 * @return
+	 */
+	public boolean isValid(PrintStream s, Set<String> seriesIds) {
 		isValid = true;
 		validationErrorHasBeenPrinted = false;
 
@@ -285,6 +295,12 @@ public class Series {
 
 		if (getId() == null) {
 			reportValidationError(s, "has no identifier");
+		}
+		else if (seriesIds != null) {
+			if (seriesIds.contains(getId())) {
+				reportValidationError(s, "has an ID that is already in use by another series");
+			}
+			seriesIds.add(getId());
 		}
 
 		if (getStartDate() == null) {
@@ -390,6 +406,8 @@ public class Series {
 		// find all messages that are in this series
 		for (Message message : allMessages) {
 			if (message.getTrackNumber(getTitle()) == null) continue;
+
+			App.logDebug("Adding " + message.getVisibility() + " message '" + message.getTitle() + "'");
 			messages.add(message);
 		}
 

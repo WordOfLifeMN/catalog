@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
+import org.wolm.catalog.App;
 import org.wolm.catalog.NamedLink;
 import org.wolm.catalog.PageRender;
 import org.wolm.series.Series;
@@ -29,7 +30,7 @@ public class ResourcesPageRender extends PageRender {
 
 	@Override
 	public void render(File pageFile) throws Exception {
-		System.out.println("Writing resources to file '" + pageFile.getName() + "'…");
+		App.logInfo("Writing resources to file '" + pageFile.getName() + "'…");
 
 		super.render(pageFile);
 	}

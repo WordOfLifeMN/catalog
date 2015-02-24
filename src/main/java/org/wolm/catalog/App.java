@@ -42,13 +42,29 @@ public class App {
 	private String s3BucketName = "wordoflife.mn.catalog";
 	private String s3ObjectPrefix = null;
 
+	private static App instance = null;
+
+	public static App instance() {
+		if (instance == null) {
+			synchronized (App.class) {
+				try {
+					if (instance == null) instance = new App();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return instance;
+	}
+
 	/** Construct the application */
 	private App() throws Exception {
 		super();
 	}
 
 	public static void main(String[] args) throws Exception {
-		App app = new App();
+		App app = instance();
 
 		JCommander cmd = new JCommander(app, args);
 		if (app.isHelpRequested()) {
@@ -132,13 +148,13 @@ public class App {
 	 */
 	public void catalog() throws Exception {
 
-		System.out.println("Catalog downloading from Google…");
+		logInfo("Catalog downloading from Google…");
 		Catalog catalog = new Catalog();
 		catalog.populateFromGoogleSpreadsheets();
 
 		// generate the recent-messages list and save it to a file
 		{
-			System.out.println("Writing series to file 'recent-messages.html'…");
+			logInfo("Writing series to file 'recent-messages.html'…");
 			Series recentMessages = catalog.getRecentMessages(60);
 			PageRender pageRender = new SeriesPageRender(recentMessages);
 			File outputFile = new File(outputFileDir, "recent-messages.html");
@@ -178,7 +194,7 @@ public class App {
 			pageRender.render(outputFile);
 		}
 
-		System.out.println("Catalog file generation is complete");
+		logInfo("Catalog file generation is complete");
 	}
 
 	/** Upload all pages that have been created to S3 (if requested) */
@@ -190,7 +206,7 @@ public class App {
 		Bucket catalogBucket = s3Helper.getBucket(getS3BucketName());
 		if (catalogBucket == null) throw new Exception("Cannot find the catalog bucket: '" + getS3BucketName() + "'");
 
-		System.out.println("Uploading all generated pages to the " + getS3BucketName() + " S3 bucket…");
+		logInfo("Uploading all generated pages to the " + getS3BucketName() + " S3 bucket…");
 		List<Future<Boolean>> futures = new ArrayList<>();
 		ExecutorService pool = Executors.newFixedThreadPool(8);
 		for (File page : RenderFactory.getCreatedPages()) {
@@ -202,18 +218,48 @@ public class App {
 				future.get();
 			}
 			catch (Exception e) {
-				System.out.println("Unable to complete upload.");
+				logError("Unable to complete upload.");
 				e.printStackTrace();
 			}
 		}
 		pool.shutdown();
 
-		System.out.println("Uploading complete");
+		logInfo("Uploading complete");
 	}
 
 	private String getS3KeyForFile(File file) {
 		if (getS3ObjectPrefix() == null) return file.getName();
 		return getS3ObjectPrefix() + "/" + file.getName();
+	}
+
+	/*
+	 * Logging
+	 */
+	private static String logIndent = "";
+
+	public static void logIndent() {
+		logIndent += "  ";
+	}
+
+	public static void logOutdent() {
+		if (logIndent.length() < 1) return;
+		logIndent = logIndent.substring(2);
+	}
+
+	public static void logDebug(String msg) {
+		if (instance.isVerbose()) System.out.println(logIndent + msg);
+	}
+
+	public static void logInfo(String msg) {
+		System.out.println(logIndent + msg);
+	}
+
+	public static void logWarn(String msg) {
+		System.out.println(logIndent + "WARNING: " + msg);
+	}
+
+	public static void logError(String msg) {
+		System.out.println(logIndent + "ERROR: " + msg);
 	}
 
 	/**
@@ -241,4 +287,5 @@ public class App {
 		}
 
 	}
+
 }

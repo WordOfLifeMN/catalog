@@ -5,9 +5,12 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.wolm.catalog.App;
 import org.wolm.catalog.NamedLink;
 import org.wolm.catalog.RenderFactory;
 import org.wolm.google.GoogleHelper;
@@ -172,7 +175,7 @@ public class Catalog {
 			 * validate the message is ok to process
 			 */
 			if (!msg.isValid(System.out)) {
-				System.out.println("WARNING: Ignoring message due to preceeding problems");
+				App.logWarn("Ignoring message due to preceeding problems");
 				continue;
 			}
 			msg.normalize();
@@ -207,60 +210,71 @@ public class Catalog {
 						+ seriesSpreadsheetName + "'");
 			}
 
+		// prepare unique ID validation
+		Set<String> seriesIds = new HashSet<>();
+
 		// create series objects
 		for (GoogleRow row : worksheet.getRows()) {
 			Series series = new Series();
 
-			// unique id
-			series.setId(row.getValue("webid"));
-
 			// title/name
 			series.setTitle(row.getValue("name"));
 
-			// date
-			series.setStartDate(row.getDateValue("datestarted"));
-			series.setEndDate(row.getDateValue("dateended"));
+			try {
+				App.logDebug("Initializing series '" + series.getTitle() + "'...");
+				App.logIndent();
 
-			// messages
-			series.setMessageCount(row.getLongValue("messages"));
+				// unique id
+				series.setId(row.getValue("webid"));
 
-			// speakers
-			String value = row.getValue("speaker");
-			if (value != null) {
-				String[] speakerArray = value.split(";");
-				List<String> speakers = new ArrayList<>(speakerArray.length);
-				for (String s : speakerArray)
-					speakers.add(s.trim());
-				series.setSpeakers(speakers);
+				// date
+				series.setStartDate(row.getDateValue("datestarted"));
+				series.setEndDate(row.getDateValue("dateended"));
+
+				// messages
+				series.setMessageCount(row.getLongValue("messages"));
+
+				// speakers
+				String value = row.getValue("speaker");
+				if (value != null) {
+					String[] speakerArray = value.split(";");
+					List<String> speakers = new ArrayList<>(speakerArray.length);
+					for (String s : speakerArray)
+						speakers.add(s.trim());
+					series.setSpeakers(speakers);
+				}
+
+				// description
+				series.setDescription(row.getValue("description"));
+
+				// visibility
+				series.setVisibilityAsString(row.getValue("visibility"));
+
+				// cover
+				series.setCoverArtLinkAsString(row.getValue("coverart"));
+				series.setCoverImageLinkAsString(row.getValue("coverimage"));
+
+				// study guide
+				series.setResourcesAsString(row.getValue("resources"));
+
+				// discover messages for this series
+				series.discoverMessages(messages);
+
+				/*
+				 * validate the series is ok to process
+				 */
+				if (!series.isValid(System.out, seriesIds)) {
+					App.logWarn("Ignoring series due to preceeding problems");
+					continue;
+				}
+
+				series.normalize();
+
+				add(series);
 			}
-
-			// description
-			series.setDescription(row.getValue("description"));
-
-			// visibility
-			series.setVisibilityAsString(row.getValue("visibility"));
-
-			// cover
-			series.setCoverArtLinkAsString(row.getValue("coverart"));
-			series.setCoverImageLinkAsString(row.getValue("coverimage"));
-
-			// study guide
-			series.setResourcesAsString(row.getValue("resources"));
-
-			// discover messages for this series
-			series.discoverMessages(messages);
-
-			/*
-			 * validate the series is ok to process
-			 */
-			if (!series.isValid(System.out)) {
-				System.out.println("    WARNING: Ignoring series due to preceeding problems");
-				continue;
+			finally {
+				App.logOutdent();
 			}
-
-			series.normalize();
-
-			add(series);
 		}
 	}
 

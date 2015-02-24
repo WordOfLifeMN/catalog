@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.wolm.catalog.AccessLevel;
+import org.wolm.catalog.App;
 import org.wolm.catalog.PageRender;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesPageRender;
@@ -47,21 +48,27 @@ public class SeriesIndexPageRender extends PageRender {
 
 	@Override
 	public void render(File pageFile) throws Exception {
-		System.out.println("Writing series index to file '" + pageFile.getName() + "'…");
+		App.logInfo("Writing series index to file '" + pageFile.getName() + "'…");
 
-		super.render(pageFile);
+		try {
+			App.logIndent();
 
-		// write out supporting files (i.e. all the series pages)
-		File pageDirectory = pageFile.getParentFile();
-		for (Series series : getSeriesList()) {
-			if (series.getVisibility() != AccessLevel.PUBLIC) {
-				System.out.println("Skpping non-Public series " + series.getTitle());
-				continue;
+			super.render(pageFile);
+
+			// write out supporting files (i.e. all the series pages)
+			File pageDirectory = pageFile.getParentFile();
+			for (Series series : getSeriesList()) {
+				if (series.getVisibility() != AccessLevel.PUBLIC) {
+					App.logInfo("Skpping non-Public series " + series.getTitle());
+					continue;
+				}
+				PageRender seriesRender = new SeriesPageRender(series);
+				File seriesFile = new File(pageDirectory, new SeriesUrlRender(series).getFileName());
+				seriesRender.render(seriesFile);
 			}
-			PageRender seriesRender = new SeriesPageRender(series);
-			File seriesFile = new File(pageDirectory, new SeriesUrlRender(series).getFileName());
-			seriesRender.render(seriesFile);
 		}
-
+		finally {
+			App.logOutdent();
+		}
 	}
 }

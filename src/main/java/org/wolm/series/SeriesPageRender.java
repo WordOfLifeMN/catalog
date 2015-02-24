@@ -2,6 +2,7 @@ package org.wolm.series;
 
 import java.io.File;
 
+import org.wolm.catalog.App;
 import org.wolm.catalog.PageRender;
 
 public class SeriesPageRender extends PageRender {
@@ -15,7 +16,7 @@ public class SeriesPageRender extends PageRender {
 
 	@Override
 	public void render(File pageFile) throws Exception {
-		System.out.println("  Writing page for series '" + series.getTitle() + "' to file " + pageFile.getName() + "…");
+		App.logInfo("Writing page for series '" + series.getTitle() + "' to file " + pageFile.getName() + "…");
 
 		addDataToModel("series", series);
 
