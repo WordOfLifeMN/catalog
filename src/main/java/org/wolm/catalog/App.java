@@ -155,17 +155,11 @@ public class App {
 
 		buildRecentMessages(catalog);
 		buildRecentSeries(catalog);
-		buildCatalogOfAllSeries(catalog);
+		buildPublicCatalog(catalog);
 		buildResources(catalog);
 		buildBooklets(catalog);
 
-		// try {
-		// RenderFactory.setMinVisibility(AccessLevel.PROTECTED);
-		// buildCatalogOfAllSeries(catalog);
-		// }
-		// finally {
-		// RenderFactory.setMinVisibility(AccessLevel.PUBLIC);
-		// }
+		buildCovenantPartnerCatalog(catalog);
 
 		logInfo("Catalog file generation is complete");
 	}
@@ -186,7 +180,7 @@ public class App {
 		pageRender.render(outputFile);
 	}
 
-	private void buildCatalogOfAllSeries(Catalog catalog) throws Exception {
+	private void buildPublicCatalog(Catalog catalog) throws Exception {
 		catalog.sortSeriesByDate();
 		PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeriesWithStandAloneMessages());
 		((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog");
@@ -197,8 +191,19 @@ public class App {
 						+ "of messages and study materials up to date. "
 						+ "New content will be added weekly through the winter of 2014-2015, so check back frequently!</h3>"
 						+ "</td></table>");
-		File outputFile = new File(outputFileDir, computeCatalogName());
+		File outputFile = new File(outputFileDir, "catalog.html");
 		pageRender.render(outputFile);
+	}
+
+	private String computeCatalogTitle() {
+		switch (RenderFactory.getMinVisibility()) {
+		case PRIVATE:
+			return "Word of Life Ministries Catalog (STAFF ONLY)";
+		case PROTECTED:
+			return "Word of Life Ministries Catalog For Covenant Partners";
+		default:
+			return "Word of Life Ministries Catalog";
+		}
 	}
 
 	private String computeCatalogName() {
@@ -218,6 +223,31 @@ public class App {
 		PageRender pageRender = new BookletsPageRender(resources);
 		File outputFile = new File(outputFileDir, "booklets.html");
 		pageRender.render(outputFile);
+	}
+
+	private void buildCovenantPartnerCatalog(Catalog catalog) throws Exception {
+		catalog.sortSeriesByDate();
+		try {
+			RenderFactory.setMinVisibility(AccessLevel.PROTECTED);
+
+			PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
+			((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog For Covenant Partners");
+			((SeriesIndexPageRender) pageRender)
+					.setIndexDescription("<table><tr>"
+							+ "<td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/Covenant+Partner+Thumb.jpg' width='164'/></td>"
+							+ "<td><span style=\"color:maroon;font-weight:bold;\">Please do not share access to this page with anyone.</span><br/>"
+							+ "Any questions about access to this page should be directed to Pastor Vern or Kevin Murray.<br/>"
+							+ "Many of these messages may be rough, unedited, or have other quality problems, "
+							+ "and we are not prepared to release them to the public <em>yet</em>. However, there may also be "
+							+ "resources on this page that contain sensitive information that we may never choose to "
+							+ "release publicly, and we appreciate your discretion as covenant partners."
+							+ "</td></table>");
+			File outputFile = new File(outputFileDir, "catalog-cpartner.html");
+			pageRender.render(outputFile);
+		}
+		finally {
+			RenderFactory.setMinVisibility(AccessLevel.PUBLIC);
+		}
 	}
 
 	/** Upload all pages that have been created to S3 (if requested) */
