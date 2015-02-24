@@ -12,7 +12,11 @@ import org.wolm.series.Series;
 public class ResourcesPageRender extends PageRender {
 
 	public ResourcesPageRender(List<NamedLink> resources) {
-		super("resources");
+		this("resources", resources);
+	}
+
+	protected ResourcesPageRender(String templateName, List<NamedLink> resources) {
+		super(templateName);
 		setResources(resources);
 	}
 

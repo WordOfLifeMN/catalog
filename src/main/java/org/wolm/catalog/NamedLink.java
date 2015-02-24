@@ -2,6 +2,7 @@ package org.wolm.catalog;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -116,4 +117,9 @@ public class NamedLink {
 		return "NamedLink [name=" + name + "]";
 	}
 
+	public static Comparator<NamedLink> byName = new Comparator<NamedLink>() {
+		public int compare(NamedLink link1, NamedLink link2) {
+			return link1.getName().compareToIgnoreCase(link2.getName());
+		}
+	};
 }

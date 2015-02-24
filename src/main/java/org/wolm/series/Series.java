@@ -457,4 +457,11 @@ public class Series {
 			return date1.before(date2) ? 1 : (date1.equals(date2) ? 0 : -1);
 		}
 	};
+
+	/** Comparator that sorts series by title */
+	public static Comparator<Series> byTitle = new Comparator<Series>() {
+		public int compare(Series series1, Series series2) {
+			return series1.getTitle().compareToIgnoreCase(series2.getTitle());
+		}
+	};
 }

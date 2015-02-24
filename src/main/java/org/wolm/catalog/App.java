@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.wolm.aws.AwsS3Helper;
+import org.wolm.catalog.catalog.BookletsPageRender;
 import org.wolm.catalog.catalog.Catalog;
 import org.wolm.catalog.catalog.ResourcesPageRender;
 import org.wolm.catalog.catalog.SeriesIndexPageRender;
@@ -191,6 +192,14 @@ public class App {
 			List<NamedLink> resources = catalog.getResources();
 			PageRender pageRender = new ResourcesPageRender(resources);
 			File outputFile = new File(outputFileDir, "resources.html");
+			pageRender.render(outputFile);
+		}
+
+		// generate the booklet list and save it to a file
+		{
+			List<NamedLink> resources = catalog.getBooklets();
+			PageRender pageRender = new BookletsPageRender(resources);
+			File outputFile = new File(outputFileDir, "booklets.html");
 			pageRender.render(outputFile);
 		}
 

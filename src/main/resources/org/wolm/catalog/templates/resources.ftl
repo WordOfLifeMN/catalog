@@ -1,7 +1,12 @@
-<h1>Index of Booklets and Reference Materials</h1>
+<h1>Index of Message Reference Materials</h1>
 <p>
-	This is an index of all booklets and reference materials that Word of Life Ministries has produced. 
-	Where available, each booklet is cross-referenced with the series or message the it came from.
+	This is an index of handouts and reference materials that Word of Life Ministries has produced to accompany
+	messages.<br/>
+	Each resources is cross-referenced with the series or message that it was produced for. In many cases, the 
+	material in these resources contains limited explanations, and you will need to listen or watch
+	the associated message to get the most out of them.<br/> 
+	For a list of the stand-alone booklets that we have produced, please see the 
+	<a href="${baseRef}/booklets.html">booklets</a> page.
 </p>
 
 <style>

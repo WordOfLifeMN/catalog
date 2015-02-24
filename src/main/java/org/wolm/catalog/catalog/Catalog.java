@@ -421,7 +421,8 @@ public class Catalog {
 	}
 
 	/**
-	 * Finds all downloadable (document) resources from any series, message, or that are standalone
+	 * Finds all downloadable (document) resources from any series, or message. Does not include standalone booklet
+	 * resources
 	 * 
 	 * @return List of all resources
 	 */
@@ -431,6 +432,7 @@ public class Catalog {
 		// find all resources from series, which will include messages in those series
 		for (Series series : getSeries()) {
 			if (!isVisible(series)) continue;
+			if (series.isBooklet()) continue;
 			for (NamedLink resource : series.getResources(true)) {
 				if (!resource.isDocumentForDownload()) continue;
 				resources.add(resource);
@@ -447,6 +449,30 @@ public class Catalog {
 			}
 		}
 
+		Collections.sort(resources, NamedLink.byName);
+		return resources;
+	}
+
+	/**
+	 * Finds all downloadable (document) booklets. These are stored as series that have {@code Series.isBooklet()}
+	 * returns {@code true}
+	 * 
+	 * @return List of booklets
+	 */
+	public List<NamedLink> getBooklets() {
+		List<NamedLink> resources = new ArrayList<>();
+
+		// find resources from stand-alone messages that are not part of any series
+		for (Series series : getSeries()) {
+			if (!isVisible(series)) continue;
+			if (!series.isBooklet()) continue;
+			for (NamedLink resource : series.getResources(true)) {
+				if (!resource.isDocumentForDownload()) continue;
+				resources.add(resource);
+			}
+		}
+
+		Collections.sort(resources, NamedLink.byName);
 		return resources;
 	}
 
