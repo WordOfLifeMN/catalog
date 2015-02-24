@@ -239,7 +239,7 @@ public class Series {
 		List<Message> visibleMessages = new ArrayList<>(messages.size());
 
 		for (Message message : messages)
-			if (RenderFactory.isVisible(message.getVisibility())) visibleMessages.add(message);
+			if (RenderFactory.isAtLeastVisible(message.getVisibility())) visibleMessages.add(message);
 
 		return visibleMessages;
 	}

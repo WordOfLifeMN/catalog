@@ -73,7 +73,7 @@ public class Catalog {
 	public List<Series> getSeries() {
 		List<Series> visibleSeries = new ArrayList<>(series.size());
 		for (Series s : series)
-			if (RenderFactory.isVisible(s.getVisibility())) visibleSeries.add(s);
+			if (RenderFactory.isExactlyVisible(s.getVisibility())) visibleSeries.add(s);
 		return visibleSeries;
 	}
 
@@ -482,7 +482,7 @@ public class Catalog {
 	 * RenderFactory
 	 */
 	private boolean isVisible(Series series) {
-		return RenderFactory.isVisible(series.getVisibility());
+		return RenderFactory.isAtLeastVisible(series.getVisibility());
 	}
 
 	/**
@@ -491,7 +491,7 @@ public class Catalog {
 	 * RenderFactory
 	 */
 	private boolean isVisible(Message message) {
-		return RenderFactory.isVisible(message.getVisibility());
+		return RenderFactory.isAtLeastVisible(message.getVisibility());
 	}
 
 	public void sortSeriesByDate() {

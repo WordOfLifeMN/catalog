@@ -108,7 +108,7 @@ public class RenderFactory {
 	 * @return <code>true</code> if the item is visible (can be displayed), <code>false</code> if the item should be
 	 * hidden
 	 */
-	public static boolean isVisible(AccessLevel itemVisibility) {
+	public static boolean isAtLeastVisible(AccessLevel itemVisibility) {
 		AccessLevel effectiveItemVisibility = itemVisibility == null ? AccessLevel.PRIVATE : itemVisibility;
 
 		switch (minVisibility) {
@@ -141,6 +141,19 @@ public class RenderFactory {
 		default:
 			return false;
 		}
+	}
+
+	/**
+	 * Determines if the specified item is visible exactly at the current visibility setting
+	 * 
+	 * @param itemVisibility Visibility of item in question
+	 * @return <code>true</code> if the item is visible (can be displayed), <code>false</code> if the item should be
+	 * hidden
+	 */
+	public static boolean isExactlyVisible(AccessLevel itemVisibility) {
+		AccessLevel effectiveItemVisibility = itemVisibility == null ? AccessLevel.PRIVATE : itemVisibility;
+
+		return effectiveItemVisibility == minVisibility;
 	}
 
 	public static Set<File> getCreatedPages() {

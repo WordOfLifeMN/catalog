@@ -153,57 +153,71 @@ public class App {
 		Catalog catalog = new Catalog();
 		catalog.populateFromGoogleSpreadsheets();
 
-		// generate the recent-messages list and save it to a file
-		{
-			logInfo("Writing series to file 'recent-messages.html'…");
-			Series recentMessages = catalog.getRecentMessages(60);
-			PageRender pageRender = new SeriesPageRender(recentMessages);
-			File outputFile = new File(outputFileDir, "recent-messages.html");
-			pageRender.render(outputFile);
-		}
+		buildRecentMessages(catalog);
+		buildRecentSeries(catalog);
+		buildCatalogOfAllSeries(catalog);
+		buildResources(catalog);
+		buildBooklets(catalog);
 
-		// generate the recent-series list and save it to a file
-		{
-			List<Series> recentSeries = catalog.getRecentSeries(60);
-			PageRender pageRender = new SeriesIndexPageRender(recentSeries);
-			((SeriesIndexPageRender) pageRender).setIndexTitle("Recent Series from Word of Life Ministries");
-			File outputFile = new File(outputFileDir, "recent-series.html");
-			pageRender.render(outputFile);
-		}
-
-		// generate the catalog index and save it to a file
-		{
-			catalog.sortSeriesByDate();
-			PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeriesWithStandAloneMessages());
-			((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog");
-			((SeriesIndexPageRender) pageRender)
-					.setIndexDescription("<table><tr>"
-							+ "<td><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/remix.jpeg' width='128'/></td>"
-							+ "<td><h3>We&apos;re currently re-editing and bringing the past 10 years "
-							+ "of messages and study materials up to date. "
-							+ "New content will be added weekly through the winter of 2014-2015, so check back frequently!</h3>"
-							+ "</td></table>");
-			File outputFile = new File(outputFileDir, "catalog.html");
-			pageRender.render(outputFile);
-		}
-
-		// generate the resource list and save it to a file
-		{
-			List<NamedLink> resources = catalog.getResources();
-			PageRender pageRender = new ResourcesPageRender(resources);
-			File outputFile = new File(outputFileDir, "resources.html");
-			pageRender.render(outputFile);
-		}
-
-		// generate the booklet list and save it to a file
-		{
-			List<NamedLink> resources = catalog.getBooklets();
-			PageRender pageRender = new BookletsPageRender(resources);
-			File outputFile = new File(outputFileDir, "booklets.html");
-			pageRender.render(outputFile);
-		}
+		// try {
+		// RenderFactory.setMinVisibility(AccessLevel.PROTECTED);
+		// buildCatalogOfAllSeries(catalog);
+		// }
+		// finally {
+		// RenderFactory.setMinVisibility(AccessLevel.PUBLIC);
+		// }
 
 		logInfo("Catalog file generation is complete");
+	}
+
+	private void buildRecentMessages(Catalog catalog) throws Exception {
+		logInfo("Writing series to file 'recent-messages.html'…");
+		Series recentMessages = catalog.getRecentMessages(60);
+		PageRender pageRender = new SeriesPageRender(recentMessages);
+		File outputFile = new File(outputFileDir, "recent-messages.html");
+		pageRender.render(outputFile);
+	}
+
+	private void buildRecentSeries(Catalog catalog) throws Exception {
+		List<Series> recentSeries = catalog.getRecentSeries(60);
+		PageRender pageRender = new SeriesIndexPageRender(recentSeries);
+		((SeriesIndexPageRender) pageRender).setIndexTitle("Recent Series from Word of Life Ministries");
+		File outputFile = new File(outputFileDir, "recent-series.html");
+		pageRender.render(outputFile);
+	}
+
+	private void buildCatalogOfAllSeries(Catalog catalog) throws Exception {
+		catalog.sortSeriesByDate();
+		PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeriesWithStandAloneMessages());
+		((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog");
+		((SeriesIndexPageRender) pageRender)
+				.setIndexDescription("<table><tr>"
+						+ "<td><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/remix.jpeg' width='128'/></td>"
+						+ "<td><h3>We&apos;re currently re-editing and bringing the past 10 years "
+						+ "of messages and study materials up to date. "
+						+ "New content will be added weekly through the winter of 2014-2015, so check back frequently!</h3>"
+						+ "</td></table>");
+		File outputFile = new File(outputFileDir, computeCatalogName());
+		pageRender.render(outputFile);
+	}
+
+	private String computeCatalogName() {
+		if (RenderFactory.getMinVisibility() == AccessLevel.PUBLIC) return "catalog.html";
+		return "catalog-" + RenderFactory.getMinVisibility().toString().toLowerCase() + ".html";
+	}
+
+	private void buildResources(Catalog catalog) throws Exception {
+		List<NamedLink> resources = catalog.getResources();
+		PageRender pageRender = new ResourcesPageRender(resources);
+		File outputFile = new File(outputFileDir, "resources.html");
+		pageRender.render(outputFile);
+	}
+
+	private void buildBooklets(Catalog catalog) throws Exception {
+		List<NamedLink> resources = catalog.getBooklets();
+		PageRender pageRender = new BookletsPageRender(resources);
+		File outputFile = new File(outputFileDir, "booklets.html");
+		pageRender.render(outputFile);
 	}
 
 	/** Upload all pages that have been created to S3 (if requested) */
