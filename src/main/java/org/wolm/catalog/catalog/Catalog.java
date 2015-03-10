@@ -473,7 +473,7 @@ public class Catalog {
 		// remove those that are booklets
 		resources.removeAll(getBooklets());
 
-		Collections.sort(resources, NamedLink.byName);
+		Collections.sort(resources, NamedLink.byTitleName);
 		return resources;
 	}
 
@@ -496,7 +496,7 @@ public class Catalog {
 			}
 		}
 
-		Collections.sort(resources, NamedLink.byName);
+		Collections.sort(resources, NamedLink.byTitleName);
 		return resources;
 	}
 

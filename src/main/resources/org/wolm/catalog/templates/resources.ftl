@@ -5,8 +5,7 @@
 	Each resources is cross-referenced with the series or message that it was produced for. In many cases, the 
 	material in these resources contains limited explanations, and you will need to listen or watch
 	the associated message to get the most out of them.<br/> 
-	For a list of the stand-alone booklets that we have produced, please see the 
-	<a href="${baseRef}/booklets.html">booklets</a> page.
+	For a list of the booklets that we have produced, please see the <a href="${baseRef}/booklets.html">booklets</a> page.
 </p>
 
 <style>

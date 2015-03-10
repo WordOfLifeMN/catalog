@@ -131,4 +131,13 @@ public class NamedLink {
 			return link1.getName().compareToIgnoreCase(link2.getName());
 		}
 	};
+
+	/** Sorts by name, but ignoring leading "A" or "The" */
+	public static Comparator<NamedLink> byTitleName = new Comparator<NamedLink>() {
+		public int compare(NamedLink link1, NamedLink link2) {
+			String title1 = link1.getName().replaceFirst("^(A|The) ", "");
+			String title2 = link2.getName().replaceFirst("^(A|The) ", "");
+			return title1.compareToIgnoreCase(title2);
+		}
+	};
 }
