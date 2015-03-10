@@ -76,9 +76,8 @@ public class NamedLink {
 		}
 
 		if (link.getHost().contains("youtu")) return "YouTube video";
-
 		if (path.isEmpty() || path.equals("/")) return "Website";
-
+		if (link.getHost().contains(".com")) return "Web page";
 		return null;
 	}
 
@@ -96,6 +95,16 @@ public class NamedLink {
 	public boolean isDocumentForDownload() {
 		String url = link.toString();
 		return url.contains("amazonaws") && url.contains("/wordoflife.mn.");
+	}
+
+	/**
+	 * Returns {@code true} if this resource references a PDF file
+	 * 
+	 * @return {@code true} if this is a link to a PDF, {@code false} for anything else
+	 */
+	public boolean isPdf() {
+		String url = link.toString();
+		return url.endsWith(".pdf") || url.endsWith(".PDF");
 	}
 
 	@Override

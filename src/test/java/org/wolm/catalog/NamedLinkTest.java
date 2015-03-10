@@ -53,8 +53,9 @@ public class NamedLinkTest {
 	}
 
 	@Test
-	public void sitePageUrlShouldNotHaveDescription() throws MalformedURLException {
-		assertThat(new NamedLink("https://store.endtime.com/Understanding-the-Endtime-DVD").getFileName()).isNull();
+	public void sitePageUrlShouldHaveDescription() throws MalformedURLException {
+		assertThat(new NamedLink("https://store.endtime.com/Understanding-the-Endtime-DVD").getFileName()).isEqualTo(
+				"Web page");
 	}
 
 }

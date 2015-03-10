@@ -77,37 +77,52 @@ public class CatalogTest {
 		}
 
 		@Test
-		public void bookletsShouldBeIncluded() {
-			Series booklet = createBookletSeries();
-			catalogUnderTest.add(booklet);
+		public void bookletListShouldIncludeSeriesBooklets() {
+			Series series = createBookletSeries();
+			catalogUnderTest.add(series);
 
-			List<NamedLink> resources = catalogUnderTest.getResources();
+			List<NamedLink> resources = catalogUnderTest.getBooklets();
 
-			assertThat(resources).containsOnly(booklet.getResources(false).get(0));
+			assertThat(resources).containsOnly(series.getResources(false).get(0));
 		}
 
 		@Test
-		public void privateBookletsShouldNotBeIncluded() {
+		public void handoutsShouldNotIncludeSeriesBooklets() {
 			Series booklet = createBookletSeries();
 			catalogUnderTest.add(booklet);
 
-			// check private
-			booklet.setVisibility(AccessLevel.PRIVATE);
-			List<NamedLink> resources = catalogUnderTest.getResources();
+			List<NamedLink> resources = catalogUnderTest.getHandoutsAndResources();
+
 			assertThat(resources).isEmpty();
+		}
+
+		@Test
+		public void publicBookletListShouldNotIncludePrivateBooklets() {
+			Series booklet = createBookletSeries();
+			catalogUnderTest.add(booklet);
+
+			// check public
+			booklet.setVisibility(AccessLevel.PUBLIC);
+			List<NamedLink> resources = catalogUnderTest.getBooklets();
+			assertThat(resources).containsOnly(booklet.getResources(false).get(0));
 
 			// check protected
 			booklet.setVisibility(AccessLevel.PROTECTED);
-			resources = catalogUnderTest.getResources();
+			resources = catalogUnderTest.getBooklets();
+			assertThat(resources).isEmpty();
+
+			// check private
+			booklet.setVisibility(AccessLevel.PRIVATE);
+			resources = catalogUnderTest.getBooklets();
 			assertThat(resources).isEmpty();
 		}
 
 		@Test
-		public void seriesWithBookletShouldBeIncluded() {
+		public void bookletListShouldIncludeSeriesWithBooklet() {
 			Series series = createSeriesWithBooklet();
 			catalogUnderTest.add(series);
 
-			List<NamedLink> resources = catalogUnderTest.getResources();
+			List<NamedLink> resources = catalogUnderTest.getBooklets();
 
 			assertThat(resources).containsOnly(series.getResources(false).get(0));
 		}
@@ -119,39 +134,24 @@ public class CatalogTest {
 
 			// check private
 			series.setVisibility(AccessLevel.PRIVATE);
-			List<NamedLink> resources = catalogUnderTest.getResources();
+			List<NamedLink> resources = catalogUnderTest.getHandoutsAndResources();
 			assertThat(resources).isEmpty();
 
 			// check protected
 			series.setVisibility(AccessLevel.PROTECTED);
-			resources = catalogUnderTest.getResources();
+			resources = catalogUnderTest.getHandoutsAndResources();
 			assertThat(resources).isEmpty();
 		}
 
 		@Test
-		public void seriesMessageBookletShouldBeIncluded() {
+		public void handoutResourcesShouldNotIncludeBooklets() {
 			Series series = createSeriesAndMessageWithBooklet();
 			catalogUnderTest.add(series);
 
-			List<NamedLink> resources = catalogUnderTest.getResources();
+			List<NamedLink> resources = catalogUnderTest.getHandoutsAndResources();
 
-			NamedLink seriesBooklet = series.getResources(false).get(0);
 			NamedLink messageBooklet = series.getMessages().get(0).getResources().get(0);
-			assertThat(resources).containsOnly(seriesBooklet, messageBooklet);
-		}
-
-		@Test
-		public void publicSeriesPrivateMessageBookletShouldNotBeIncluded() {
-			Series series = createSeriesAndMessageWithBooklet();
-			catalogUnderTest.add(series);
-
-			series.getMessages().get(0).setVisibility(AccessLevel.PRIVATE);
-			List<NamedLink> resources = catalogUnderTest.getResources();
-
-			// the series is public and it's booklet should be included, but the message is private so it's book
-			// shouldn't be included
-			NamedLink seriesBooklet = series.getResources(false).get(0);
-			assertThat(resources).containsOnly(seriesBooklet);
+			assertThat(resources).containsOnly(messageBooklet);
 		}
 
 		@Test
@@ -162,24 +162,22 @@ public class CatalogTest {
 			Message message = createMessageWithBooklet();
 			catalogUnderTest.add(message);
 
-			List<NamedLink> resources = catalogUnderTest.getResources();
+			List<NamedLink> resources = catalogUnderTest.getHandoutsAndResources();
 
-			NamedLink seriesBooklet = series.getResources(false).get(0);
 			NamedLink seriesMessageBooklet = series.getMessages().get(0).getResources().get(0);
 			NamedLink messageBooklet = message.getResources().get(0);
-			assertThat(resources).containsOnly(seriesBooklet, seriesMessageBooklet, messageBooklet);
+			assertThat(resources).containsOnly(seriesMessageBooklet, messageBooklet);
 		}
 
 		@Test
-		public void youtubeLinksShouldNotBeIncluded() {
+		public void youtubeLinksShouldBeIncluded() {
 			Message message = createMessageWithBooklet();
 			message.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/MSG-BOOKLET.PDF;http://youtu.be/blahblah");
 			catalogUnderTest.add(message);
 
-			List<NamedLink> resources = catalogUnderTest.getResources();
+			List<NamedLink> resources = catalogUnderTest.getHandoutsAndResources();
 
-			NamedLink document = message.getResources().get(0);
-			assertThat(resources).containsOnly(document);
+			assertThat(resources).containsOnly(message.getResources().get(0), message.getResources().get(1));
 		}
 
 		private Series createBookletSeries() {

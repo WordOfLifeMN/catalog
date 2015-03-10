@@ -156,7 +156,7 @@ public class App {
 		buildRecentMessages(catalog);
 		buildRecentSeries(catalog);
 		buildPublicCatalog(catalog);
-		buildResources(catalog);
+		buildHandoutsAndResources(catalog);
 		buildBooklets(catalog);
 
 		buildCovenantPartnerCatalog(catalog);
@@ -195,8 +195,8 @@ public class App {
 		pageRender.render(outputFile);
 	}
 
-	private void buildResources(Catalog catalog) throws Exception {
-		List<NamedLink> resources = catalog.getResources();
+	private void buildHandoutsAndResources(Catalog catalog) throws Exception {
+		List<NamedLink> resources = catalog.getHandoutsAndResources();
 		PageRender pageRender = new ResourcesPageRender(resources);
 		File outputFile = new File(outputFileDir, "resources.html");
 		pageRender.render(outputFile);

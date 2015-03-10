@@ -20,6 +20,26 @@ import org.wolm.google.GoogleWorksheet;
 import org.wolm.message.Message;
 import org.wolm.series.Series;
 
+/**
+ * Definitions:
+ * <table>
+ * <tr>
+ * <td>Booklet</td>
+ * <td>A link attached to a Series which is a PDF file.</td>
+ * </tr>
+ * <tr>
+ * <td>Handout</td>
+ * <td>A link attached to a Message which is a PDF file.</td>
+ * </tr>
+ * <tr>
+ * <td>Resource</td>
+ * <td>A link attached to a Message or a Series which is not a PDF file.</td>
+ * </tr>
+ * </table>
+ * 
+ * @author wolm
+ */
+
 public class Catalog {
 	private String messageSpreadsheetName = "Messages";
 	private List<Message> messages = new ArrayList<>();
@@ -421,20 +441,21 @@ public class Catalog {
 	}
 
 	/**
-	 * Finds all downloadable (document) resources from any series, or message. Does not include standalone booklet
-	 * resources
+	 * Finds all handouts (downloadable documents) or resources (links like YouTube or website) from any series, or
+	 * message. Does not include Booklets
 	 * 
 	 * @return List of all resources
 	 */
-	public List<NamedLink> getResources() {
+	public List<NamedLink> getHandoutsAndResources() {
 		List<NamedLink> resources = new ArrayList<>();
+
+		// find all resources
 
 		// find all resources from series, which will include messages in those series
 		for (Series series : getSeries()) {
 			if (!isVisible(series)) continue;
-			if (series.isBooklet()) continue;
 			for (NamedLink resource : series.getResources(true)) {
-				if (!resource.isDocumentForDownload()) continue;
+				// if (!resource.isDocumentForDownload()) continue;
 				resources.add(resource);
 			}
 		}
@@ -444,30 +465,33 @@ public class Catalog {
 			if (!message.getSeries().isEmpty()) continue;
 			if (!isVisible(message)) continue;
 			for (NamedLink resource : message.getResources()) {
-				if (!resource.isDocumentForDownload()) continue;
+				// if (!resource.isDocumentForDownload()) continue;
 				resources.add(resource);
 			}
 		}
+
+		// remove those that are booklets
+		resources.removeAll(getBooklets());
 
 		Collections.sort(resources, NamedLink.byName);
 		return resources;
 	}
 
 	/**
-	 * Finds all downloadable (document) booklets. These are stored as series that have {@code Series.isBooklet()}
-	 * returns {@code true}
+	 * Finds all downloadable booklets. Booklets are any PDF resources that are associated with Series, but not with the
+	 * messages in a series
 	 * 
 	 * @return List of booklets
 	 */
 	public List<NamedLink> getBooklets() {
 		List<NamedLink> resources = new ArrayList<>();
 
-		// find resources from stand-alone messages that are not part of any series
+		// find resources of all series that are PDFs
 		for (Series series : getSeries()) {
 			if (!isVisible(series)) continue;
-			if (!series.isBooklet()) continue;
-			for (NamedLink resource : series.getResources(true)) {
+			for (NamedLink resource : series.getResources(false)) {
 				if (!resource.isDocumentForDownload()) continue;
+				if (!resource.isPdf()) continue;
 				resources.add(resource);
 			}
 		}
