@@ -149,7 +149,7 @@
 		</tr>
 		<tr>
 			<td class="resources">
-				<b>Additional Resources</b>
+				<b>Booklets &amp; Resources</b>
 				<#list series.resources as resource>
 					<br/>
 					<#if resource.fileName??>

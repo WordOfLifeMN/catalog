@@ -223,10 +223,12 @@ public class Series {
 	}
 
 	public List<NamedLink> getResources(boolean includeResourcesFromMessages) {
-		if (!includeResourcesFromMessages) return resources;
-
 		List<NamedLink> allResources = new ArrayList<>();
+		allResources.addAll(booklets);
 		allResources.addAll(resources);
+
+		if (!includeResourcesFromMessages) return allResources;
+
 		if (getMessages() != null) {
 			for (Message message : getMessages()) {
 				for (NamedLink resource : message.getResources()) {
