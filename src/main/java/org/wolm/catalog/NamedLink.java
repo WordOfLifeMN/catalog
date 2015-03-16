@@ -20,6 +20,10 @@ public class NamedLink {
 		this.link = link;
 	}
 
+	public NamedLink(NamedLink other) {
+		this(other.getName(), other.getLink());
+	}
+
 	/**
 	 * Constructs a named link from a serialized string in one of the following formats:
 	 * <ul>

@@ -38,12 +38,14 @@ public class Series {
 	private AccessLevel visibility;
 	private URL coverArtLink;
 	private URL coverImageLink;
+	private List<NamedLink> booklets = new ArrayList<>();
 	private List<NamedLink> resources = new ArrayList<>();
 
 	transient private String visibilityError;
 	transient private String coverArtLinkError;
 	transient private String coverImageLinkError;
 	transient private String resourceError;
+	transient private String bookletError;
 
 	transient private boolean validationErrorHasBeenPrinted;
 	transient private boolean isValid;
@@ -183,6 +185,37 @@ public class Series {
 	}
 
 	/**
+	 * Gets all booklets (listed in the "Booklets" column) regardless of visibility
+	 * 
+	 * @return List of all series booklets
+	 */
+	public List<NamedLink> getBooklets() {
+		return booklets;
+	}
+
+	public void setBooklets(List<NamedLink> booklets) {
+		this.booklets = booklets == null ? new ArrayList<NamedLink>() : booklets;
+	}
+
+	public void setBookletsAsString(String serializedBooklets) {
+		booklets = new ArrayList<>();
+		if (serializedBooklets == null) return;
+		if (SPECIAL_LINKS.contains(serializedBooklets)) return;
+
+		String[] links = serializedBooklets.split("\\s*;\\s*");
+		if (links == null) return;
+
+		for (String link : links)
+			try {
+				booklets.add(new NamedResourceLink(link, this));
+			}
+			catch (MalformedURLException e) {
+				if (resourceError == null) resourceError = "unable to parse the booklet URLs: ";
+				bookletError += "'" + link + "' (" + e.getMessage() + ")";
+			}
+	}
+
+	/**
 	 * @return Resources. Empty list if none
 	 */
 	public List<NamedLink> getResources() {
@@ -260,7 +293,7 @@ public class Series {
 	 */
 	public boolean isBooklet() {
 		if (getTitle() == null) return false;
-		if (getResources(false).isEmpty()) return false;
+		if (getBooklets().isEmpty()) return false;
 		if (getStartDate() != null) return false;
 		if (getMessageCount() > 0) return false;
 		return true;
@@ -281,6 +314,7 @@ public class Series {
 		if (visibilityError != null) reportValidationError(s, visibilityError);
 		if (coverArtLinkError != null) reportValidationError(s, coverArtLinkError);
 		if (coverImageLinkError != null) reportValidationError(s, coverImageLinkError);
+		if (bookletError != null) reportValidationError(s, resourceError);
 		if (resourceError != null) reportValidationError(s, resourceError);
 
 		if (getTitle() == null) {

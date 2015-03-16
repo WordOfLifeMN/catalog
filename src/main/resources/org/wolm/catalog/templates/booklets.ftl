@@ -34,9 +34,9 @@
 				<span style="float:clear;" />
 
 				<#-- source of the resource -->
-				<br/>
-				<span class="source">
-					<#if (resource.sourceSeries.id)?? || resource.sourceMessage??>
+				<#if (resource.sourceSeries.id)?? || resource.sourceMessage??>
+					<br/>
+					<span class="source">
 						<#-- series and/or message names -->
 						From 
 						<#if (resource.sourceSeries.id)??>
@@ -53,10 +53,8 @@
 						<#elseif resource.sourceSeries??>
 							<#if resource.sourceSeries.startDate??>(${resource.sourceSeries.startDate?date})</#if>
 						</#if>
-					<#else>
-						Not associated with any series.
-					</#if>
-				</span>
+					</span>
+				</#if>
 				<#-- <hr/> -->
 			</td>
 		</tr>

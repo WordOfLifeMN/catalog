@@ -83,7 +83,7 @@ public class CatalogTest {
 
 			List<NamedLink> resources = catalogUnderTest.getBooklets();
 
-			assertThat(resources).containsOnly(series.getResources(false).get(0));
+			assertThat(resources).containsOnly(series.getBooklets().get(0));
 		}
 
 		@Test
@@ -97,34 +97,13 @@ public class CatalogTest {
 		}
 
 		@Test
-		public void publicBookletListShouldNotIncludePrivateBooklets() {
-			Series booklet = createBookletSeries();
-			catalogUnderTest.add(booklet);
-
-			// check public
-			booklet.setVisibility(AccessLevel.PUBLIC);
-			List<NamedLink> resources = catalogUnderTest.getBooklets();
-			assertThat(resources).containsOnly(booklet.getResources(false).get(0));
-
-			// check protected
-			booklet.setVisibility(AccessLevel.PROTECTED);
-			resources = catalogUnderTest.getBooklets();
-			assertThat(resources).isEmpty();
-
-			// check private
-			booklet.setVisibility(AccessLevel.PRIVATE);
-			resources = catalogUnderTest.getBooklets();
-			assertThat(resources).isEmpty();
-		}
-
-		@Test
 		public void bookletListShouldIncludeSeriesWithBooklet() {
 			Series series = createSeriesWithBooklet();
 			catalogUnderTest.add(series);
 
-			List<NamedLink> resources = catalogUnderTest.getBooklets();
+			List<NamedLink> booklets = catalogUnderTest.getBooklets();
 
-			assertThat(resources).containsOnly(series.getResources(false).get(0));
+			assertThat(booklets).containsOnly(series.getBooklets().get(0));
 		}
 
 		@Test
@@ -145,33 +124,35 @@ public class CatalogTest {
 
 		@Test
 		public void handoutResourcesShouldNotIncludeBooklets() {
-			Series series = createSeriesAndMessageWithBooklet();
+			Series series = createSeriesWithResourceAndMessageWithResource();
 			catalogUnderTest.add(series);
 
 			List<NamedLink> resources = catalogUnderTest.getHandoutsAndResources();
 
-			NamedLink messageBooklet = series.getMessages().get(0).getResources().get(0);
-			assertThat(resources).containsOnly(messageBooklet);
+			NamedLink seriesResource = series.getResources().get(0);
+			NamedLink messageResource = series.getMessages().get(0).getResources().get(0);
+			assertThat(resources).containsOnly(seriesResource, messageResource);
 		}
 
 		@Test
 		public void standAloneMessageBookletShouldBeIncluded() {
-			Series series = createSeriesAndMessageWithBooklet();
+			Series series = createSeriesWithResourceAndMessageWithResource();
 			catalogUnderTest.add(series);
 
-			Message message = createMessageWithBooklet();
+			Message message = createMessageWithResource();
 			catalogUnderTest.add(message);
 
 			List<NamedLink> resources = catalogUnderTest.getHandoutsAndResources();
 
-			NamedLink seriesMessageBooklet = series.getMessages().get(0).getResources().get(0);
-			NamedLink messageBooklet = message.getResources().get(0);
-			assertThat(resources).containsOnly(seriesMessageBooklet, messageBooklet);
+			NamedLink seriesResource = series.getResources().get(0);
+			NamedLink seriesMessageResource = series.getMessages().get(0).getResources().get(0);
+			NamedLink messageResource = message.getResources().get(0);
+			assertThat(resources).containsOnly(seriesResource, seriesMessageResource, messageResource);
 		}
 
 		@Test
 		public void youtubeLinksShouldBeIncluded() {
-			Message message = createMessageWithBooklet();
+			Message message = createMessageWithResource();
 			message.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/MSG-BOOKLET.PDF;http://youtu.be/blahblah");
 			catalogUnderTest.add(message);
 
@@ -180,43 +161,57 @@ public class CatalogTest {
 			assertThat(resources).containsOnly(message.getResources().get(0), message.getResources().get(1));
 		}
 
+		@Test
+		public void bookletsShouldContainBookletsFromPrivateSeries() {
+			Series series = createSeriesWithBooklet();
+			series.setVisibility(AccessLevel.PRIVATE);
+			catalogUnderTest.add(series);
+
+			List<NamedLink> booklets = catalogUnderTest.getBooklets();
+
+			// the booklet may be present, but it will not be the same object, so built a NamedLink to test agains
+			assertThat(booklets).contains(new NamedLink(series.getBooklets().get(0)));
+		}
+
+		/** Creates a booklet-series. That is, a series that only contains a booklet and no messages */
 		private Series createBookletSeries() {
 			Series booklet = new Series();
 			booklet.setTitle("BOOKLET");
-			booklet.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/BOOKLET.PDF");
+			booklet.setBookletsAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/BOOKLET.PDF");
 			booklet.setVisibility(AccessLevel.PUBLIC);
 			return booklet;
 		}
 
+		/** Creates a series with a booklet. That is, a series that has a booklet and messages */
 		private Series createSeriesWithBooklet() {
 			Series series = new Series();
 			series.setTitle("SERIES WITH BOOKLET");
 			series.setMessageCount(1L);
 			series.setStartDate(new Date());
-			series.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/SERIES-BOOKLET.PDF");
+			series.setBookletsAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/SERIES-BOOKLET.PDF");
 			series.setVisibility(AccessLevel.PUBLIC);
 			return series;
 		}
 
-		private Message createMessageWithBooklet() {
+		private Message createMessageWithResource() {
 			Message message = new Message();
 			message.setTitle("MESSAGE WITH BOOKLET");
 			message.setVisibility(AccessLevel.PUBLIC);
-			message.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/MSG-BOOKLET.PDF");
+			message.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/MSG-RESOURCE.PDF");
 
 			return message;
 		}
 
-		private Series createSeriesAndMessageWithBooklet() {
+		private Series createSeriesWithResourceAndMessageWithResource() {
 			Series series = new Series();
 			series.setTitle("SERIES WITH MESSAGE WITH BOOKLET");
 			series.setMessageCount(1L);
 			series.setStartDate(new Date());
-			series.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/SERIES-BOOKLET.PDF");
+			series.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/SERIES-RESOURCE.PDF");
 			series.setVisibility(AccessLevel.PUBLIC);
 
-			Message message = createMessageWithBooklet();
-			message.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/SERIES-MSG-BOOKLET.PDF");
+			Message message = createMessageWithResource();
+			message.setResourcesAsString("https://s3-us-west-2.amazonaws.com/wordoflife.mn.BUCKET/SERIES-MSG-RESOURCE.PDF");
 			series.addMessage(message);
 
 			return series;

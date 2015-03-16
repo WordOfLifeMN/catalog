@@ -224,7 +224,7 @@ public class Catalog {
 
 		List<String> columns = worksheet.getColumnNames();
 		for (String columnName : new String[] { "name", "datestarted", "dateended", "messages", "speaker",
-				"description", "visibility", "coverart", "coverimage", "resources", "webid" })
+				"description", "booklets", "resources", "visibility", "coverart", "coverimage", "webid" })
 			if (!columns.contains(columnName)) {
 				throw new Exception("Cannot find column '" + columnName + "' in the spreadsheet '"
 						+ seriesSpreadsheetName + "'");
@@ -267,15 +267,18 @@ public class Catalog {
 				// description
 				series.setDescription(row.getValue("description"));
 
+				// booklets
+				series.setBookletsAsString(row.getValue("booklets"));
+
+				// resources
+				series.setResourcesAsString(row.getValue("resources"));
+
 				// visibility
 				series.setVisibilityAsString(row.getValue("visibility"));
 
 				// cover
 				series.setCoverArtLinkAsString(row.getValue("coverart"));
 				series.setCoverImageLinkAsString(row.getValue("coverimage"));
-
-				// study guide
-				series.setResourcesAsString(row.getValue("resources"));
 
 				// discover messages for this series
 				series.discoverMessages(messages);
@@ -478,26 +481,30 @@ public class Catalog {
 	}
 
 	/**
-	 * Finds all downloadable booklets. Booklets are any PDF resources that are associated with Series, but not with the
-	 * messages in a series
+	 * Finds all downloadable booklets. Booklets are from the Series Booklets column. Booklets are always public,
+	 * regardless of visibility of the series. However, if the series isn't visible, then the booklet link will not
+	 * cross-reference back to the series
 	 * 
 	 * @return List of booklets
 	 */
 	public List<NamedLink> getBooklets() {
-		List<NamedLink> resources = new ArrayList<>();
+		List<NamedLink> booklets = new ArrayList<>();
 
-		// find resources of all series that are PDFs
-		for (Series series : getSeries()) {
-			if (!isVisible(series)) continue;
-			for (NamedLink resource : series.getResources(false)) {
-				if (!resource.isDocumentForDownload()) continue;
-				if (!resource.isPdf()) continue;
-				resources.add(resource);
+		// find booklets of all series, regardless of visibility
+		for (Series series : getRawSeries()) {
+			for (NamedLink booklet : series.getBooklets()) {
+				if (!booklet.isDocumentForDownload()) continue;
+				// if the series is not visible, then break the reference back to it by converting it from a
+				// NamedResourceLink to just a NamedLink
+				if (!isVisible(series)) {
+					booklet = new NamedLink(booklet);
+				}
+				booklets.add(booklet);
 			}
 		}
 
-		Collections.sort(resources, NamedLink.byTitleName);
-		return resources;
+		Collections.sort(booklets, NamedLink.byTitleName);
+		return booklets;
 	}
 
 	/**

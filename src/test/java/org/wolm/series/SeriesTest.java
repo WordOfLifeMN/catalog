@@ -19,11 +19,18 @@ public class SeriesTest {
 		public void beforeEachTest() {
 			bookletUnderTest = new Series();
 			bookletUnderTest.setTitle("UNIT TEST BOOKLET");
-			bookletUnderTest.setResourcesAsString("http://org.wolm.com/none.jpg");
+			bookletUnderTest.setBookletsAsString("http://org.wolm.com/none.jpg");
 		}
 
 		@Test
-		public void resourceOnlyShouldBeValidBooklet() {
+		public void bookletOnlyShouldBeValidBooklet() {
+			assertThat(bookletUnderTest.isBooklet()).isTrue();
+			assertThat(bookletUnderTest.isValid(System.out, null)).isTrue();
+		}
+
+		@Test
+		public void resourceWithBookletOnlyShouldBeValidBooklet() {
+			bookletUnderTest.setResourcesAsString("http://org.wolm.com/none.jpg");
 			assertThat(bookletUnderTest.isBooklet()).isTrue();
 			assertThat(bookletUnderTest.isValid(System.out, null)).isTrue();
 		}
@@ -41,8 +48,8 @@ public class SeriesTest {
 		}
 
 		@Test
-		public void withoutResourceShouldNotBeBooklet() {
-			bookletUnderTest.setResourcesAsString(null);
+		public void withoutBookletShouldNotBeBooklet() {
+			bookletUnderTest.setBookletsAsString(null);
 			assertThat(bookletUnderTest.isBooklet()).isFalse();
 		}
 	}
