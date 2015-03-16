@@ -6,6 +6,16 @@
 	To see a list of all our handouts and resources that accompany messages, see the 
 	<a href="${baseRef}/resources.html">resources</a> page.
 </p>
+<p>
+	<b>Key:</b><br/>
+	&nbsp;&nbsp;&nbsp;
+	<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XXSmall.png" />
+	Indicates a booklet associated with a series. Click on this icon to see the series.
+	<br/>
+	&nbsp;&nbsp;&nbsp;
+	<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CombBound-XXSmall.gif" />
+	Indicates a booklet not currently associated with a series.
+</p>
 
 <style>
 	td.resource .filename {
@@ -23,38 +33,38 @@
 	}
 </style>
 
+<hr />
 <table class="resources" width="100%">
 	<#list resourceList as resource>
 		<tr>
 			<td class="resource">
+				<#if (resource.sourceSeries.id)?? || resource.sourceMessage??>
+					<#assign alt= 'From ' />
+					<#if (resource.sourceSeries.id)??><#assign alt = alt + resource.sourceSeries.title /></#if>
+					<#if (resource.sourceSeries.id)?? && resource.sourceMessage??><#assign alt = alt + ':' /></#if>
+					<#assign alt = alt + ' ' />
+					<#if resource.sourceMessage??><#assign alt = alt + resource.sourceMessage.title /></#if>
+					
+					<#-- source date -->
+					<#if resource.sourceMessage??>
+						<#assign alt = alt + ' (' + resource.sourceMessage.date?date + ')' />
+					<#elseif resource.sourceSeries??>
+						<#assign alt = alt + ' (' + resource.sourceSeries.startDate?date + ')' />
+					</#if>
+					<a href="${baseRef}/${resource.sourceSeries.id}.html">
+						<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XXSmall.png" 
+							alt="${alt}" title="${alt}"/>
+					</a>
+				<#else>
+					<#assign alt= 'This booklet is not associated with any series.' />
+					<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CombBound-XXSmall.gif" 
+						alt="${alt}" title="${alt}"/>
+				</#if>
 				<#if resource.fileName??>
 					<span class="filename">(${resource.fileName})</span>
 				</#if>
 				<a href="${resource.link}" target="wolmGuide">${resource.name}</a>
 				<span style="float:clear;" />
-
-				<#-- source of the resource -->
-				<#if (resource.sourceSeries.id)?? || resource.sourceMessage??>
-					<br/>
-					<span class="source">
-						<#-- series and/or message names -->
-						From 
-						<#if (resource.sourceSeries.id)??>
-							<a href="${baseRef}/${resource.sourceSeries.id}.html">${resource.sourceSeries.title}</a>
-						</#if>
-						<#if (resource.sourceSeries.id)?? && resource.sourceMessage??>:</#if>
-						<#if resource.sourceMessage??>
-							${resource.sourceMessage.title}
-						</#if>
-						
-						<#-- source date -->
-						<#if resource.sourceMessage??>
-							<#if resource.sourceMessage.date??>(${resource.sourceMessage.date?date})</#if>
-						<#elseif resource.sourceSeries??>
-							<#if resource.sourceSeries.startDate??>(${resource.sourceSeries.startDate?date})</#if>
-						</#if>
-					</span>
-				</#if>
 				<#-- <hr/> -->
 			</td>
 		</tr>
