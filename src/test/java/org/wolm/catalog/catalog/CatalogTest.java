@@ -12,7 +12,7 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.NamedLink;
-import org.wolm.catalog.RenderFactory;
+import org.wolm.catalog.RenderEnvironment;
 import org.wolm.message.Message;
 import org.wolm.series.Series;
 
@@ -25,12 +25,12 @@ public class CatalogTest {
 		@Before
 		public void beforeEachTest() {
 			catalogUnderTest = new Catalog();
-			RenderFactory.setMinVisibility(AccessLevel.PUBLIC);
+			RenderEnvironment.instance().setMinVisibility(AccessLevel.PUBLIC);
 		}
 
 		@After
 		public void afterEachTest() {
-			RenderFactory.setMinVisibility(null);
+			RenderEnvironment.instance().setMinVisibility(null);
 		}
 
 		@Test
@@ -68,12 +68,12 @@ public class CatalogTest {
 		@Before
 		public void beforeEachTest() {
 			catalogUnderTest = new Catalog();
-			RenderFactory.setMinVisibility(AccessLevel.PUBLIC);
+			RenderEnvironment.instance().setMinVisibility(AccessLevel.PUBLIC);
 		}
 
 		@After
 		public void afterEachTest() {
-			RenderFactory.setMinVisibility(null);
+			RenderEnvironment.instance().setMinVisibility(null);
 		}
 
 		@Test

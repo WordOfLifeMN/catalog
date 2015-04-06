@@ -40,6 +40,8 @@ public class App {
 	@Parameter(names = { "-u", "--upload" }, description = "Upload final files to S3.")
 	private boolean upload = false;
 
+	private RenderEnvironment env = RenderEnvironment.instance();
+
 	private String s3BucketName = "wordoflife.mn.catalog";
 	private String s3ObjectPrefix = null;
 
@@ -99,7 +101,7 @@ public class App {
 			RenderFactory.setBaseRef("file://" + outputFileDir.toString());
 		}
 
-		RenderFactory.setMinVisibility(AccessLevel.PUBLIC);
+		env.setMinVisibility(AccessLevel.PUBLIC);
 	}
 
 	public boolean isHelpRequested() {
@@ -212,7 +214,7 @@ public class App {
 	private void buildCovenantPartnerCatalog(Catalog catalog) throws Exception {
 		catalog.sortSeriesByDate();
 		try {
-			RenderFactory.setMinVisibility(AccessLevel.PROTECTED);
+			env.setMinVisibility(AccessLevel.PROTECTED);
 
 			PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
 			((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog For Covenant Partners");
@@ -230,7 +232,7 @@ public class App {
 			pageRender.render(outputFile);
 		}
 		finally {
-			RenderFactory.setMinVisibility(AccessLevel.PUBLIC);
+			env.setMinVisibility(AccessLevel.PUBLIC);
 		}
 	}
 

@@ -12,7 +12,7 @@ import java.util.Set;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.wolm.catalog.App;
 import org.wolm.catalog.NamedLink;
-import org.wolm.catalog.RenderFactory;
+import org.wolm.catalog.RenderEnvironment;
 import org.wolm.google.GoogleHelper;
 import org.wolm.google.GoogleRow;
 import org.wolm.google.GoogleSpreadsheet;
@@ -41,6 +41,8 @@ import org.wolm.series.Series;
  */
 
 public class Catalog {
+	private RenderEnvironment env = RenderEnvironment.instance();
+
 	private String messageSpreadsheetName = "Messages";
 	private List<Message> messages = new ArrayList<>();
 
@@ -93,7 +95,7 @@ public class Catalog {
 	public List<Series> getSeries() {
 		List<Series> visibleSeries = new ArrayList<>(series.size());
 		for (Series s : series)
-			if (RenderFactory.isExactlyVisible(s.getVisibility())) visibleSeries.add(s);
+			if (env.isExactlyVisible(s.getVisibility())) visibleSeries.add(s);
 		return visibleSeries;
 	}
 
@@ -337,7 +339,7 @@ public class Catalog {
 		series.setTitle("Messages from " + year + " that are not part of a series");
 		series.setId("WOLS-SA" + year);
 		series.setDescription("Messages from " + year + " that were not part of any series.");
-		series.setVisibility(RenderFactory.getMinVisibility());
+		series.setVisibility(env.getMinVisibility());
 
 		// add all the messages newer than the cutoff
 		GregorianCalendar cal = new GregorianCalendar();
@@ -513,7 +515,7 @@ public class Catalog {
 	 * RenderFactory
 	 */
 	private boolean isVisible(Series series) {
-		return RenderFactory.isAtLeastVisible(series.getVisibility());
+		return env.isAtLeastVisible(series.getVisibility());
 	}
 
 	/**
@@ -522,7 +524,7 @@ public class Catalog {
 	 * RenderFactory
 	 */
 	private boolean isVisible(Message message) {
-		return RenderFactory.isAtLeastVisible(message.getVisibility());
+		return env.isAtLeastVisible(message.getVisibility());
 	}
 
 	public void sortSeriesByDate() {

@@ -21,9 +21,6 @@ public class RenderFactory {
 	/** The base reference path for all internally referenced pages */
 	private static String baseRef = null;
 
-	/** Minimum level of visibility that should be output */
-	private static AccessLevel minVisibility;
-
 	/** List of all pages that have been created */
 	private static Set<File> createdPages = new HashSet<>();
 
@@ -91,69 +88,6 @@ public class RenderFactory {
 
 	public static void setBaseRef(String baseRef) {
 		RenderFactory.baseRef = baseRef;
-	}
-
-	public static AccessLevel getMinVisibility() {
-		return minVisibility;
-	}
-
-	public static void setMinVisibility(AccessLevel minVisibility) {
-		RenderFactory.minVisibility = minVisibility;
-	}
-
-	/**
-	 * Determines if the specified item is visible under the current visibilty settings
-	 * 
-	 * @param itemVisibility Visibility of item in question
-	 * @return <code>true</code> if the item is visible (can be displayed), <code>false</code> if the item should be
-	 * hidden
-	 */
-	public static boolean isAtLeastVisible(AccessLevel itemVisibility) {
-		AccessLevel effectiveItemVisibility = itemVisibility == null ? AccessLevel.PRIVATE : itemVisibility;
-
-		switch (minVisibility) {
-		case RAW:
-			return true;
-		case PRIVATE:
-			switch (effectiveItemVisibility) {
-			case RAW:
-				return false;
-			default:
-				return true;
-			}
-		case PROTECTED:
-			switch (effectiveItemVisibility) {
-			case RAW:
-			case PRIVATE:
-				return false;
-			default:
-				return true;
-			}
-		case PUBLIC:
-			switch (effectiveItemVisibility) {
-			case RAW:
-			case PRIVATE:
-			case PROTECTED:
-				return false;
-			default:
-				return true;
-			}
-		default:
-			return false;
-		}
-	}
-
-	/**
-	 * Determines if the specified item is visible exactly at the current visibility setting
-	 * 
-	 * @param itemVisibility Visibility of item in question
-	 * @return <code>true</code> if the item is visible (can be displayed), <code>false</code> if the item should be
-	 * hidden
-	 */
-	public static boolean isExactlyVisible(AccessLevel itemVisibility) {
-		AccessLevel effectiveItemVisibility = itemVisibility == null ? AccessLevel.PRIVATE : itemVisibility;
-
-		return effectiveItemVisibility == minVisibility;
 	}
 
 	public static Set<File> getCreatedPages() {

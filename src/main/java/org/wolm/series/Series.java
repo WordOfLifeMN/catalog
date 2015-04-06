@@ -19,7 +19,7 @@ import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.App;
 import org.wolm.catalog.NamedLink;
 import org.wolm.catalog.NamedResourceLink;
-import org.wolm.catalog.RenderFactory;
+import org.wolm.catalog.RenderEnvironment;
 import org.wolm.message.Message;
 
 /**
@@ -274,7 +274,7 @@ public class Series {
 		List<Message> visibleMessages = new ArrayList<>(messages.size());
 
 		for (Message message : messages)
-			if (RenderFactory.isAtLeastVisible(message.getVisibility())) visibleMessages.add(message);
+			if (RenderEnvironment.instance().isAtLeastVisible(message.getVisibility())) visibleMessages.add(message);
 
 		return visibleMessages;
 	}

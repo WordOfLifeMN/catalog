@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.wolm.catalog.App;
 import org.wolm.catalog.PageRender;
-import org.wolm.catalog.RenderFactory;
+import org.wolm.catalog.RenderEnvironment;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesPageRender;
 import org.wolm.series.SeriesUrlRender;
@@ -58,7 +58,7 @@ public class SeriesIndexPageRender extends PageRender {
 			// write out supporting files (i.e. all the series pages)
 			File pageDirectory = pageFile.getParentFile();
 			for (Series series : getSeriesList()) {
-				if (!RenderFactory.isAtLeastVisible(series.getVisibility())) {
+				if (!RenderEnvironment.instance().isAtLeastVisible(series.getVisibility())) {
 					App.logInfo("Skipping non-Public series " + series.getTitle());
 					continue;
 				}
