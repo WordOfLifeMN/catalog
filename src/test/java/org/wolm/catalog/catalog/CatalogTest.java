@@ -12,7 +12,8 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.NamedLink;
-import org.wolm.catalog.RenderEnvironment;
+import org.wolm.catalog.environment.RenderEnvironment;
+import org.wolm.catalog.environment.VisibilityFilter;
 import org.wolm.message.Message;
 import org.wolm.series.Series;
 
@@ -25,12 +26,12 @@ public class CatalogTest {
 		@Before
 		public void beforeEachTest() {
 			catalogUnderTest = new Catalog();
-			RenderEnvironment.instance().setMinVisibility(AccessLevel.PUBLIC);
+			RenderEnvironment.instance().addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
 		}
 
 		@After
 		public void afterEachTest() {
-			RenderEnvironment.instance().setMinVisibility(null);
+			RenderEnvironment.instance().clearFilters();
 		}
 
 		@Test
@@ -38,7 +39,7 @@ public class CatalogTest {
 			Series series = createSeries();
 			catalogUnderTest.add(series);
 
-			assertThat(catalogUnderTest.getSeries()).containsOnly(series);
+			assertThat(catalogUnderTest.getFilteredSeries()).containsOnly(series);
 		}
 
 		@Test
@@ -47,10 +48,10 @@ public class CatalogTest {
 			catalogUnderTest.add(series);
 
 			series.setVisibility(AccessLevel.PRIVATE);
-			assertThat(catalogUnderTest.getSeries()).isEmpty();
+			assertThat(catalogUnderTest.getFilteredSeries()).isEmpty();
 
 			series.setVisibility(AccessLevel.PROTECTED);
-			assertThat(catalogUnderTest.getSeries()).isEmpty();
+			assertThat(catalogUnderTest.getFilteredSeries()).isEmpty();
 		}
 
 		private Series createSeries() {
@@ -68,12 +69,12 @@ public class CatalogTest {
 		@Before
 		public void beforeEachTest() {
 			catalogUnderTest = new Catalog();
-			RenderEnvironment.instance().setMinVisibility(AccessLevel.PUBLIC);
+			RenderEnvironment.instance().addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
 		}
 
 		@After
 		public void afterEachTest() {
-			RenderEnvironment.instance().setMinVisibility(null);
+			RenderEnvironment.instance().clearFilters();
 		}
 
 		@Test

@@ -16,7 +16,7 @@ public class SeriesPageRender extends PageRender {
 
 	@Override
 	public void render(File pageFile) throws Exception {
-		App.logInfo("Writing page for series '" + series.getTitle() + "' to file " + pageFile.getName() + "…");
+		App.logInfo("Writing page for series '" + series.getTitle() + "' to file " + pageFile.getName() + " ...");
 
 		addDataToModel("series", series);
 

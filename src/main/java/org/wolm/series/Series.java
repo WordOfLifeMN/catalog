@@ -19,7 +19,7 @@ import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.App;
 import org.wolm.catalog.NamedLink;
 import org.wolm.catalog.NamedResourceLink;
-import org.wolm.catalog.RenderEnvironment;
+import org.wolm.catalog.environment.RenderEnvironment;
 import org.wolm.message.Message;
 
 /**
@@ -268,15 +268,10 @@ public class Series {
 	}
 
 	/**
-	 * @return Messages for this series that are visible under the current visibility rules
+	 * @return All messages for this series.
 	 */
 	public List<Message> getMessages() {
-		List<Message> visibleMessages = new ArrayList<>(messages.size());
-
-		for (Message message : messages)
-			if (RenderEnvironment.instance().isAtLeastVisible(message.getVisibility())) visibleMessages.add(message);
-
-		return visibleMessages;
+		return messages;
 	}
 
 	public void setMessages(List<Message> messages) {
@@ -285,6 +280,19 @@ public class Series {
 
 	public void addMessage(Message message) {
 		messages.add(message);
+	}
+
+	/**
+	 * @return All messages for this series that should be included according to the current filters
+	 */
+	public List<Message> getFilteredMessages() {
+		RenderEnvironment env = RenderEnvironment.instance();
+
+		List<Message> includedMessages = new ArrayList<>();
+		for (Message message : getMessages())
+			if (env.shouldInclude(this, message)) includedMessages.add(message);
+
+		return includedMessages;
 	}
 
 	/**

@@ -34,7 +34,7 @@ public class ResourcesPageRender extends PageRender {
 
 	@Override
 	public void render(File pageFile) throws Exception {
-		App.logInfo("Writing resources to file '" + pageFile.getName() + "'…");
+		App.logInfo("Writing resources to file '" + pageFile.getName() + "' ...");
 
 		super.render(pageFile);
 	}

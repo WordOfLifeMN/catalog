@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.wolm.catalog.App;
 import org.wolm.catalog.PageRender;
-import org.wolm.catalog.RenderEnvironment;
+import org.wolm.catalog.environment.RenderEnvironment;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesPageRender;
 import org.wolm.series.SeriesUrlRender;
@@ -48,7 +48,7 @@ public class SeriesIndexPageRender extends PageRender {
 
 	@Override
 	public void render(File pageFile) throws Exception {
-		App.logInfo("Writing series index to file '" + pageFile.getName() + "'…");
+		App.logInfo("Writing series index to file '" + pageFile.getName() + "' ...");
 
 		try {
 			App.logIndent();
@@ -58,8 +58,8 @@ public class SeriesIndexPageRender extends PageRender {
 			// write out supporting files (i.e. all the series pages)
 			File pageDirectory = pageFile.getParentFile();
 			for (Series series : getSeriesList()) {
-				if (!RenderEnvironment.instance().isAtLeastVisible(series.getVisibility())) {
-					App.logInfo("Skipping non-Public series " + series.getTitle());
+				if (!RenderEnvironment.instance().shouldInclude(series)) {
+					App.logInfo("Filtering series " + series.getTitle());
 					continue;
 				}
 				PageRender seriesRender = new SeriesPageRender(series);

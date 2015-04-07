@@ -12,7 +12,7 @@ import java.util.Set;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.wolm.catalog.App;
 import org.wolm.catalog.NamedLink;
-import org.wolm.catalog.RenderEnvironment;
+import org.wolm.catalog.environment.RenderEnvironment;
 import org.wolm.google.GoogleHelper;
 import org.wolm.google.GoogleRow;
 import org.wolm.google.GoogleSpreadsheet;
@@ -69,12 +69,12 @@ public class Catalog {
 	}
 
 	/**
-	 * @return All messages that are visible under the current visibility restrictions
+	 * @return All messages that are visible under the current filters
 	 */
 	public List<Message> getMessages() {
 		List<Message> visibleMessages = new ArrayList<>(messages.size());
 		for (Message message : messages)
-			if (isVisible(message)) visibleMessages.add(message);
+			if (env.shouldInclude(message)) visibleMessages.add(message);
 		return visibleMessages;
 	}
 
@@ -85,17 +85,17 @@ public class Catalog {
 	/**
 	 * @return All series regardless of current visibility rules
 	 */
-	public List<Series> getRawSeries() {
+	public List<Series> getSeries() {
 		return series;
 	}
 
 	/**
 	 * @return All series that are visible under the current visibility rules
 	 */
-	public List<Series> getSeries() {
+	public List<Series> getFilteredSeries() {
 		List<Series> visibleSeries = new ArrayList<>(series.size());
 		for (Series s : series)
-			if (env.isExactlyVisible(s.getVisibility())) visibleSeries.add(s);
+			if (env.shouldInclude(s)) visibleSeries.add(s);
 		return visibleSeries;
 	}
 
@@ -313,7 +313,7 @@ public class Catalog {
 		List<Series> allSeries = new ArrayList<>();
 
 		// add the stand-alone messages
-		for (int year = 2000; year < 2020; year++) {
+		for (int year = 2000; year < 2030; year++) {
 			Series series = getStandAloneMessages(year);
 			if (series.getMessageCount() > 0) allSeries.add(series);
 		}
@@ -339,7 +339,7 @@ public class Catalog {
 		series.setTitle("Messages from " + year + " that are not part of a series");
 		series.setId("WOLS-SA" + year);
 		series.setDescription("Messages from " + year + " that were not part of any series.");
-		series.setVisibility(env.getMinVisibility());
+		series.setVisibility(env.getVisibility());
 
 		// add all the messages newer than the cutoff
 		GregorianCalendar cal = new GregorianCalendar();
@@ -349,7 +349,7 @@ public class Catalog {
 			// bail if not in the right year
 			cal.setTime(message.getDate());
 			if (cal.get(Calendar.YEAR) != year) continue;
-			if (!isVisible(message)) continue;
+			if (!env.shouldInclude(message)) continue;
 			if (!message.getSeries().isEmpty()) continue;
 			series.addMessage(message);
 		}
@@ -373,9 +373,9 @@ public class Catalog {
 	public List<Series> getCompletedSeries() {
 		List<Series> serieses = new ArrayList<>();
 
-		for (Series series : getSeries()) {
+		for (Series series : getFilteredSeries()) {
 			if (series.getEndDate() == null) continue;
-			if (!isVisible(series)) continue;
+			if (!env.shouldInclude(series)) continue;
 			if (series.isBooklet()) continue;
 			serieses.add(series);
 		}
@@ -401,9 +401,9 @@ public class Catalog {
 		cal.add(Calendar.DATE, -1 * days);
 		Date cutoff = cal.getTime();
 
-		for (Series series : getSeries()) {
+		for (Series series : getFilteredSeries()) {
 			if (series.getEndDate() != null && series.getEndDate().before(cutoff)) continue;
-			if (!isVisible(series)) continue;
+			if (!env.shouldInclude(series)) continue;
 			if (series.isBooklet()) continue;
 			serieses.add(series);
 		}
@@ -428,6 +428,7 @@ public class Catalog {
 		final Series series = new Series();
 		series.setTitle("Recent Messages from Word of Life Ministries");
 		series.setDescription("Recent messages from the last " + days + " days.");
+		series.setVisibility(env.getVisibility());
 
 		// find cutoff
 		GregorianCalendar cal = new GregorianCalendar();
@@ -438,7 +439,7 @@ public class Catalog {
 		for (Message message : orderedMessages) {
 			if (message.getDate() == null) break; // nulls are sorted to end
 			if (message.getDate().before(cutoff)) break;
-			if (!isVisible(message)) continue;
+			if (!env.shouldInclude(message)) continue;
 			series.addMessage(message);
 		}
 
@@ -457,8 +458,8 @@ public class Catalog {
 		// find all resources
 
 		// find all resources from series, which will include messages in those series
-		for (Series series : getSeries()) {
-			if (!isVisible(series)) continue;
+		for (Series series : getFilteredSeries()) {
+			if (!env.shouldInclude(series)) continue;
 			for (NamedLink resource : series.getResources(true)) {
 				// if (!resource.isDocumentForDownload()) continue;
 				resources.add(resource);
@@ -468,7 +469,7 @@ public class Catalog {
 		// find resources from stand-alone messages that are not part of any series
 		for (Message message : getMessages()) {
 			if (!message.getSeries().isEmpty()) continue;
-			if (!isVisible(message)) continue;
+			if (!env.shouldInclude(message)) continue;
 			for (NamedLink resource : message.getResources()) {
 				// if (!resource.isDocumentForDownload()) continue;
 				resources.add(resource);
@@ -493,12 +494,12 @@ public class Catalog {
 		List<NamedLink> booklets = new ArrayList<>();
 
 		// find booklets of all series, regardless of visibility
-		for (Series series : getRawSeries()) {
+		for (Series series : getSeries()) {
 			for (NamedLink booklet : series.getBooklets()) {
 				if (!booklet.isDocumentForDownload()) continue;
 				// if the series is not visible, then break the reference back to it by converting it from a
 				// NamedResourceLink to just a NamedLink
-				if (!isVisible(series)) {
+				if (!env.shouldInclude(series)) {
 					booklet = new NamedLink(booklet);
 				}
 				booklets.add(booklet);
@@ -507,24 +508,6 @@ public class Catalog {
 
 		Collections.sort(booklets, NamedLink.byTitleName);
 		return booklets;
-	}
-
-	/**
-	 * @param series A series
-	 * @return {@code true} if the series is visible according to the current visibility level defined in the
-	 * RenderFactory
-	 */
-	private boolean isVisible(Series series) {
-		return env.isAtLeastVisible(series.getVisibility());
-	}
-
-	/**
-	 * @param message A message
-	 * @return {@code true} if the message is visible according to the current visibility level defined in the
-	 * RenderFactory
-	 */
-	private boolean isVisible(Message message) {
-		return env.isAtLeastVisible(message.getVisibility());
 	}
 
 	public void sortSeriesByDate() {

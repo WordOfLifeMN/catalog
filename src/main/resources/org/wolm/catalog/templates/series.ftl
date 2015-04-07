@@ -85,7 +85,7 @@
 
 <table width="100%">	
 	<#-- messages -->
-	<#list series.messages as message>
+	<#list series.filteredMessages as message>
 		<tr>
 			<td class="message">
 				<div class="title" title="${message.description!}"

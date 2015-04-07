@@ -14,6 +14,9 @@ import org.wolm.catalog.catalog.BookletsPageRender;
 import org.wolm.catalog.catalog.Catalog;
 import org.wolm.catalog.catalog.ResourcesPageRender;
 import org.wolm.catalog.catalog.SeriesIndexPageRender;
+import org.wolm.catalog.environment.RenderEnvironment;
+import org.wolm.catalog.environment.TypeFilter;
+import org.wolm.catalog.environment.VisibilityFilter;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesPageRender;
 
@@ -100,8 +103,6 @@ public class App {
 			// not uploading to S3: the baseref is the file directory we are outputting to
 			RenderFactory.setBaseRef("file://" + outputFileDir.toString());
 		}
-
-		env.setMinVisibility(AccessLevel.PUBLIC);
 	}
 
 	public boolean isHelpRequested() {
@@ -151,7 +152,7 @@ public class App {
 	 */
 	public void catalog() throws Exception {
 
-		logInfo("Catalog downloading from Google…");
+		logInfo("Catalog downloading from Google ...");
 		Catalog catalog = new Catalog();
 		catalog.populateFromGoogleSpreadsheets();
 
@@ -167,7 +168,14 @@ public class App {
 	}
 
 	private void buildRecentMessages(Catalog catalog) throws Exception {
-		logInfo("Writing series to file 'recent-messages.html'…");
+		logInfo("Writing recent messages to 'recent-messages.html' ...");
+
+		// prepare environment
+		env.clearFilters();
+		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
+		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+
+		// find messages
 		Series recentMessages = catalog.getRecentMessages(60);
 		PageRender pageRender = new SeriesPageRender(recentMessages);
 		File outputFile = new File(outputFileDir, "recent-messages.html");
@@ -175,6 +183,14 @@ public class App {
 	}
 
 	private void buildRecentSeries(Catalog catalog) throws Exception {
+		logInfo("Writing recent series to 'recent-series.html' ...");
+
+		// prepare environment
+		env.clearFilters();
+		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
+		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+
+		// find series
 		List<Series> recentSeries = catalog.getRecentSeries(60);
 		PageRender pageRender = new SeriesIndexPageRender(recentSeries);
 		((SeriesIndexPageRender) pageRender).setIndexTitle("Recent Series from Word of Life Ministries");
@@ -183,6 +199,13 @@ public class App {
 	}
 
 	private void buildPublicCatalog(Catalog catalog) throws Exception {
+		logInfo("Writing all public series to 'catalog.html' ...");
+
+		// prepare environment
+		env.clearFilters();
+		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
+		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+
 		catalog.sortSeriesByDate();
 		PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeriesWithStandAloneMessages());
 		((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog");
@@ -198,6 +221,13 @@ public class App {
 	}
 
 	private void buildHandoutsAndResources(Catalog catalog) throws Exception {
+		logInfo("Writing handouts and resources to 'resources.html' ...");
+
+		// prepare environment
+		env.clearFilters();
+		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
+		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+
 		List<NamedLink> resources = catalog.getHandoutsAndResources();
 		PageRender pageRender = new ResourcesPageRender(resources);
 		File outputFile = new File(outputFileDir, "resources.html");
@@ -205,6 +235,13 @@ public class App {
 	}
 
 	private void buildBooklets(Catalog catalog) throws Exception {
+		logInfo("Writing booklets to 'booklets.html' ...");
+
+		// prepare environment
+		env.clearFilters();
+		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
+		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+
 		List<NamedLink> resources = catalog.getBooklets();
 		PageRender pageRender = new BookletsPageRender(resources);
 		File outputFile = new File(outputFileDir, "booklets.html");
@@ -212,28 +249,27 @@ public class App {
 	}
 
 	private void buildCovenantPartnerCatalog(Catalog catalog) throws Exception {
-		catalog.sortSeriesByDate();
-		try {
-			env.setMinVisibility(AccessLevel.PROTECTED);
+		logInfo("Writing all protected series to 'catalog-cpartner.html' ...");
 
-			PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
-			((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog For Covenant Partners");
-			((SeriesIndexPageRender) pageRender)
-					.setIndexDescription("<table><tr>"
-							+ "<td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/Covenant+Partner+Thumb.jpg' width='164'/></td>"
-							+ "<td><span style=\"color:maroon;font-weight:bold;\">Please do not share access to this page with anyone.</span><br/>"
-							+ "Any questions about access to this page should be directed to Pastor Vern or Kevin Murray.<br/>"
-							+ "Many of these messages may be rough, unedited, or have other quality problems, "
-							+ "and we are not prepared to release them to the public <em>yet</em>. However, there may also be "
-							+ "resources on this page that contain sensitive information that we may never choose to "
-							+ "release publicly, and we appreciate your discretion as covenant partners."
-							+ "</td></table>");
-			File outputFile = new File(outputFileDir, "catalog-cpartner.html");
-			pageRender.render(outputFile);
-		}
-		finally {
-			env.setMinVisibility(AccessLevel.PUBLIC);
-		}
+		// prepare environment
+		env.clearFilters();
+		env.addFilter(new VisibilityFilter(AccessLevel.PROTECTED));
+		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+
+		catalog.sortSeriesByDate();
+		PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
+		((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog For Covenant Partners");
+		((SeriesIndexPageRender) pageRender)
+				.setIndexDescription("<table><tr>"
+						+ "<td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/Covenant+Partner+Thumb.jpg' width='164'/></td>"
+						+ "<td><span style=\"color:maroon;font-weight:bold;\">Please do not share access to this page with anyone.</span><br/>"
+						+ "Any questions about access to this page should be directed to Pastor Vern or Kevin Murray.<br/>"
+						+ "Many of these messages may be rough, unedited, or have other quality problems, "
+						+ "and we are not prepared to release them to the public <em>yet</em>. However, there may also be "
+						+ "resources on this page that contain sensitive information that we may never choose to "
+						+ "release publicly, and we appreciate your discretion as covenant partners." + "</td></table>");
+		File outputFile = new File(outputFileDir, "catalog-cpartner.html");
+		pageRender.render(outputFile);
 	}
 
 	/** Upload all pages that have been created to S3 (if requested) */
@@ -245,7 +281,7 @@ public class App {
 		Bucket catalogBucket = s3Helper.getBucket(getS3BucketName());
 		if (catalogBucket == null) throw new Exception("Cannot find the catalog bucket: '" + getS3BucketName() + "'");
 
-		logInfo("Uploading all generated pages to the " + getS3BucketName() + " S3 bucket…");
+		logInfo("Uploading all generated pages to the " + getS3BucketName() + " S3 bucket ...");
 		List<Future<Boolean>> futures = new ArrayList<>();
 		ExecutorService pool = Executors.newFixedThreadPool(8);
 		for (File page : RenderFactory.getCreatedPages()) {
