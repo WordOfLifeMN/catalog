@@ -46,6 +46,14 @@ public class SeriesIndexPageRender extends PageRender {
 		addDataToModel("description", indexDescription);
 	}
 
+	public String getDepartment() {
+		return (String) getDataFromModel("department");
+	}
+
+	public void setDepartment(String department) {
+		addDataToModel("department", department);
+	}
+
 	@Override
 	public void render(File pageFile) throws Exception {
 		App.logInfo("Writing series index to file '" + pageFile.getName() + "' ...");
@@ -62,7 +70,8 @@ public class SeriesIndexPageRender extends PageRender {
 					App.logInfo("Filtering series " + series.getTitle());
 					continue;
 				}
-				PageRender seriesRender = new SeriesPageRender(series);
+				SeriesPageRender seriesRender = new SeriesPageRender(series);
+				seriesRender.setDepartment(getDepartment());
 				File seriesFile = new File(pageDirectory, new SeriesUrlRender(series).getFileName());
 				seriesRender.render(seriesFile);
 			}

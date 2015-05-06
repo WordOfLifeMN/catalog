@@ -1,3 +1,10 @@
+<style>
+	<#if department! == 'CORE'>
+		a { color: #840; }
+		a:hover { color: #c70; }
+	</#if>
+</style>
+
 <h1>${title!}</h1>
 <#if description??><p>${description}</p></#if>
 <ul>

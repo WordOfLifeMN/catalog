@@ -253,9 +253,9 @@ public class App {
 		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
 
 		catalog.sortSeriesByDate();
-		PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
-		((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog For Covenant Partners");
-		((SeriesIndexPageRender) pageRender).setIndexDescription(getCovenantPartnerIndexDescription());
+		SeriesIndexPageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
+		pageRender.setIndexTitle("Word of Life Ministries Catalog For Covenant Partners");
+		pageRender.setIndexDescription(getCovenantPartnerIndexDescription());
 		File outputFile = new File(outputFileDir, "catalog-cpartner.html");
 		pageRender.render(outputFile);
 	}
@@ -269,9 +269,10 @@ public class App {
 		env.addFilter(new TypeFilter().withType("C.O.R.E."));
 
 		catalog.sortSeriesByDate();
-		PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
-		((SeriesIndexPageRender) pageRender).setIndexTitle("C.O.R.E. Programs");
-		((SeriesIndexPageRender) pageRender).setIndexDescription(getCoreIndexDescription());
+		SeriesIndexPageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
+		pageRender.setIndexTitle("C.O.R.E. Programs");
+		pageRender.setIndexDescription(getCoreIndexDescription());
+		pageRender.setDepartment("CORE");
 		File outputFile = new File(outputFileDir, "core.html");
 		pageRender.render(outputFile);
 	}

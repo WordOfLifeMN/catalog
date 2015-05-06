@@ -64,7 +64,11 @@
 		background-color: #3e713f;
 		color: white;	
 	}
-	
+	<#if department! == 'CORE'>
+		td.message { border: 2px solid #420; }
+		td.message div.title.highlight { background-color: #840; }
+	</#if>
+
 	td.resources {
 		border: 2px solid #bf9c03;
 		border-radius: 5px; 
