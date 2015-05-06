@@ -1,6 +1,7 @@
 #!/bin/bash
 
 recompile=true
+recompile=
 artifactName=wolm-catalog
 
 realpath() {

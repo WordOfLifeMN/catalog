@@ -164,6 +164,8 @@ public class App {
 
 		buildCovenantPartnerCatalog(catalog);
 
+		buildCORECatalog(catalog);
+
 		logInfo("Catalog file generation is complete");
 	}
 
@@ -209,13 +211,7 @@ public class App {
 		catalog.sortSeriesByDate();
 		PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeriesWithStandAloneMessages());
 		((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog");
-		((SeriesIndexPageRender) pageRender)
-				.setIndexDescription("<table><tr>"
-						+ "<td><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/remix.jpeg' width='128'/></td>"
-						+ "<td><h3>We&apos;re currently re-editing and bringing the past 10 years "
-						+ "of messages and study materials up to date. "
-						+ "New content will be added weekly through the winter of 2014-2015, so check back frequently!</h3>"
-						+ "</td></table>");
+		((SeriesIndexPageRender) pageRender).setIndexDescription(getCatalogIndexDescription());
 		File outputFile = new File(outputFileDir, "catalog.html");
 		pageRender.render(outputFile);
 	}
@@ -259,16 +255,24 @@ public class App {
 		catalog.sortSeriesByDate();
 		PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
 		((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog For Covenant Partners");
-		((SeriesIndexPageRender) pageRender)
-				.setIndexDescription("<table><tr>"
-						+ "<td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/Covenant+Partner+Thumb.jpg' width='164'/></td>"
-						+ "<td><span style=\"color:maroon;font-weight:bold;\">Please do not share access to this page with anyone.</span><br/>"
-						+ "Any questions about access to this page should be directed to Pastor Vern or Kevin Murray.<br/>"
-						+ "Many of these messages may be rough, unedited, or have other quality problems, "
-						+ "and we are not prepared to release them to the public <em>yet</em>. However, there may also be "
-						+ "resources on this page that contain sensitive information that we may never choose to "
-						+ "release publicly, and we appreciate your discretion as covenant partners." + "</td></table>");
+		((SeriesIndexPageRender) pageRender).setIndexDescription(getCovenantPartnerIndexDescription());
 		File outputFile = new File(outputFileDir, "catalog-cpartner.html");
+		pageRender.render(outputFile);
+	}
+
+	private void buildCORECatalog(Catalog catalog) throws Exception {
+		logInfo("Writing all public C.O.R.E. series to 'core.html' ...");
+
+		// prepare environment
+		env.clearFilters();
+		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
+		env.addFilter(new TypeFilter().withType("C.O.R.E."));
+
+		catalog.sortSeriesByDate();
+		PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
+		((SeriesIndexPageRender) pageRender).setIndexTitle("C.O.R.E. Programs");
+		((SeriesIndexPageRender) pageRender).setIndexDescription(getCoreIndexDescription());
+		File outputFile = new File(outputFileDir, "core.html");
 		pageRender.render(outputFile);
 	}
 
@@ -360,7 +364,72 @@ public class App {
 			s3Helper.uploadPublicFile(bucket, key, file);
 			return Boolean.TRUE;
 		}
-
 	}
 
+	private String getCatalogIndexDescription() {
+		StringBuilder b = new StringBuilder();
+
+		b.append("<table>");
+		b.append("  <tr>");
+		b.append("    <td><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/remix.jpeg' width='128'/></td>");
+		b.append("    <td>");
+		b.append("      <h3>");
+		b.append("        We&apos;re currently re-editing and bringing the past 10 years of messages and study materials ");
+		b.append("        up to date. New content will be added weekly through the winter of 2014-2015, ");
+		b.append("        so check back frequently!");
+		b.append("      </h3>");
+		b.append("    </td>");
+		b.append("  </tr>");
+		b.append("</table>");
+
+		return b.toString();
+	}
+
+	private String getCovenantPartnerIndexDescription() {
+		StringBuilder b = new StringBuilder();
+
+		b.append("<table>");
+		b.append("  <tr>");
+		b.append("    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/Covenant+Partner+Thumb.jpg' width='164'/></td>");
+		b.append("    <td>");
+		b.append("      <p style=\"color:maroon;font-weight:bold;\">Please do not share access to this page with anyone.</p>");
+		b.append("      <p>Any questions about access to this page should be directed to Pastor Vern or Kevin Murray.</p>");
+		b.append("      <p>");
+		b.append("        Many of these messages may be rough, unedited, or have other quality problems, ");
+		b.append("        and we are not prepared to release them to the public <em>yet</em>. However, there may also be ");
+		b.append("        resources on this page that contain sensitive information that we may never choose to ");
+		b.append("        release publicly, and we appreciate your discretion as covenant partners.");
+		b.append("      </p>");
+		b.append("    </td>");
+		b.append("  </tr>");
+		b.append("</table>");
+
+		return b.toString();
+	}
+
+	private String getCoreIndexDescription() {
+		StringBuilder b = new StringBuilder();
+
+		b.append("<table>");
+		b.append("  <tr>");
+		b.append("    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/corestaff.jpg' width='164'/></td>");
+		b.append("    <td>");
+		b.append("      <p>C.O.R.E.: Center of Our Relationship Experiences</p>");
+		b.append("      <p>");
+		b.append("        Mary Peltz is a certified counselor with A.A.C.C. and is a Co-Pastor at Word of Life Ministries ");
+		b.append("        which is affiliated and licensed through ");
+		b.append("        <a href=\"http://www.afcminternational.org\" target=\"_blank\">A.F.C.M. International</a>.");
+		b.append("      </p>");
+		b.append("      <p>");
+		b.append("        Mary specializes in communication skills and restoring relationships and families. ");
+		b.append("        She administrates C.O.R.E. programs which is a \"Freedom From\" program that brings help to ");
+		b.append("        schools, group homes and staff situations. She is currently facilitating C.O.R.E. Programs at ");
+		b.append("        the jails in the Northern Minnesota areas.");
+		b.append("      </p>");
+		b.append("    </td>");
+		b.append("  </tr>");
+		b.append("</table>");
+
+		return b.toString();
+	}
 }
