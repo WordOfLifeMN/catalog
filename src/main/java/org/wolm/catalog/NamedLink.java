@@ -39,23 +39,23 @@ public class NamedLink {
 		if (s.contains("|")) {
 			int pos = s.indexOf('|');
 			name = s.substring(0, pos).trim();
-			link = new URL(s.substring(pos + 1).trim());
+			link = new URL(normalize(s.substring(pos + 1).trim()));
 		}
 		else if (s.contains("(") && s.contains(")")) {
 			int open = s.indexOf('(');
 			int close = s.indexOf(')', open);
 			name = s.substring(open + 1, close).trim();
-			link = new URL(s.substring(0, open).trim());
+			link = new URL(normalize(s.substring(0, open).trim()));
 		}
 		else if (s.contains("<") && s.contains(">")) {
 			int open = s.indexOf('<');
 			int close = s.indexOf('>', open);
 			name = s.substring(open + 1, close).trim();
-			link = new URL(s.substring(0, open).trim());
+			link = new URL(normalize(s.substring(0, open).trim()));
 		}
 		else {
-			link = new URL(s);
-			name = link.getPath().replaceFirst(".*/", "").replace('+', ' ').replaceFirst("\\.[^\\.]*$", "");
+			link = new URL(normalize(s));
+			name = link.getPath().replaceFirst(".*/", "").replace("%20", " ").replaceFirst("\\.[^\\.]*$", "");
 		}
 	}
 
@@ -76,7 +76,9 @@ public class NamedLink {
 		String path = link.getPath();
 
 		if (isDocumentForDownload()) {
-			return path.substring(path.lastIndexOf('/') + 1); // works if lastIndexOf() returns -1
+			String fileName = path.substring(path.lastIndexOf('/') + 1); // works if lastIndexOf() returns -1
+			fileName = fileName.replace("%20", " ");
+			return fileName;
 		}
 
 		if (link.getHost().contains("youtu")) return "YouTube video";
@@ -123,6 +125,26 @@ public class NamedLink {
 		if (getClass() != obj.getClass()) return false;
 		NamedLink other = (NamedLink) obj;
 		return Objects.equals(link, other.link) && Objects.equals(name, other.name);
+	}
+
+	/**
+	 * Given a string, will examine it and make any corrections necessary to make it more friendly or consistent for
+	 * display.
+	 * <ul>
+	 * <li>If this is an Amazon string, convert https:// to http://
+	 * <li>If this is an Amazon string, covert '+' to '%20' for friendlier downloads. This allows "Names+of+God.pdf" to
+	 * download as "Names of God.pdf" instead of "Names+of+God.pdf"
+	 * </ul>
+	 * 
+	 * @param s Raw URL to a link
+	 * @return Cleaned up URL
+	 */
+	private String normalize(String s) {
+		if (s.contains("amazonaws")) {
+			if (s.startsWith("https://")) s = "http://" + s.substring("https://".length());
+			s = s.replace("+", "%20");
+		}
+		return s;
 	}
 
 	@Override
