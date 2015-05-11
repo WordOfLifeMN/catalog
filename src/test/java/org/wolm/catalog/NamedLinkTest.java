@@ -21,7 +21,7 @@ public class NamedLinkTest {
 		assertThat(
 				new NamedLink(
 						"https://s3-us-west-2.amazonaws.com/wordoflife.mn.audio/StudyGuide/Pastors+1990+Dream.pdf")
-						.getFileName()).isEqualTo("Pastors+1990+Dream.pdf");
+						.getFileName()).isEqualTo("Pastors 1990 Dream.pdf");
 	}
 
 	@Test
