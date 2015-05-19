@@ -3,6 +3,7 @@ package org.wolm.catalog;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -18,6 +19,7 @@ import org.wolm.catalog.environment.RenderEnvironment;
 import org.wolm.catalog.environment.TypeFilter;
 import org.wolm.catalog.environment.VisibilityFilter;
 import org.wolm.series.Series;
+import org.wolm.series.SeriesHelper;
 import org.wolm.series.SeriesPageRender;
 
 import com.amazonaws.services.s3.model.Bucket;
@@ -195,7 +197,7 @@ public class App {
 		// find series
 		List<Series> recentSeries = catalog.getRecentSeries(60);
 		PageRender pageRender = new SeriesIndexPageRender(recentSeries);
-		((SeriesIndexPageRender) pageRender).setIndexTitle("Recent Series from Word of Life Ministries");
+		pageRender.setTitle("Recent Series from Word of Life Ministries");
 		File outputFile = new File(outputFileDir, "recent-series.html");
 		pageRender.render(outputFile);
 	}
@@ -208,9 +210,15 @@ public class App {
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
 		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
 
-		catalog.sortSeriesByDate();
-		PageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeriesWithStandAloneMessages());
-		((SeriesIndexPageRender) pageRender).setIndexTitle("Word of Life Ministries Catalog");
+		// get all completed and in-progress series plus all stand-alone messages
+		List<Series> catalogSeries = catalog.getCompletedSeries();
+		catalogSeries.addAll(catalog.getInProgressSeries());
+		catalogSeries.addAll(catalog.getStandAloneMessagesInSeries());
+		catalogSeries = SeriesHelper.withoutDuplicates(catalogSeries);
+		Collections.sort(catalogSeries, Series.byDate);
+
+		PageRender pageRender = new SeriesIndexPageRender(catalogSeries);
+		pageRender.setTitle("Word of Life Ministries Catalog");
 		((SeriesIndexPageRender) pageRender).setIndexDescription(getCatalogIndexDescription());
 		File outputFile = new File(outputFileDir, "catalog.html");
 		pageRender.render(outputFile);
@@ -226,6 +234,7 @@ public class App {
 
 		List<NamedLink> resources = catalog.getHandoutsAndResources();
 		PageRender pageRender = new ResourcesPageRender(resources);
+		pageRender.setTitle("Handouts and Resources");
 		File outputFile = new File(outputFileDir, "resources.html");
 		pageRender.render(outputFile);
 	}
@@ -240,6 +249,7 @@ public class App {
 
 		List<NamedLink> resources = catalog.getBooklets();
 		PageRender pageRender = new BookletsPageRender(resources);
+		pageRender.setTitle("Booklets");
 		File outputFile = new File(outputFileDir, "booklets.html");
 		pageRender.render(outputFile);
 	}
@@ -252,9 +262,14 @@ public class App {
 		env.addFilter(new VisibilityFilter(AccessLevel.PROTECTED));
 		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
 
-		catalog.sortSeriesByDate();
-		SeriesIndexPageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
-		pageRender.setIndexTitle("Word of Life Ministries Catalog For Covenant Partners");
+		// get all completed and in-progress series
+		List<Series> catalogSeries = catalog.getCompletedSeries();
+		catalogSeries.addAll(catalog.getInProgressSeries());
+		catalogSeries = SeriesHelper.withoutDuplicates(catalogSeries);
+		Collections.sort(catalogSeries, Series.byDate);
+
+		SeriesIndexPageRender pageRender = new SeriesIndexPageRender(catalogSeries);
+		pageRender.setTitle("Covenant Partner Catalog");
 		pageRender.setIndexDescription(getCovenantPartnerIndexDescription());
 		File outputFile = new File(outputFileDir, "catalog-cpartner.html");
 		pageRender.render(outputFile);
@@ -268,9 +283,15 @@ public class App {
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
 		env.addFilter(new TypeFilter().withType("C.O.R.E."));
 
-		catalog.sortSeriesByDate();
-		SeriesIndexPageRender pageRender = new SeriesIndexPageRender(catalog.getCompletedSeries());
-		pageRender.setIndexTitle("C.O.R.E. Programs");
+		// get all completed and in-progress series
+		List<Series> coreSeries = catalog.getCompletedSeries();
+		coreSeries.addAll(catalog.getInProgressSeries());
+		coreSeries = SeriesHelper.withoutDuplicates(coreSeries);
+		Collections.sort(coreSeries, Series.byDate);
+
+		// build the HTML page
+		SeriesIndexPageRender pageRender = new SeriesIndexPageRender(coreSeries);
+		pageRender.setTitle("C.O.R.E. Programs");
 		pageRender.setIndexDescription(getCoreIndexDescription());
 		pageRender.setDepartment("CORE");
 		File outputFile = new File(outputFileDir, "core.html");
@@ -376,8 +397,7 @@ public class App {
 		b.append("    <td>");
 		b.append("      <h3>");
 		b.append("        We&apos;re currently re-editing and bringing the past 10 years of messages and study materials ");
-		b.append("        up to date. New content will be added weekly through the winter of 2014-2015, ");
-		b.append("        so check back frequently!");
+		b.append("        up to date. New content will be added throughout 2015, so check back frequently!");
 		b.append("      </h3>");
 		b.append("    </td>");
 		b.append("  </tr>");

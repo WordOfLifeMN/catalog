@@ -12,6 +12,7 @@ public class SeriesPageRender extends PageRender {
 	public SeriesPageRender(Series series) {
 		super("series");
 		this.series = series;
+		setTitle(series.getTitle());
 	}
 
 	public String getDepartment() {

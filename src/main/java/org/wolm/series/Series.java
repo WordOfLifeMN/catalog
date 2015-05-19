@@ -310,7 +310,7 @@ public class Series {
 	}
 
 	/**
-	 * Determins if this series is valid or not
+	 * Determines if this series is valid or not
 	 * 
 	 * @param s Series to validate
 	 * @param seriesIds List of IDs of all the series. If this series' ID is in the list, then it is not unique and

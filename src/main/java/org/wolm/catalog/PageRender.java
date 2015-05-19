@@ -45,6 +45,14 @@ public abstract class PageRender {
 		addDataToModel("baseRef", RenderFactory.getBaseRef());
 	}
 
+	public String getTitle() {
+		return (String) getDataFromModel("title");
+	}
+
+	public void setTitle(String title) {
+		addDataToModel("title", title);
+	}
+
 	/**
 	 * Retrieves the current value of a model data element
 	 * 
@@ -87,6 +95,7 @@ public abstract class PageRender {
 
 		Map<String, String> content = prepareContent();
 		content.put("Content", out.toString());
+		content.put("Title", (String) getDataFromModel("title"));
 
 		// insert the content
 		page.substituteVariables(content);
@@ -104,6 +113,7 @@ public abstract class PageRender {
 		// read the Weebly template page
 		WeeblyPage page = new WeeblyPage(RenderFactory.getWeeblyPageTemplateUrl());
 		page.preparePageForRemoteHosting();
+		page.addTitleBreadcrumb("${Title}");
 
 		return page;
 	}

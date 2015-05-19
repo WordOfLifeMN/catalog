@@ -30,14 +30,6 @@ public class SeriesIndexPageRender extends PageRender {
 		addDataToModel("seriesList", seriesList);
 	}
 
-	public String getIndexTitle() {
-		return (String) getDataFromModel("title");
-	}
-
-	public void setIndexTitle(String indexTitle) {
-		addDataToModel("title", indexTitle);
-	}
-
 	public String getIndexDescription() {
 		return (String) getDataFromModel("description");
 	}

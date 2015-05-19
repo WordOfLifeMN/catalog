@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
-import org.wolm.weebly.WeeblyPage;
 
 @RunWith(Enclosed.class)
 public class WeeblyPageTest {
@@ -81,6 +80,21 @@ public class WeeblyPageTest {
 							"type='text/css' href='//cdn1.editmysite.com/editor/libraries/fancybox/fancybox.css?1397603321' />",
 							"</head>", "<body>", "</body>", "</html>" }));
 		}
+	}
+
+	public static class InsertTitleBreadcrumb {
+
+		@Test
+		public void breadcrumbShouldBeInserted() throws Exception {
+			WeeblyPage page = new WeeblyPage(asList(new String[] { "<html>", "<head>", "<title>Hi</title>", "</head>",
+					"<body>", "</body>", "</html>" }));
+
+			page.addTitleBreadcrumb("Ho");
+
+			assertThat(page.getLines().size()).isEqualTo(7);
+			assertThat(page.getLines().get(2)).contains("<title>Ho - Hi</title>");
+		}
+
 	}
 
 	public static class PreparePageForRemoteHosting {

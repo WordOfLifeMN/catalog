@@ -3,6 +3,7 @@
 		a { color: #840; }
 		a:hover { color: #c70; }
 	</#if>
+	span.inprogress { color: #999; font-style: italic; }
 </style>
 
 <h1>${title!}</h1>
@@ -19,6 +20,7 @@
 					<#if series.endDate?? && series.endDate?date != series.startDate?date>
 						- ${series.endDate?date}
 					</#if>
+					<#if !(series.endDate??)><span class="inprogress"> -more to come!</span></#if>
 				</#if>
 			)
 			<#-- (${series.startDate?date?string.iso} - ${series.endDate?date?string.iso}) -->

@@ -304,22 +304,17 @@ public class Catalog {
 	}
 
 	/**
-	 * Gets a list of all non-series messages by year and concatenates all completed series
+	 * Gets a list of all non-series messages and returns them wrapped in series. Currently, loose messages are gathered
+	 * by year and one series is returned per year.
 	 * 
-	 * @return List of series, starting with years with stand-alone messages followed by all the completed series,
-	 * oldest first
+	 * @return List of series representing all loose, stand-alone messages oldest first
 	 */
-	public List<Series> getCompletedSeriesWithStandAloneMessages() {
+	public List<Series> getStandAloneMessagesInSeries() {
 		List<Series> allSeries = new ArrayList<>();
-
-		// add the stand-alone messages
 		for (int year = 2000; year < 2030; year++) {
 			Series series = getStandAloneMessages(year);
 			if (series.getMessageCount() > 0) allSeries.add(series);
 		}
-
-		// add the completed
-		allSeries.addAll(getCompletedSeries());
 		return allSeries;
 	}
 
@@ -375,6 +370,27 @@ public class Catalog {
 
 		for (Series series : getFilteredSeries()) {
 			if (series.getEndDate() == null) continue;
+			if (!env.shouldInclude(series)) continue;
+			if (series.isBooklet()) continue;
+			serieses.add(series);
+		}
+
+		return serieses;
+	}
+
+	/**
+	 * Gets a list of all series that are in progress (have a non-<code>null</code> start date but a {@code null} end
+	 * date)
+	 * <p>
+	 * Honors the global minimum visibility
+	 * 
+	 * @return List of all in progress series, sorted in date order (oldest first)
+	 */
+	public List<Series> getInProgressSeries() {
+		List<Series> serieses = new ArrayList<>();
+
+		for (Series series : getFilteredSeries()) {
+			if (series.getEndDate() != null) continue;
 			if (!env.shouldInclude(series)) continue;
 			if (series.isBooklet()) continue;
 			serieses.add(series);

@@ -192,6 +192,30 @@ public class WeeblyPage {
 	}
 
 	/**
+	 * Adds a new bread-crumb to the title of this page.
+	 * 
+	 * A Weebly page has a title that consists of reverse bread-crumbs. Specifically something like
+	 * "Media Catalog - Word of Life Ministries". This method will add a new bread-crumb prefix to the title
+	 * 
+	 * @param breadcrumb Bread-crumb to add to the beginning of the title
+	 */
+	public void addTitleBreadcrumb(String breadcrumb) {
+		boolean inHead = false;
+		for (ListIterator<String> iter = lines.listIterator(); iter.hasNext();) {
+			String line = iter.next();
+
+			// detect when we are entering the head
+			if (line.matches("\\s*<head>\\s*")) inHead = true;
+			if (!inHead) continue;
+
+			// look for the title and insert the new bread-crumb
+			if (!line.matches("\\s*<title>.*")) continue;
+			iter.set(line.replace("<title>", "<title>" + breadcrumb + " - "));
+			break;
+		}
+	}
+
+	/**
 	 * Converts all relative references in one line to absolute
 	 * 
 	 * @param lineToConvert Line with possible relative href references

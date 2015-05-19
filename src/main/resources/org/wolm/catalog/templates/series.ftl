@@ -1,3 +1,7 @@
+<style>
+	span.inprogress { color: #999; font-style: italic; }
+</style>
+
 <h1>${series.title}</h1>
 <table>
 	<#-- cover art and description -->
@@ -147,6 +151,13 @@
 			</td>
 		</tr>
 	</#list>
+	
+	<#if series.startDate?? && !(series.endDate??)>
+		<tr><td>
+			<span class="inprogress">- there is still more to come in this series!</span>
+		</td></tr>
+	</#if>
+	
 	<#if series.resources?has_content>
 		<tr>
 			<td>&nbsp;</td>
