@@ -54,4 +54,4 @@ startTime=$(date +%s)
 java -jar "$jar" --out=/Users/wolm/tmp --upload "$@"
 
 echo "Completed in $(( $(date +%s) - $startTime )) seconds"
-sleep 5
+#sleep 5
