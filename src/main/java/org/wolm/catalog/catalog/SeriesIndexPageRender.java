@@ -59,7 +59,7 @@ public class SeriesIndexPageRender extends PageRender {
 			File pageDirectory = pageFile.getParentFile();
 			for (Series series : getSeriesList()) {
 				if (!RenderEnvironment.instance().shouldInclude(series)) {
-					App.logInfo("Filtering series " + series.getTitle());
+					App.logInfo("Filtering out series " + series.getTitle());
 					continue;
 				}
 				SeriesPageRender seriesRender = new SeriesPageRender(series);

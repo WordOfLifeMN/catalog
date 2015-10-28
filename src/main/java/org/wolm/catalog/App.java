@@ -213,7 +213,8 @@ public class App {
 		// get all completed and in-progress series plus all stand-alone messages
 		List<Series> catalogSeries = catalog.getCompletedSeries();
 		catalogSeries.addAll(catalog.getInProgressSeries());
-		catalogSeries.addAll(catalog.getStandAloneMessagesInSeries());
+		// catalogSeries.addAll(catalog.getStandAloneMessagesInSeriesByYear());
+		catalogSeries.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
 		catalogSeries = SeriesHelper.withoutDuplicates(catalogSeries);
 		Collections.sort(catalogSeries, Series.byDate);
 
@@ -286,6 +287,7 @@ public class App {
 		// get all completed and in-progress series
 		List<Series> coreSeries = catalog.getCompletedSeries();
 		coreSeries.addAll(catalog.getInProgressSeries());
+		coreSeries.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
 		coreSeries = SeriesHelper.withoutDuplicates(coreSeries);
 		Collections.sort(coreSeries, Series.byDate);
 

@@ -8,6 +8,7 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.wolm.catalog.App;
@@ -304,12 +305,59 @@ public class Catalog {
 	}
 
 	/**
-	 * Gets a list of all non-series messages and returns them wrapped in series. Currently, loose messages are gathered
-	 * by year and one series is returned per year.
+	 * Gets a list of all non-series messages and returns them wrapped in series. Each loose message is put into a
+	 * series of one message with the same name.
 	 * 
 	 * @return List of series representing all loose, stand-alone messages oldest first
 	 */
-	public List<Series> getStandAloneMessagesInSeries() {
+	public List<Series> getStandAloneMessagesInSeriesByMessage() {
+		List<Series> serieses = new ArrayList<>();
+
+		// sort the messages by date
+		List<Message> orderedMessages = new ArrayList<>(messages);
+		Collections.sort(orderedMessages, Message.byDate);
+
+		for (Message message : orderedMessages) {
+			if (message.getDate() == null) break; // nulls are sorted to end
+
+			// skip if already in a series
+			if (!message.getSeries().isEmpty()) continue;
+
+			// skip if not visible
+			if (!env.shouldInclude(message)) continue;
+
+			// create series
+			serieses.add(getStandAloneMessage(message));
+		}
+		return serieses;
+	}
+
+	/**
+	 * Given a single message, creates a series containing nothing but that message
+	 * 
+	 * @param message
+	 * @return
+	 */
+	private Series getStandAloneMessage(Message message) {
+		Series series = new Series();
+		series.addMessage(message);
+		series.setTitle(message.getTitle());
+		series.setId("SAM-" + UUID.randomUUID());
+		series.setDescription(message.getDescription());
+		series.setVisibility(message.getVisibility());
+		series.setStartDate(message.getDate());
+		series.setEndDate(message.getDate());
+		// series.setMessageCount(1L);
+		return series;
+	}
+
+	/**
+	 * Gets a list of all non-series messages and returns them wrapped in series. Loose messages are gathered by year
+	 * and one series is returned per year.
+	 * 
+	 * @return List of series representing all loose, stand-alone messages oldest first
+	 */
+	public List<Series> getStandAloneMessagesInSeriesByYear() {
 		List<Series> allSeries = new ArrayList<>();
 		for (int year = 2000; year < 2030; year++) {
 			Series series = getStandAloneMessages(year);
@@ -341,11 +389,10 @@ public class Catalog {
 		for (Message message : orderedMessages) {
 			if (message.getDate() == null) break; // nulls are sorted to end
 
-			// bail if not in the right year
 			cal.setTime(message.getDate());
-			if (cal.get(Calendar.YEAR) != year) continue;
-			if (!env.shouldInclude(message)) continue;
-			if (!message.getSeries().isEmpty()) continue;
+			if (cal.get(Calendar.YEAR) != year) continue; // not the right year
+			if (!env.shouldInclude(message)) continue; // not the right visibility
+			if (!message.getSeries().isEmpty()) continue; // already in a series
 			series.addMessage(message);
 		}
 
