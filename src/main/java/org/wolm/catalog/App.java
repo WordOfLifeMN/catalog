@@ -15,9 +15,15 @@ import org.wolm.catalog.catalog.BookletsPageRender;
 import org.wolm.catalog.catalog.Catalog;
 import org.wolm.catalog.catalog.ResourcesPageRender;
 import org.wolm.catalog.catalog.SeriesIndexPageRender;
+import org.wolm.catalog.environment.BookletFilter;
+import org.wolm.catalog.environment.EntirelyWithinYearFilter;
+import org.wolm.catalog.environment.IntersectingWithYearFilter;
+import org.wolm.catalog.environment.RecentFilter;
 import org.wolm.catalog.environment.RenderEnvironment;
+import org.wolm.catalog.environment.StartedWithinYearFilter;
 import org.wolm.catalog.environment.TypeFilter;
 import org.wolm.catalog.environment.VisibilityFilter;
+import org.wolm.message.Message;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesHelper;
 import org.wolm.series.SeriesPageRender;
@@ -49,6 +55,16 @@ public class App {
 
 	private String s3BucketName = "wordoflife.mn.catalog";
 	private String s3ObjectPrefix = null;
+
+	/** Policy to define series inclusion with a date range (like a year) */
+	private enum InclusionPolicy {
+		/** Include any series that has a message in the date range */
+		intersectingWith,
+		/** Include only series that started in the date range, regardless of completion date */
+		startedWithin,
+		/** Include any series that started in the date range AND (finished in the date range OR hasn't finished yet) */
+		entirelyWithin
+	}
 
 	private static App instance = null;
 
@@ -160,6 +176,8 @@ public class App {
 
 		buildRecentMessages(catalog);
 		buildRecentSeries(catalog);
+		buildSeriesForYear(catalog, 2015, InclusionPolicy.startedWithin);
+		buildSeriesForYear(catalog, 2015, InclusionPolicy.intersectingWith);
 		buildPublicCatalog(catalog);
 		buildHandoutsAndResources(catalog);
 		buildBooklets(catalog);
@@ -178,9 +196,15 @@ public class App {
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
 		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+		env.addFilter(new RecentFilter().withDays(60));
+		env.addFilter(new BookletFilter(false));
 
 		// find messages
-		Series recentMessages = catalog.getRecentMessages(60);
+		Series recentMessages = catalog.getFilteredMessagesInASeries();
+		recentMessages.setTitle("Recent Messages from Word of Life Ministries");
+		recentMessages.setDescription("Recent messages from the last " + 60 + " days.");
+		recentMessages.sortMessages(Message.byDateDescending);
+
 		PageRender pageRender = new SeriesPageRender(recentMessages);
 		File outputFile = new File(outputFileDir, "recent-messages.html");
 		pageRender.render(outputFile);
@@ -193,12 +217,55 @@ public class App {
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
 		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+		env.addFilter(new RecentFilter().withDays(60));
+		env.addFilter(new BookletFilter(false));
 
 		// find series
-		List<Series> recentSeries = catalog.getRecentSeries(60);
-		PageRender pageRender = new SeriesIndexPageRender(recentSeries);
+		List<Series> series = catalog.getFilteredSeries();
+		series.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
+		Collections.sort(series, Series.byDate);
+
+		PageRender pageRender = new SeriesIndexPageRender(series);
 		pageRender.setTitle("Recent Series from Word of Life Ministries");
 		File outputFile = new File(outputFileDir, "recent-series.html");
+		pageRender.render(outputFile);
+	}
+
+	/**
+	 * Gets series for a specific year.
+	 * 
+	 * @param catalog Source catalog
+	 * @param year Year to extract series for
+	 * @param inclusion Determines how to select whether a series is in a year or not
+	 * @throws Exception
+	 */
+	private void buildSeriesForYear(Catalog catalog, int year, InclusionPolicy inclusion) throws Exception {
+		logInfo("Writing " + year + " series to '" + inclusion + year + "-series.html' ...");
+
+		// prepare environment
+		env.clearFilters();
+		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
+		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+		switch (inclusion) {
+		case entirelyWithin:
+			env.addFilter(new EntirelyWithinYearFilter(year));
+			break;
+		case intersectingWith:
+			env.addFilter(new IntersectingWithYearFilter(year));
+			break;
+		case startedWithin:
+			env.addFilter(new StartedWithinYearFilter(year));
+			break;
+		}
+
+		// find series
+		List<Series> series = catalog.getFilteredSeries();
+		series.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
+		Collections.sort(series, Series.byDate);
+
+		PageRender pageRender = new SeriesIndexPageRender(series);
+		pageRender.setTitle("Messages and Series from Word of Life Ministries in " + year);
+		File outputFile = new File(outputFileDir, inclusion.toString() + year + "-series.html");
 		pageRender.render(outputFile);
 	}
 

@@ -3,12 +3,10 @@ package org.wolm.catalog.catalog;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.wolm.catalog.App;
@@ -98,6 +96,29 @@ public class Catalog {
 		for (Series s : series)
 			if (env.shouldInclude(s)) visibleSeries.add(s);
 		return visibleSeries;
+	}
+
+	/**
+	 * Creates an artificial series for all filtered messages
+	 * 
+	 * @return List of filtered messages sorted chronologically
+	 */
+	public Series getFilteredMessagesInASeries() {
+		// sort the messages by date
+		List<Message> orderedMessages = new ArrayList<>(messages);
+		Collections.sort(orderedMessages, Message.byDate);
+
+		// create series
+		final Series series = new Series();
+		series.setVisibility(env.getVisibility());
+
+		// add all the messages newer than the cutoff
+		for (Message message : orderedMessages) {
+			if (!env.shouldInclude(message)) continue;
+			series.addMessage(message);
+		}
+
+		return series;
 	}
 
 	public void add(Series series) {
@@ -342,7 +363,7 @@ public class Catalog {
 		Series series = new Series();
 		series.addMessage(message);
 		series.setTitle(message.getTitle());
-		series.setId("SAM-" + UUID.randomUUID());
+		series.setId("SAM-" + Math.abs((message.getTitle() + message.getDate()).hashCode()));
 		series.setDescription(message.getDescription());
 		series.setVisibility(message.getVisibility());
 		series.setStartDate(message.getDate());
@@ -444,69 +465,6 @@ public class Catalog {
 		}
 
 		return serieses;
-	}
-
-	/**
-	 * Gets a list of recent series. A recent series is any series with a start date but no end date (assumed to be in
-	 * progress still), or any series with a recent end date.
-	 * <p>
-	 * Honors the global minimum visibility
-	 * 
-	 * @param days Number of days that should be considered "recent". Only series ended in the past <code>days</code>
-	 * days will be returned.
-	 * @return List of recent series, sorted by most recent first. Empty list if none
-	 */
-	public List<Series> getRecentSeries(int days) {
-		List<Series> serieses = new ArrayList<>();
-
-		// find cutoff
-		GregorianCalendar cal = new GregorianCalendar();
-		cal.add(Calendar.DATE, -1 * days);
-		Date cutoff = cal.getTime();
-
-		for (Series series : getFilteredSeries()) {
-			if (series.getEndDate() != null && series.getEndDate().before(cutoff)) continue;
-			if (!env.shouldInclude(series)) continue;
-			if (series.isBooklet()) continue;
-			serieses.add(series);
-		}
-
-		return serieses;
-	}
-
-	/**
-	 * Creates an artificial series for all recent messages.
-	 * <p>
-	 * Honors the global minimum visibility
-	 * 
-	 * @param days How many days old something has to be to no longer be considered "Recent"
-	 * @return List of recent messages sorted newest to oldest
-	 */
-	public Series getRecentMessages(int days) {
-		// sort the messages by date
-		List<Message> orderedMessages = new ArrayList<>(messages);
-		Collections.sort(orderedMessages, Message.byDateDescending);
-
-		// create series
-		final Series series = new Series();
-		series.setTitle("Recent Messages from Word of Life Ministries");
-		series.setDescription("Recent messages from the last " + days + " days.");
-		series.setVisibility(env.getVisibility());
-
-		// find cutoff
-		GregorianCalendar cal = new GregorianCalendar();
-		cal.add(Calendar.DATE, -1 * days);
-		final Date cutoff = cal.getTime();
-
-		// add all the messages newer than the cutoff
-		for (Message message : orderedMessages) {
-			if (message.getDate() == null) break; // nulls are sorted to end
-			if (message.getDate().before(cutoff)) break;
-			if (!env.shouldInclude(message)) continue;
-			series.addMessage(message);
-		}
-
-		return series;
 	}
 
 	/**

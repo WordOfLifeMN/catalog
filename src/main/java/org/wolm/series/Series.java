@@ -282,6 +282,10 @@ public class Series {
 		messages.add(message);
 	}
 
+	public void sortMessages(Comparator<Message> comparator) {
+		Collections.sort(messages, comparator);
+	}
+
 	/**
 	 * @return All messages for this series that should be included according to the current filters
 	 */
