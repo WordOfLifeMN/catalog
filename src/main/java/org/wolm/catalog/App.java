@@ -3,7 +3,9 @@ package org.wolm.catalog;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -15,6 +17,7 @@ import org.wolm.catalog.catalog.BookletsPageRender;
 import org.wolm.catalog.catalog.Catalog;
 import org.wolm.catalog.catalog.ResourcesPageRender;
 import org.wolm.catalog.catalog.SeriesIndexPageRender;
+import org.wolm.catalog.catalog.SeriesIndexWithPromoPageRender;
 import org.wolm.catalog.environment.BookletFilter;
 import org.wolm.catalog.environment.EntirelyWithinYearFilter;
 import org.wolm.catalog.environment.IntersectingWithYearFilter;
@@ -225,8 +228,10 @@ public class App {
 		series.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
 		Collections.sort(series, Series.byDate);
 
-		PageRender pageRender = new SeriesIndexPageRender(series);
+		// build the page renderer
+		PageRender pageRender = new SeriesIndexWithPromoPageRender(series);
 		pageRender.setTitle("Recent Series from Word of Life Ministries");
+		addCurrentSeriesPromo(catalog, (SeriesIndexWithPromoPageRender) pageRender);
 		File outputFile = new File(outputFileDir, "recent-series.html");
 		pageRender.render(outputFile);
 	}
@@ -263,8 +268,11 @@ public class App {
 		series.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
 		Collections.sort(series, Series.byDate);
 
-		PageRender pageRender = new SeriesIndexPageRender(series);
+		PageRender pageRender = new SeriesIndexWithPromoPageRender(series);
 		pageRender.setTitle("Messages and Series from Word of Life Ministries in " + year);
+		if (year == new GregorianCalendar().get(Calendar.YEAR)) {
+			addCurrentSeriesPromo(catalog, (SeriesIndexWithPromoPageRender) pageRender);
+		}
 		File outputFile = new File(outputFileDir, inclusion.toString() + year + "-series.html");
 		pageRender.render(outputFile);
 	}
@@ -365,6 +373,19 @@ public class App {
 		pageRender.setDepartment("CORE");
 		File outputFile = new File(outputFileDir, "core.html");
 		pageRender.render(outputFile);
+	}
+
+	private void addCurrentSeriesPromo(Catalog catalog, SeriesIndexWithPromoPageRender render) {
+		render.setPromoName("current-series");
+
+		// current promo series is Holy Spirit, so build a series list for it
+		List<Series> promoSeries = new ArrayList<>();
+		for (Series series : catalog.getSeries())
+			if (series.getTitle().startsWith("Holy Spirit (Part ")) {
+				promoSeries.add(series);
+			}
+		Collections.sort(promoSeries, Series.byTitle);
+		render.setPromoSeries(promoSeries);
 	}
 
 	/** Upload all pages that have been created to S3 (if requested) */

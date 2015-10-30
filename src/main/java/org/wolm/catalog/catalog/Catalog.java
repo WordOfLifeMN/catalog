@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.math.NumberUtils;
 import org.wolm.catalog.App;
 import org.wolm.catalog.NamedLink;
@@ -86,6 +88,16 @@ public class Catalog {
 	 */
 	public List<Series> getSeries() {
 		return series;
+	}
+
+	/**
+	 * @param seriesTitle The name of a series
+	 * @return Series with the name, or {@code null} if not found
+	 */
+	public Series getSeries(@Nonnull String seriesTitle) {
+		for (Series series : getSeries())
+			if (seriesTitle.equalsIgnoreCase(series.getTitle())) return series;
+		return null;
 	}
 
 	/**
