@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.App;
 import org.wolm.catalog.NamedLink;
@@ -284,6 +285,26 @@ public class Series {
 
 	public void sortMessages(Comparator<Message> comparator) {
 		Collections.sort(messages, comparator);
+	}
+
+	/**
+	 * @return A single token (no whitespace) that represents the sortable name of this series
+	 */
+	public String getTitleSortKey() {
+		String key = getTitle().toLowerCase().replaceAll(" +", " ");
+		key = StringUtils.removeStart(key, "the ");
+		key = StringUtils.removeStart(key, "a ");
+		key = StringUtils.removeStart(key, "an ");
+		key = key.replaceAll("[^a-z0-9]+", "");
+		return key;
+	}
+
+	/**
+	 * @return A string that represents all the keywords describing the series
+	 */
+	public String getKeywords() {
+		// right now, we just use the title
+		return getTitle().toLowerCase();
 	}
 
 	/**
