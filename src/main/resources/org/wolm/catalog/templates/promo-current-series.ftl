@@ -1,9 +1,13 @@
 <img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/dove.jpg' width='96' style='float:left;padding-right:12px;'/>
-<p >
-	If you are just joining us, we are in a long-running series on the Holy Spirit,
-	both what He means to us and what we mean to Him. <br/>
-	This series is broken into several topics, each of which we are studying in-depth.<br/>
-	To get fully caught up, you can watch or listen to the following topics. 
+<p>
+	If you are just joining us, we are in a long-running series on the Holy Spirit.  
+	This series is intended to be an In-Depth study of the Holy Spirit.  Pastor is moving through topics slowly 
+	in an effort to thoroughly cover as many aspects of the Holy Spirit and the Baptism in the Holy Spirit as is 
+	feasibly possible.   
+</p>
+<p>
+	Please note:  the over-all series is broken into several general areas of study.  
+	To get fully caught up, you can watch or listen to the following topics.
 </p>
 <ul style='clear:left;'>
 	<#list promoSeriesList as series>
