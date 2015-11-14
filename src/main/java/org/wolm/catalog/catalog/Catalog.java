@@ -158,19 +158,19 @@ public class Catalog {
 	 */
 	private void initMessages(GoogleHelper google) throws Exception {
 		GoogleSpreadsheet spreadsheet = google.getSpreadsheet(messageSpreadsheetName);
-		if (spreadsheet == null) throw new Exception("Cannot find spreadsheet called '" + messageSpreadsheetName
-				+ "' on Google.");
+		if (spreadsheet == null)
+			throw new Exception("Cannot find spreadsheet called '" + messageSpreadsheetName + "' on Google.");
 
 		GoogleWorksheet worksheet = spreadsheet.getWorksheet("Media Log");
-		if (worksheet == null) throw new Exception("Cannot find worksheet called 'Media Log' in the '"
-				+ messageSpreadsheetName + "' spreadsheet.");
+		if (worksheet == null) throw new Exception(
+				"Cannot find worksheet called 'Media Log' in the '" + messageSpreadsheetName + "' spreadsheet.");
 
 		List<String> columns = worksheet.getColumnNames();
 		for (String columnName : new String[] { "date", "name", "speaker", "audiolink", "videolink", "type",
 				"visibility", "seriesname", "track", "description", "resources" })
 			if (!columns.contains(columnName)) {
-				throw new Exception("Cannot find column '" + columnName + "' in the spreadsheet '"
-						+ messageSpreadsheetName + "'");
+				throw new Exception(
+						"Cannot find column '" + columnName + "' in the spreadsheet '" + messageSpreadsheetName + "'");
 			}
 
 		// create message objects
@@ -251,19 +251,19 @@ public class Catalog {
 		assert !getRawMessages().isEmpty();
 
 		GoogleSpreadsheet spreadsheet = google.getSpreadsheet(seriesSpreadsheetName);
-		if (spreadsheet == null) throw new Exception("Cannot find spreadsheet called '" + seriesSpreadsheetName
-				+ "' on Google.");
+		if (spreadsheet == null)
+			throw new Exception("Cannot find spreadsheet called '" + seriesSpreadsheetName + "' on Google.");
 
 		GoogleWorksheet worksheet = spreadsheet.getWorksheet("Series Log");
-		if (worksheet == null) throw new Exception("Cannot find worksheet called 'Series Log' in the '"
-				+ seriesSpreadsheetName + "' spreadsheet.");
+		if (worksheet == null) throw new Exception(
+				"Cannot find worksheet called 'Series Log' in the '" + seriesSpreadsheetName + "' spreadsheet.");
 
 		List<String> columns = worksheet.getColumnNames();
 		for (String columnName : new String[] { "name", "datestarted", "dateended", "messages", "speaker",
 				"description", "booklets", "resources", "visibility", "coverart", "coverimage", "webid" })
 			if (!columns.contains(columnName)) {
-				throw new Exception("Cannot find column '" + columnName + "' in the spreadsheet '"
-						+ seriesSpreadsheetName + "'");
+				throw new Exception(
+						"Cannot find column '" + columnName + "' in the spreadsheet '" + seriesSpreadsheetName + "'");
 			}
 
 		// prepare unique ID validation

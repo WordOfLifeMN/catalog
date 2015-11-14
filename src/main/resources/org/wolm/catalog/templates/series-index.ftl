@@ -21,7 +21,7 @@
 			</#if>
 		)
 		<#-- (${series.startDate?date?string.iso} - ${series.endDate?date?string.iso}) -->
-		<span class="filterKey" style="display:none;">${series.keywords}<span>
+		<span class="filterKey" style="display:none;"><#list series.keywords.keywordList as k>${k} </#list><span>
 	</li>
 </#macro>
 
@@ -47,11 +47,12 @@
 		<option value="sortByTitle">Title</option>
 	</select>
 </div>
-<form action="javascript:noop();" class="filterForm" style="float:right;">
-	Filter on: <input type="text" class="filterInput"/>
+<#-- filter options -->
+<form action="javascript:noop();" class="filterForm" style="float:left;">
+	Filter on: <input type="text" class="filterInput" title="Enter words to search titles and speaker names for. Will search all messages in the series."/>
 </form>
 <div style="clear:right"/>
-
+<p/>
 <ul class="seriesList">
 	<#list seriesList as series>
 		<@seriesSummaryItem series=series />

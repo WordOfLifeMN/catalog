@@ -16,6 +16,7 @@ import java.util.ListIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.wolm.aws.AwsS3Helper;
 import org.wolm.catalog.AccessLevel;
+import org.wolm.catalog.Keywords;
 import org.wolm.catalog.NamedLink;
 import org.wolm.catalog.NamedResourceLink;
 
@@ -234,6 +235,15 @@ public class Message {
 			}
 	}
 
+	public Keywords getKeywords() {
+		Keywords helper = new Keywords();
+
+		helper.add(getTitle());
+		helper.add(getSpeakers());
+
+		return helper;
+	}
+
 	public boolean isValid(PrintStream s) {
 		isValid = true;
 		validationErrorHasBeenPrinted = false;
@@ -249,8 +259,8 @@ public class Message {
 		int seriesCount = getSeries().size();
 		int trackCount = getTrackNumbers().size();
 		if (seriesCount != trackCount) {
-			reportValidationError(s, "is in " + seriesCount + " series, but has track data for " + trackCount
-					+ " series");
+			reportValidationError(s,
+					"is in " + seriesCount + " series, but has track data for " + trackCount + " series");
 		}
 
 		if (getType() != null && !TYPES.contains(getType())) {

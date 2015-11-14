@@ -18,6 +18,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.wolm.catalog.AccessLevel;
 import org.wolm.catalog.App;
+import org.wolm.catalog.Keywords;
 import org.wolm.catalog.NamedLink;
 import org.wolm.catalog.NamedResourceLink;
 import org.wolm.catalog.environment.RenderEnvironment;
@@ -302,9 +303,17 @@ public class Series {
 	/**
 	 * @return A string that represents all the keywords describing the series
 	 */
-	public String getKeywords() {
-		// right now, we just use the title
-		return getTitle().toLowerCase();
+	public Keywords getKeywords() {
+		Keywords helper = new Keywords();
+
+		helper.add(getTitle());
+		helper.add(getSpeakers());
+
+		// add messages
+		for (Message message : getMessages())
+			helper.add(message.getKeywords());
+
+		return helper;
 	}
 
 	/**
@@ -383,16 +392,16 @@ public class Series {
 			reportValidationError(s, "has 0 messages");
 		}
 		else if (getMessageCount() > messages.size()) {
-			reportValidationError(s,
-					"has a message count of " + getMessageCount() + " messages, but " + messages.size()
-							+ " actual messages");
+			reportValidationError(s, "has a message count of " + getMessageCount() + " messages, but " + messages.size()
+					+ " actual messages");
 		}
 		else {
 			int tmpCount = countOfMessagesWithLessVisibilityThan(getVisibility());
 			if (tmpCount > 0) {
-				reportValidationWarning(s, "has visibility of " + getVisibility() + ", but " + tmpCount + " of "
-						+ countOfMessagesWithAnyVisibility()
-						+ " messages are not visible at that level, some messages may not be displayed");
+				reportValidationWarning(s,
+						"has visibility of " + getVisibility() + ", but " + tmpCount + " of "
+								+ countOfMessagesWithAnyVisibility()
+								+ " messages are not visible at that level, some messages may not be displayed");
 			}
 		}
 
