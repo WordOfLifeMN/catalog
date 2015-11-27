@@ -188,6 +188,7 @@ public class App {
 		buildCovenantPartnerCatalog(catalog);
 
 		buildCORECatalog(catalog);
+		buildAskPastorCatalog(catalog);
 
 		logInfo("Catalog file generation is complete");
 	}
@@ -283,7 +284,7 @@ public class App {
 		// prepare environment
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
-		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+		env.addFilter(new TypeFilter().withoutType("C.O.R.E.", "Ask Pastor"));
 
 		// get all completed and in-progress series plus all stand-alone messages
 		List<Series> catalogSeries = catalog.getCompletedSeries();
@@ -336,11 +337,13 @@ public class App {
 		// prepare environment
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PROTECTED));
-		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+		env.addFilter(new TypeFilter().withoutType("C.O.R.E.", "Ask Pastor"));
 
 		// get all completed and in-progress series
 		List<Series> catalogSeries = catalog.getCompletedSeries();
 		catalogSeries.addAll(catalog.getInProgressSeries());
+		// catalogSeries.addAll(catalog.getStandAloneMessagesInSeriesByYear());
+		catalogSeries.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
 		catalogSeries = SeriesHelper.withoutDuplicates(catalogSeries);
 		Collections.sort(catalogSeries, Series.byDate);
 
@@ -372,6 +375,27 @@ public class App {
 		pageRender.setIndexDescription(getCoreIndexDescription());
 		pageRender.setDepartment("CORE");
 		File outputFile = new File(outputFileDir, "core.html");
+		pageRender.render(outputFile);
+	}
+
+	private void buildAskPastorCatalog(Catalog catalog) throws Exception {
+		logInfo("Writing all public Ask Pastor series to 'core.html' ...");
+
+		// prepare environment
+		env.clearFilters();
+		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
+		env.addFilter(new TypeFilter().withType("Ask Pastor"));
+
+		// get all completed and in-progress series
+		Series series = catalog.getFilteredMessagesInASeries();
+		series.setTitle("Ask The Pastor");
+		series.setDescription(getAskPastorDescription());
+
+		// build the HTML page
+		SeriesPageRender pageRender = new SeriesPageRender(series);
+		pageRender.setTitle("Ask The Pastor");
+		pageRender.setDepartment("Ask The Pastor");
+		File outputFile = new File(outputFileDir, "askpastor.html");
 		pageRender.render(outputFile);
 	}
 
@@ -483,10 +507,12 @@ public class App {
 
 		b.append("<table>");
 		b.append("  <tr>");
-		b.append("    <td><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/remix.jpeg' width='128'/></td>");
+		b.append(
+				"    <td><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/remix.jpeg' width='128'/></td>");
 		b.append("    <td>");
 		b.append("      <h3>");
-		b.append("        We&apos;re currently re-editing and bringing the past 10 years of messages and study materials ");
+		b.append(
+				"        We&apos;re currently re-editing and bringing the past 10 years of messages and study materials ");
 		b.append("        up to date. New content will be added throughout 2015, so check back frequently!");
 		b.append("      </h3>");
 		b.append("    </td>");
@@ -501,13 +527,17 @@ public class App {
 
 		b.append("<table>");
 		b.append("  <tr>");
-		b.append("    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/Covenant+Partner+Thumb.jpg' width='164'/></td>");
+		b.append(
+				"    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/Covenant+Partner+Thumb.jpg' width='164'/></td>");
 		b.append("    <td>");
-		b.append("      <p style=\"color:maroon;font-weight:bold;\">Please do not share access to this page with anyone.</p>");
-		b.append("      <p>Any questions about access to this page should be directed to Pastor Vern or Kevin Murray.</p>");
+		b.append(
+				"      <p style=\"color:maroon;font-weight:bold;\">Please do not share access to this page with anyone.</p>");
+		b.append(
+				"      <p>Any questions about access to this page should be directed to Pastor Vern or Kevin Murray.</p>");
 		b.append("      <p>");
 		b.append("        Many of these messages may be rough, unedited, or have other quality problems, ");
-		b.append("        and we are not prepared to release them to the public <em>yet</em>. However, there may also be ");
+		b.append(
+				"        and we are not prepared to release them to the public <em>yet</em>. However, there may also be ");
 		b.append("        resources on this page that contain sensitive information that we may never choose to ");
 		b.append("        release publicly, and we appreciate your discretion as covenant partners.");
 		b.append("      </p>");
@@ -523,18 +553,22 @@ public class App {
 
 		b.append("<table>");
 		b.append("  <tr>");
-		b.append("    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/corestaff.jpg' width='164'/></td>");
+		b.append(
+				"    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/corestaff.jpg' width='164'/></td>");
 		b.append("    <td>");
 		b.append("      <p>C.O.R.E.: Center of Our Relationship Experiences</p>");
 		b.append("      <p>");
-		b.append("        Mary Peltz is a certified counselor with A.A.C.C. and is a Co-Pastor at Word of Life Ministries ");
+		b.append(
+				"        Mary Peltz is a certified counselor with A.A.C.C. and is a Co-Pastor at Word of Life Ministries ");
 		b.append("        which is affiliated and licensed through ");
 		b.append("        <a href=\"http://www.afcminternational.org\" target=\"_blank\">A.F.C.M. International</a>.");
 		b.append("      </p>");
 		b.append("      <p>");
 		b.append("        Mary specializes in communication skills and restoring relationships and families. ");
-		b.append("        She administrates C.O.R.E. programs which is a \"Freedom From\" program that brings help to ");
-		b.append("        schools, group homes and staff situations. She is currently facilitating C.O.R.E. Programs at ");
+		b.append(
+				"        She administrates C.O.R.E. programs which is a \"Freedom From\" program that brings help to ");
+		b.append(
+				"        schools, group homes and staff situations. She is currently facilitating C.O.R.E. Programs at ");
 		b.append("        the jails in the Northern Minnesota areas.");
 		b.append("      </p>");
 		b.append("    </td>");
@@ -542,5 +576,16 @@ public class App {
 		b.append("</table>");
 
 		return b.toString();
+	}
+
+	private String getAskPastorDescription() {
+		return "<br/><em>Always be prepared to give an answer to everyone who asks you to give the "
+				+ "reason for the hope that you have. (1 Peter 3:15)</em><br/><br/>"
+				+ "Too many times we see things in the world around us or find things in the Word of God that we "
+				+ "don't understand. If you have questions about what you see, read, or hear, these short messages "
+				+ "might have the answers you are looking for. <br/><br/>"
+				+ "Pastor Vern fields questions submitted to him from the congregation or anyone online. "
+				+ "If you have a question for Pastor Vern, please "
+				+ "<a href=\"mailto:wordoflife.mn@gmail.com\">email it to us</a>.<br/><br/>";
 	}
 }
