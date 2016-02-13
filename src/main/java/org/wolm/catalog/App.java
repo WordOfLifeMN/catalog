@@ -227,7 +227,7 @@ public class App {
 		// find series
 		List<Series> series = catalog.getFilteredSeries();
 		series.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
-		Collections.sort(series, Series.byDate);
+		Collections.sort(series, Series.byTitle);
 
 		// build the page renderer
 		PageRender pageRender = new SeriesIndexWithPromoPageRender(series);
@@ -267,7 +267,7 @@ public class App {
 		// find series
 		List<Series> series = catalog.getFilteredSeries();
 		series.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
-		Collections.sort(series, Series.byDate);
+		Collections.sort(series, Series.byTitle);
 
 		PageRender pageRender = new SeriesIndexWithPromoPageRender(series);
 		pageRender.setTitle("Messages and Series from Word of Life Ministries in " + year);
@@ -292,7 +292,7 @@ public class App {
 		// catalogSeries.addAll(catalog.getStandAloneMessagesInSeriesByYear());
 		catalogSeries.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
 		catalogSeries = SeriesHelper.withoutDuplicates(catalogSeries);
-		Collections.sort(catalogSeries, Series.byDate);
+		Collections.sort(catalogSeries, Series.byTitle);
 
 		PageRender pageRender = new SeriesIndexPageRender(catalogSeries);
 		pageRender.setTitle("Word of Life Ministries Catalog");
@@ -345,7 +345,7 @@ public class App {
 		// catalogSeries.addAll(catalog.getStandAloneMessagesInSeriesByYear());
 		catalogSeries.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
 		catalogSeries = SeriesHelper.withoutDuplicates(catalogSeries);
-		Collections.sort(catalogSeries, Series.byDate);
+		Collections.sort(catalogSeries, Series.byTitle);
 
 		SeriesIndexPageRender pageRender = new SeriesIndexPageRender(catalogSeries);
 		pageRender.setTitle("Covenant Partner Catalog");
@@ -367,7 +367,7 @@ public class App {
 		coreSeries.addAll(catalog.getInProgressSeries());
 		coreSeries.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
 		coreSeries = SeriesHelper.withoutDuplicates(coreSeries);
-		Collections.sort(coreSeries, Series.byDate);
+		Collections.sort(coreSeries, Series.byTitle);
 
 		// build the HTML page
 		SeriesIndexPageRender pageRender = new SeriesIndexPageRender(coreSeries);
@@ -513,7 +513,7 @@ public class App {
 		b.append("      <h3>");
 		b.append(
 				"        We&apos;re currently re-editing and bringing the past 10 years of messages and study materials ");
-		b.append("        up to date. New content will be added throughout 2015, so check back frequently!");
+		b.append("        up to date. New content will be added throughout 2016, so check back frequently!");
 		b.append("      </h3>");
 		b.append("    </td>");
 		b.append("  </tr>");

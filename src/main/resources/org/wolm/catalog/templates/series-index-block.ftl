@@ -112,11 +112,11 @@
 <#-- sorting options -->
 <div style="float:right;">
 	&nbsp;&nbsp;&nbsp;
-	Sort on: 
+	Sort by: 
 	<select class="sortingSelect">
+		<option value="sortByTitle">Title</option>
 		<option value="sortByDateAsc">Date (Oldest First)</option>
 		<option value="sortByDateDesc">Date (Newest First)</option>
-		<option value="sortByTitle">Title</option>
 	</select>
 </div>
 <#-- filter options -->
