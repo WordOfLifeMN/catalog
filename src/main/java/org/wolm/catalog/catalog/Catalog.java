@@ -377,6 +377,7 @@ public class Catalog {
 		series.setTitle(message.getTitle());
 		series.setId("SAM-" + Math.abs((message.getTitle() + message.getDate()).hashCode()));
 		series.setDescription(message.getDescription());
+		series.setSpeakers(message.getSpeakers());
 		series.setVisibility(message.getVisibility());
 		series.setStartDate(message.getDate());
 		series.setEndDate(message.getDate());

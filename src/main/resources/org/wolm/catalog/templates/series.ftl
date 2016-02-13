@@ -1,3 +1,13 @@
+<#if department! == 'CORE'>
+	<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CORELogo-Small.jpg' />
+	<#assign defaultColor = '#840' />
+	<#assign highlightColor = '#5b2d00' />
+<#else>
+	<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XSmall.png' />
+	<#assign defaultColor = '#5a9e5d' />
+	<#assign highlightColor = '#337e37' />
+</#if>
+
 <style>
 	span.inprogress { color: #999; font-style: italic; }
 </style>
@@ -5,7 +15,7 @@
 <h1>${series.title}</h1>
 <table>
 	<#-- cover art and description -->
-	<#assign artLink = series.coverArtLink!'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XSmall.png' />
+	<#assign artLink = series.coverArtLink!defaultCover />
 	<tr>
 		<#if artLink??>
 			<td valign="top"><img src="${artLink}" width="128"/></td>
@@ -68,10 +78,8 @@
 		background-color: #3e713f;
 		color: white;	
 	}
-	<#if department! == 'CORE'>
-		td.message { border: 2px solid #420; }
-		td.message div.title.highlight { background-color: #840; }
-	</#if>
+	td.message { border: 2px solid ${defaultColor}; }
+	td.message div.title.highlight { background-color: ${highlightColor}; }
 
 	td.resources {
 		border: 2px solid #bf9c03;

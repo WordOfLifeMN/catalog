@@ -1,7 +1,9 @@
 <#if department! == 'CORE'>
+	<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CORELogo-Small.jpg' />
 	<#assign defaultColor = '#840' />
 	<#assign highlightColor = '#5b2d00' />
 <#else>
+	<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XSmall.png' />
 	<#assign defaultColor = '#5a9e5d' />
 	<#assign highlightColor = '#337e37' />
 </#if>
@@ -9,14 +11,65 @@
 <style>
 	a { color: ${defaultColor}; }
 	a:hover { color: ${highlightColor}; }
+
 	span.inprogress { color: #999; font-style: italic; }
+	
+	.seriesItem {
+		border: 1px ${defaultColor} solid;
+		border-radius: 4px;
+		height: 128px;
+		padding: 4px;
+		margin-bottom: 4px;
+	}
+	.seriesItem .title {
+		font-size: 20px;
+	}
+	.seriesItem .coverArt {
+		float: left;
+		margin-right: 10px;
+		width: 132px;
+		height: 128px;
+		position: relative;
+	}
+	.seriesItem div.coverArt img {
+		/* scale to fit */
+		max-width: 100%;
+		max-height: 100%;
+		/* center */
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+	.seriesItem span.label {
+		display: inline-block;
+		width: 80px;
+		text-align: left;
+		vertical-align: top;
+	}
+	.seriesItem span.longtext {
+		display: inline-block;
+		/*white-space: nowrap;*/
+		overflow: hidden;
+		width: 432px;
+		height: 30px;
+		font-size: 10px;
+	}
+	.seriesItem p.clear { clear: both; }
 </style>
 
 <#macro seriesSummaryItem series>
-	<li data-date="${series.startDate?date?iso_utc}" data-title="${series.titleSortKey}">
-		<a href="${baseRef}/${series.id}.html">${series.title}</a>
-		- ${series.messageCount} <#if series.messageCount == 1>message<#else>messages</#if>
-		(
+	<div class="seriesItem" data-date="${series.startDate?date?iso_utc}" data-title="${series.titleSortKey}">
+		<#local artLink = series.coverArtLink!defaultCover />
+		<div class="coverArt">
+			<a class="title" href="${baseRef}/${series.id}.html"><img src="${artLink}" /></a>
+		</div>
+		<p>
+			<a class="title" href="${baseRef}/${series.id}.html">${series.title}</a>
+			<br/>
+			<span class="label">Messages:</span> ${series.messageCount}
+			<br/>
+			<span class="label">Presented:</span>
 			<#if series.startDate??>
 				<#if !(series.endDate??)>Started</#if> <#-- still in progress -->
 				${series.startDate?date}
@@ -25,10 +78,23 @@
 				</#if>
 				<#if !(series.endDate??)><span class="inprogress"> -more to come!</span></#if>
 			</#if>
-		)
+			<#if series.speakers?size &gt; 0>
+				<br/>
+				<span class="label">Speaker<#if series.speakers?size &gt; 1>s</#if>:</span> 
+				<#list series.speakers as speaker>${speaker}<#if speaker?has_next>, </#if></#list>
+			</#if>
+			<#if series.description??>
+				<br/>
+				<span class="label">Description:</span> 
+				<span class="longtext" title="${series.description?html}">${series.description}</span>
+			</#if>
+		</p>
+		
 		<#-- (${series.startDate?date?string.iso} - ${series.endDate?date?string.iso}) -->
 		<span class="filterKey" style="display:none;"><#list series.keywords.keywordList as k>${k} </#list><span>
-	</li>
+
+		<p class="clear">&nbsp;</p>
+	</div>
 </#macro>
 
 <#-- -------------------------------------------------------------------------------------- -->
@@ -59,27 +125,27 @@
 </form>
 <div style="clear:right"/>
 <p/>
-<ul class="seriesList">
+<div class="seriesList">
 	<#list seriesList as series>
 		<@seriesSummaryItem series=series />
 	</#list>
-</ul>
+</div>
 
 <script type="text/javascript">
 //<![CDATA[
 	/* Given a comparator, will sort the items in the "class=seriesList" with that comparator
-	* @param comparator One of: sortByDateAsc, sortByDateDesc, sortByTitle  
-	*/
+	 * @param comparator One of: sortByDateAsc, sortByDateDesc, sortByTitle  
+	 */
 	function sortIndex(comparator) {
 		switch (comparator) {
 		case "sortByDateAsc":
-			jQuery('.seriesList li').sort(sortByDateAsc).appendTo('.seriesList');
+			jQuery('.seriesList div.seriesItem').sort(sortByDateAsc).appendTo('.seriesList');
 			break;
 		case "sortByDateDesc":
-			jQuery('.seriesList li').sort(sortByDateDesc).appendTo('.seriesList');
+			jQuery('.seriesList div.seriesItem').sort(sortByDateDesc).appendTo('.seriesList');
 			break;
 		case "sortByTitle":
-			jQuery('.seriesList li').sort(sortByTitle).appendTo('.seriesList');
+			jQuery('.seriesList div.seriesItem').sort(sortByTitle).appendTo('.seriesList');
 			break;
 		}
 	}
@@ -99,8 +165,8 @@
 	});
 	
 	/*
-	* attach the filtering operation to the filter field
-	*/
+	 * attach the filtering operation to the filter field
+	 */
 	function noop() { return; }
 	// create a case-insensitive selector
 	jQuery.expr[':'].containsIgnoreCase = function(a,i,m){
@@ -113,7 +179,7 @@
 			jQuery('.seriesList').find("span.filterKey:not(:containsIgnoreCase(" + filter + "))").parent().slideUp();
 			jQuery('.seriesList').find("span.filterKey:containsIgnoreCase(" + filter + ")").parent().slideDown();
 		} else {
-			jQuery('.seriesList').find("li").slideDown();
+			jQuery('.seriesList').find("div").slideDown();
 		}
 	});
     // fire the above change event after every letter

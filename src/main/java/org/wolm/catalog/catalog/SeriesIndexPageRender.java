@@ -14,7 +14,7 @@ import org.wolm.series.SeriesUrlRender;
 public class SeriesIndexPageRender extends PageRender {
 
 	public SeriesIndexPageRender(List<Series> seriesList) {
-		super("series-index");
+		super("series-index-block");
 		setSeriesList(seriesList);
 	}
 
