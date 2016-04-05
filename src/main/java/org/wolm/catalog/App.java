@@ -179,8 +179,8 @@ public class App {
 
 		buildRecentMessages(catalog);
 		buildRecentSeries(catalog);
-		buildSeriesForYear(catalog, 2015, InclusionPolicy.startedWithin);
-		buildSeriesForYear(catalog, 2015, InclusionPolicy.intersectingWith);
+		buildSeriesForYear(catalog, 2016, InclusionPolicy.startedWithin);
+		buildSeriesForYear(catalog, 2016, InclusionPolicy.intersectingWith);
 		buildPublicCatalog(catalog);
 		buildHandoutsAndResources(catalog);
 		buildBooklets(catalog);
