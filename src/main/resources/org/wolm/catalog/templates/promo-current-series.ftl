@@ -5,12 +5,12 @@
 	in an effort to thoroughly cover as many aspects of the Holy Spirit and the Baptism in the Holy Spirit as is 
 	feasibly possible.   
 </p>
-<p>
+<p style='clear:left;'>
 	Please note:  the over-all series is broken into several general areas of study.  
 	To get fully caught up, you can watch or listen to the following topics.
 </p>
-<ul style='clear:left;'>
+<div style='clear:left;'>
 	<#list promoSeriesList as series>
 		<@seriesSummaryItem series=series />
 	</#list>
-</ul>
+</div>

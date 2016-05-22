@@ -36,7 +36,7 @@
 <h1>${title!}</h1>
 
 <#if promoFileName??>
-	<div style="border-style:ridge;border-color:#5a9e5d;border-width:medium;padding:4px;margin:32px;">
+	<div style="border-style:ridge;border-color:#5a9e5d;border-width:medium;padding:4px;">
 		<#include "${promoFileName}"/>
 	</div>
 </#if>
