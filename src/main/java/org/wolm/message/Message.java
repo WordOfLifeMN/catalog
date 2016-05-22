@@ -50,7 +50,7 @@ public class Message {
 	private static final List<String> TYPES = Arrays.asList(new String[] { "Ask Pastor", "C.O.R.E.", "Message",
 			"Prayer", "Q&A", "Song", "Special Event", "Testimony", "Training", "Word" });
 	private static final List<String> SPECIAL_LINKS = Arrays.asList(new String[] { "-", "n/a", "n/e", "abrogated",
-			"in progress", "editing", "edited", "rendering", "rendered", "flash", "uploading" });
+			"source", "in progress", "editing", "edited", "rendering", "rendered", "flash", "uploading" });
 
 	public Message() {
 		super();
