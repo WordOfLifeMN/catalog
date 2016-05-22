@@ -44,7 +44,7 @@ import org.wolm.series.Series;
 public class Catalog {
 	private RenderEnvironment env = RenderEnvironment.instance();
 
-	private String messageSpreadsheetName = "Messages";
+	private String messageSpreadsheetName = "WOL Messages";
 	private List<Message> messages = new ArrayList<>();
 
 	private String seriesSpreadsheetName = "Series";
