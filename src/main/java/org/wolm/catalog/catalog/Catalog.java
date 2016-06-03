@@ -44,22 +44,24 @@ import org.wolm.series.Series;
 public class Catalog {
 	private RenderEnvironment env = RenderEnvironment.instance();
 
-	private String messageSpreadsheetName = "WOL Messages";
+	private final String messageSpreadsheetName;
 	private List<Message> messages = new ArrayList<>();
 
-	private String seriesSpreadsheetName = "Series";
+	private final String seriesSpreadsheetName;
 	private List<Series> series = new ArrayList<>();
 
 	public Catalog() {
-		super();
+		this("WOL Series", "WOL Messages");
 	}
 
 	public String getMessageSpreadsheetName() {
 		return messageSpreadsheetName;
 	}
 
-	public void setMessageSpreadsheetName(String messageSpreadsheetName) {
+	public Catalog(String seriesSpreadsheetName, String messageSpreadsheetName) {
+		super();
 		this.messageSpreadsheetName = messageSpreadsheetName;
+		this.seriesSpreadsheetName = seriesSpreadsheetName;
 	}
 
 	/**
@@ -159,7 +161,10 @@ public class Catalog {
 	private void initMessages(GoogleHelper google) throws Exception {
 		GoogleSpreadsheet spreadsheet = google.getSpreadsheet(messageSpreadsheetName);
 		if (spreadsheet == null)
-			throw new Exception("Cannot find spreadsheet called '" + messageSpreadsheetName + "' on Google.");
+			throw new Exception("Cannot find spreadsheet called '" + messageSpreadsheetName + "' on Google.\n" //
+					+ "Reminder: you have to share the sheet with " //
+					+ "674258723045-lkoog528blgr1veujebv8chvj4tt6nfu@developer.gserviceaccount.com " //
+					+ "before it will be visible.");
 
 		GoogleWorksheet worksheet = spreadsheet.getWorksheet("Media Log");
 		if (worksheet == null) throw new Exception(
@@ -249,10 +254,14 @@ public class Catalog {
 	private void initSeries(GoogleHelper google) throws Exception {
 		// must do messages first so we can record which messages go with each series
 		assert !getRawMessages().isEmpty();
+		if (seriesSpreadsheetName == null) return;
 
 		GoogleSpreadsheet spreadsheet = google.getSpreadsheet(seriesSpreadsheetName);
 		if (spreadsheet == null)
-			throw new Exception("Cannot find spreadsheet called '" + seriesSpreadsheetName + "' on Google.");
+			throw new Exception("Cannot find spreadsheet called '" + seriesSpreadsheetName + "' on Google.\n" //
+					+ "Reminder: you have to share the sheet with " //
+					+ "674258723045-lkoog528blgr1veujebv8chvj4tt6nfu@developer.gserviceaccount.com " //
+					+ "before it will be visible.");
 
 		GoogleWorksheet worksheet = spreadsheet.getWorksheet("Series Log");
 		if (worksheet == null) throw new Exception(

@@ -54,9 +54,13 @@ public class App {
 	@Parameter(names = { "-u", "--upload" }, description = "Upload final files to S3.")
 	private boolean upload = false;
 
+	@Parameter(names = { "-s", "--site" }, description = "The site to process (WOL or TBO). WOL is default.")
+	private String siteAcronym = "WOL";
+
 	private RenderEnvironment env = RenderEnvironment.instance();
 
-	private String s3BucketName = "wordoflife.mn.catalog";
+	private String wolS3BucketName = "wordoflife.mn.catalog";
+	private String tboS3BucketName = "thebridgeoutreach.mn.catalog";
 	private String s3ObjectPrefix = null;
 
 	/** Policy to define series inclusion with a date range (like a year) */
@@ -117,7 +121,7 @@ public class App {
 	private void initRenderFactory() {
 		if (isUpload()) {
 			// uploading to S3: the baseref is the URL to the s3 bucket
-			RenderFactory.setBaseRef("http://s3-us-west-2.amazonaws.com/" + getS3BucketName()
+			RenderFactory.setBaseRef("http://s3-us-west-2.amazonaws.com/" + computeS3BucketName()
 					+ (getS3ObjectPrefix() == null ? "" : "/" + getS3ObjectPrefix()));
 		}
 		else {
@@ -150,12 +154,15 @@ public class App {
 		this.upload = upload;
 	}
 
-	public String getS3BucketName() {
-		return s3BucketName;
-	}
-
-	public void setS3BucketName(String s3BucketName) {
-		this.s3BucketName = s3BucketName;
+	public String computeS3BucketName() {
+		switch (siteAcronym) {
+		case "WOL":
+			return wolS3BucketName;
+		case "TBO":
+			return tboS3BucketName;
+		default:
+			throw new IllegalStateException("Unknown site '" + siteAcronym + "'");
+		}
 	}
 
 	public String getS3ObjectPrefix() {
@@ -173,8 +180,8 @@ public class App {
 	 */
 	public void catalog() throws Exception {
 
-		logInfo("Catalog downloading from Google ...");
-		Catalog catalog = new Catalog();
+		logInfo("Downloading " + siteAcronym + " catalog from Google ...");
+		Catalog catalog = new Catalog(siteAcronym + " Series", siteAcronym + " Messages");
 		catalog.populateFromGoogleSpreadsheets();
 
 		buildRecentMessages(catalog);
@@ -193,8 +200,31 @@ public class App {
 		logInfo("Catalog file generation is complete");
 	}
 
+	private String computeFileNameForSite(String baseName) {
+		switch (siteAcronym) {
+		case "WOL":
+			return baseName;
+		default:
+			int dot = baseName.lastIndexOf('.');
+			if (dot == -1) return baseName;
+			return baseName.substring(0, dot) + "-" + siteAcronym.toLowerCase() + baseName.substring(dot);
+		}
+	}
+
+	private String computeMinistryName() {
+		switch (siteAcronym) {
+		case "WOL":
+			return "Word of Life Ministries";
+		case "TBO":
+			return "The Bridge Outreach";
+		default:
+			throw new IllegalStateException("Unknown site '" + siteAcronym + "'");
+		}
+	}
+
 	private void buildRecentMessages(Catalog catalog) throws Exception {
-		logInfo("Writing recent messages to 'recent-messages.html' ...");
+		final String fileName = computeFileNameForSite("recent-messages.html");
+		logInfo("Writing recent messages to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
@@ -205,17 +235,18 @@ public class App {
 
 		// find messages
 		Series recentMessages = catalog.getFilteredMessagesInASeries();
-		recentMessages.setTitle("Recent Messages from Word of Life Ministries");
+		recentMessages.setTitle("Recent Messages from " + computeMinistryName());
 		recentMessages.setDescription("Recent messages from the last " + 60 + " days.");
 		recentMessages.sortMessages(Message.byDateDescending);
 
 		PageRender pageRender = new SeriesPageRender(recentMessages);
-		File outputFile = new File(outputFileDir, "recent-messages.html");
+		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
 	private void buildRecentSeries(Catalog catalog) throws Exception {
-		logInfo("Writing recent series to 'recent-series.html' ...");
+		final String fileName = computeFileNameForSite("recent-series.html");
+		logInfo("Writing recent series to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
@@ -231,9 +262,9 @@ public class App {
 
 		// build the page renderer
 		PageRender pageRender = new SeriesIndexWithPromoPageRender(series);
-		pageRender.setTitle("Recent Series from Word of Life Ministries");
+		pageRender.setTitle("Recent Series from " + computeMinistryName());
 		addCurrentSeriesPromo(catalog, (SeriesIndexWithPromoPageRender) pageRender);
-		File outputFile = new File(outputFileDir, "recent-series.html");
+		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
@@ -246,7 +277,8 @@ public class App {
 	 * @throws Exception
 	 */
 	private void buildSeriesForYear(Catalog catalog, int year, InclusionPolicy inclusion) throws Exception {
-		logInfo("Writing " + year + " series to '" + inclusion + year + "-series.html' ...");
+		final String fileName = computeFileNameForSite(inclusion.toString() + year + "-series.html");
+		logInfo("Writing " + year + " series to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
@@ -270,16 +302,17 @@ public class App {
 		Collections.sort(series, Series.byTitle);
 
 		PageRender pageRender = new SeriesIndexWithPromoPageRender(series);
-		pageRender.setTitle("Messages and Series from Word of Life Ministries in " + year);
+		pageRender.setTitle("Messages and Series from " + computeMinistryName() + " in " + year);
 		if (year == new GregorianCalendar().get(Calendar.YEAR)) {
 			addCurrentSeriesPromo(catalog, (SeriesIndexWithPromoPageRender) pageRender);
 		}
-		File outputFile = new File(outputFileDir, inclusion.toString() + year + "-series.html");
+		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
 	private void buildPublicCatalog(Catalog catalog) throws Exception {
-		logInfo("Writing all public series to 'catalog.html' ...");
+		final String fileName = computeFileNameForSite("catalog.html");
+		logInfo("Writing all public series to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
@@ -295,14 +328,15 @@ public class App {
 		Collections.sort(catalogSeries, Series.byTitle);
 
 		PageRender pageRender = new SeriesIndexPageRender(catalogSeries);
-		pageRender.setTitle("Word of Life Ministries Catalog");
+		pageRender.setTitle(computeMinistryName() + " Catalog");
 		((SeriesIndexPageRender) pageRender).setIndexDescription(getCatalogIndexDescription());
-		File outputFile = new File(outputFileDir, "catalog.html");
+		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
 	private void buildHandoutsAndResources(Catalog catalog) throws Exception {
-		logInfo("Writing handouts and resources to 'resources.html' ...");
+		final String fileName = computeFileNameForSite("resources.html");
+		logInfo("Writing handouts and resources to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
@@ -312,12 +346,13 @@ public class App {
 		List<NamedLink> resources = catalog.getHandoutsAndResources();
 		PageRender pageRender = new ResourcesPageRender(resources);
 		pageRender.setTitle("Handouts and Resources");
-		File outputFile = new File(outputFileDir, "resources.html");
+		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
 	private void buildBooklets(Catalog catalog) throws Exception {
-		logInfo("Writing booklets to 'booklets.html' ...");
+		final String fileName = computeFileNameForSite("booklets.html");
+		logInfo("Writing booklets to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
@@ -327,12 +362,13 @@ public class App {
 		List<NamedLink> resources = catalog.getBooklets();
 		PageRender pageRender = new BookletsPageRender(resources);
 		pageRender.setTitle("Booklets");
-		File outputFile = new File(outputFileDir, "booklets.html");
+		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
 	private void buildCovenantPartnerCatalog(Catalog catalog) throws Exception {
-		logInfo("Writing all protected series to 'catalog-cpartner.html' ...");
+		final String fileName = computeFileNameForSite("catalog-cpartner.html");
+		logInfo("Writing all protected series to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
@@ -348,14 +384,15 @@ public class App {
 		Collections.sort(catalogSeries, Series.byTitle);
 
 		SeriesIndexPageRender pageRender = new SeriesIndexPageRender(catalogSeries);
-		pageRender.setTitle("Covenant Partner Catalog");
+		pageRender.setTitle("Covenant Partner Catalog for " + computeMinistryName());
 		pageRender.setIndexDescription(getCovenantPartnerIndexDescription());
-		File outputFile = new File(outputFileDir, "catalog-cpartner.html");
+		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
 	private void buildCORECatalog(Catalog catalog) throws Exception {
-		logInfo("Writing all public C.O.R.E. series to 'core.html' ...");
+		final String fileName = computeFileNameForSite("core.html");
+		logInfo("Writing all public C.O.R.E. series to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
@@ -374,12 +411,13 @@ public class App {
 		pageRender.setTitle("C.O.R.E. Programs");
 		pageRender.setIndexDescription(getCoreIndexDescription());
 		pageRender.setDepartment("CORE");
-		File outputFile = new File(outputFileDir, "core.html");
+		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
 	private void buildAskPastorCatalog(Catalog catalog) throws Exception {
-		logInfo("Writing all public Ask Pastor series to 'core.html' ...");
+		final String fileName = computeFileNameForSite("askpastor.html");
+		logInfo("Writing all public Ask Pastor series to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
@@ -395,7 +433,7 @@ public class App {
 		SeriesPageRender pageRender = new SeriesPageRender(series);
 		pageRender.setTitle("Ask The Pastor");
 		pageRender.setDepartment("Ask The Pastor");
-		File outputFile = new File(outputFileDir, "askpastor.html");
+		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
@@ -418,10 +456,11 @@ public class App {
 		if (!isUpload()) return;
 
 		AwsS3Helper s3Helper = AwsS3Helper.instance();
-		Bucket catalogBucket = s3Helper.getBucket(getS3BucketName());
-		if (catalogBucket == null) throw new Exception("Cannot find the catalog bucket: '" + getS3BucketName() + "'");
+		Bucket catalogBucket = s3Helper.getBucket(computeS3BucketName());
+		if (catalogBucket == null)
+			throw new Exception("Cannot find the catalog bucket: '" + computeS3BucketName() + "'");
 
-		logInfo("Uploading all generated pages to the " + getS3BucketName() + " S3 bucket ...");
+		logInfo("Uploading all generated pages to the " + computeS3BucketName() + " S3 bucket ...");
 		List<Future<Boolean>> futures = new ArrayList<>();
 		ExecutorService pool = Executors.newFixedThreadPool(8);
 		for (File page : RenderFactory.getCreatedPages()) {
@@ -462,7 +501,7 @@ public class App {
 	}
 
 	public static void logDebug(String msg) {
-		if (instance.isVerbose()) System.out.println(logIndent + msg);
+		if (instance == null || instance.isVerbose()) System.out.println(logIndent + msg);
 	}
 
 	public static void logInfo(String msg) {
@@ -507,8 +546,8 @@ public class App {
 
 		b.append("<table>");
 		b.append("  <tr>");
-		b.append(
-				"    <td><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/remix.jpeg' width='128'/></td>");
+		b.append("    <td><img src='https://s3-us-west-2.amazonaws.com/" + computeS3BucketName()
+				+ "/remix.jpeg' width='128'/></td>");
 		b.append("    <td>");
 		b.append("      <h3>");
 		b.append(
@@ -527,8 +566,8 @@ public class App {
 
 		b.append("<table>");
 		b.append("  <tr>");
-		b.append(
-				"    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/Covenant+Partner+Thumb.jpg' width='164'/></td>");
+		b.append("    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/" + computeS3BucketName()
+				+ "/Covenant+Partner+Thumb.jpg' width='164'/></td>");
 		b.append("    <td>");
 		b.append(
 				"      <p style=\"color:maroon;font-weight:bold;\">Please do not share access to this page with anyone.</p>");
@@ -553,8 +592,8 @@ public class App {
 
 		b.append("<table>");
 		b.append("  <tr>");
-		b.append(
-				"    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/corestaff.jpg' width='164'/></td>");
+		b.append("    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/" + computeS3BucketName()
+				+ "/corestaff.jpg' width='164'/></td>");
 		b.append("    <td>");
 		b.append("      <p>C.O.R.E.: Center of Our Relationship Experiences</p>");
 		b.append("      <p>");

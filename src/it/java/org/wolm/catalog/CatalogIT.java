@@ -3,17 +3,42 @@ package org.wolm.catalog;
 import static org.fest.assertions.Assertions.*;
 
 import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 import org.wolm.catalog.catalog.Catalog;
 
+@RunWith(Enclosed.class)
 public class CatalogIT {
 
-	@Test
-	public void shouldBeAbleToReadCatalog() throws Exception {
-		Catalog catalog = new Catalog();
-		catalog.setMessageSpreadsheetName("zITMessages");
-		catalog.populateFromGoogleSpreadsheets();
+	public static class WolCatalog {
+		@Test
+		public void defaultCatalog() throws Exception {
+			Catalog catalog = new Catalog();
+			catalog.populateFromGoogleSpreadsheets();
 
-		assertThat(catalog.getMessages().size()).isEqualTo(3);
+			assertThat(catalog.getSeries().size()).isGreaterThan(100);
+			assertThat(catalog.getMessages().size()).isGreaterThan(1000);
+		}
+
+		@Test
+		public void explicitCatalog() throws Exception {
+			Catalog catalog = new Catalog("WOL Series", "WOL Messages");
+			catalog.populateFromGoogleSpreadsheets();
+
+			assertThat(catalog.getSeries().size()).isGreaterThan(100);
+			assertThat(catalog.getMessages().size()).isGreaterThan(1000);
+		}
 	}
 
+	public static class TboCatalog {
+
+		@Test
+		public void explicitCatalog() throws Exception {
+			Catalog catalog = new Catalog("TBO Series", "TBO Messages");
+			catalog.populateFromGoogleSpreadsheets();
+
+			assertThat(catalog.getSeries().size()).isGreaterThan(100);
+			assertThat(catalog.getMessages().size()).isGreaterThan(1000);
+		}
+	}
 }
