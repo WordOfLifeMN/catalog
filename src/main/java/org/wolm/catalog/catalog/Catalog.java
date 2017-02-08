@@ -171,7 +171,7 @@ public class Catalog {
 				"Cannot find worksheet called 'Media Log' in the '" + messageSpreadsheetName + "' spreadsheet.");
 
 		List<String> columns = worksheet.getColumnNames();
-		for (String columnName : new String[] { "date", "name", "speaker", "audiolink", "videolink", "type",
+		for (String columnName : new String[] { "date", "name", "speaker", "audiolink", "videolink", "ministry", "type",
 				"visibility", "seriesname", "track", "description", "resources" })
 			if (!columns.contains(columnName)) {
 				throw new Exception(
@@ -211,6 +211,9 @@ public class Catalog {
 
 			// resources
 			msg.setResourcesAsString(row.getValue("resources"));
+
+			// ministry
+			msg.setMinistry(row.getValue("ministry"));
 
 			// type
 			msg.setType(row.getValue("type"));

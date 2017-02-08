@@ -32,6 +32,7 @@ public class Message {
 	private List<String> series = new ArrayList<>();
 	private List<Integer> trackNumbers = new ArrayList<>();
 	private String description;
+	private String ministry;
 	private String type;
 	private AccessLevel visibility;
 	private List<String> speakers;
@@ -47,10 +48,11 @@ public class Message {
 	private transient boolean isValid;
 	private transient boolean validationErrorHasBeenPrinted;
 
-	private static final List<String> TYPES = Arrays.asList(new String[] { "Ask Pastor", "C.O.R.E.", "Message",
-			"Prayer", "Q&A", "Song", "Special Event", "Testimony", "Training", "Word" });
-	private static final List<String> SPECIAL_LINKS = Arrays.asList(new String[] { "-", "n/a", "n/e", "abrogated",
-			"source", "in progress", "editing", "edited", "rendering", "rendered", "flash", "uploading" });
+	private static final List<String> MINISTRIES = Arrays.asList("WOL", "TBO", "CORE", "Ask Pastor");
+	private static final List<String> TYPES = Arrays.asList("Ask Pastor", "C.O.R.E.", "Message", "Prayer", "Q&A",
+			"Song", "Special Event", "Testimony", "Training", "Word");
+	private static final List<String> SPECIAL_LINKS = Arrays.asList("-", "n/a", "n/e", "abrogated", "source",
+			"in progress", "editing", "edited", "rendering", "rendered", "flash", "uploading");
 
 	public Message() {
 		super();
@@ -112,6 +114,14 @@ public class Message {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getMinistry() {
+		return ministry;
+	}
+
+	public void setMinistry(String ministry) {
+		this.ministry = ministry;
 	}
 
 	public String getType() {
@@ -263,6 +273,12 @@ public class Message {
 					"is in " + seriesCount + " series, but has track data for " + trackCount + " series");
 		}
 
+		if (getMinistry() == null) {
+			reportValidationError(s, "has no ministry");
+		}
+		else if (!MINISTRIES.contains(getMinistry())) {
+			reportValidationError(s, "has an unrecognized ministry '" + getMinistry() + "'");
+		}
 		if (getType() != null && !TYPES.contains(getType())) {
 			reportValidationWarning(s, "has an unknown type '" + getType() + "'");
 		}

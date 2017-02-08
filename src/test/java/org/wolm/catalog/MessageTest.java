@@ -30,6 +30,7 @@ public class MessageTest {
 			messageUnderTest.setDate(new Date());
 			messageUnderTest.setSeries(Arrays.asList(new String[] { "ONE", "TWO" }));
 			messageUnderTest.setTrackNumbers(Arrays.asList(new Integer[] { 1, 2 }));
+			messageUnderTest.setMinistry("WOL");
 			messageUnderTest.setType("Message");
 			messageUnderTest.setVisibilityAsString("Private");
 			messageUnderTest.setAudioLink(new URL("http://audio.com/link.wav"));
@@ -65,6 +66,20 @@ public class MessageTest {
 			messageUnderTest.setDate(null);
 			assertThat(messageUnderTest.isValid(outStream)).isFalse();
 			assertThat(validationMessage.toString()).contains("has no date");
+		}
+
+		@Test
+		public void ministryIsMissing() {
+			messageUnderTest.setMinistry(null);
+			assertThat(messageUnderTest.isValid(outStream)).isFalse();
+			assertThat(validationMessage.toString()).contains("has no ministry");
+		}
+
+		@Test
+		public void ministryIsInvalid() {
+			messageUnderTest.setMinistry("TESTING");
+			assertThat(messageUnderTest.isValid(outStream)).isFalse();
+			assertThat(validationMessage.toString()).contains("unrecognized ministry");
 		}
 
 		@Test
