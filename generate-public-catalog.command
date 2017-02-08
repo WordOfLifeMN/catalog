@@ -51,7 +51,7 @@ jar=$(findJar "$self")
 startTime=$(date +%s)
 
 # run the package, passing through parameters
-java -jar "$jar" --out=/Users/wolm/tmp --upload "$@"
+java -jar "$jar" --out=/Users/wolm/tmp/catalog --upload "$@"
 
 echo "Completed in $(( $(date +%s) - $startTime )) seconds"
 #sleep 5

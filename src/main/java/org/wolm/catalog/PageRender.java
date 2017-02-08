@@ -2,6 +2,7 @@ package org.wolm.catalog;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -26,6 +27,7 @@ public abstract class PageRender {
 
 	/** The singleton configuration for all Freemarker template processing */
 	private static final Configuration freemarkerConfig = new Configuration(Configuration.VERSION_2_3_21);
+
 	static {
 		freemarkerConfig.setClassForTemplateLoading(PageRender.class, "templates");
 		freemarkerConfig.setDefaultEncoding("UTF-8");
@@ -101,6 +103,14 @@ public abstract class PageRender {
 		page.substituteVariables(content);
 
 		// write the page out
+		File dir = outputFile.getParentFile();
+		if (!dir.exists()) dir.mkdirs();
+		if (!dir.exists()) {
+			throw new IOException("Output directory '" + dir + "' cannot be created.");
+		}
+		if (!dir.isDirectory()) {
+			throw new IllegalStateException("Output directory '" + dir + "' already exists, but is not a directory.");
+		}
 		try (PrintStream outStream = new PrintStream(new FileOutputStream(outputFile))) {
 			page.printPage(outStream);
 		}
