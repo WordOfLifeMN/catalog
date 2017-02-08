@@ -544,20 +544,20 @@ public class App {
 	private String getCatalogIndexDescription() {
 		StringBuilder b = new StringBuilder();
 
-		b.append("<table>");
-		b.append("  <tr>");
-		b.append("    <td><img src='https://s3-us-west-2.amazonaws.com/" + computeS3BucketName()
-				+ "/remix.jpeg' width='128'/></td>");
-		b.append("    <td>");
-		b.append("      <h3>");
-		b.append(
-				"        We&apos;re currently re-editing and bringing the past 10 years of messages and study materials ");
-		b.append("        up to date. New content will be added throughout 2016, so check back frequently!");
-		b.append("      </h3>");
-		b.append("    </td>");
-		b.append("  </tr>");
-		b.append("</table>");
-
+		// b.append("<table>");
+		// b.append(" <tr>");
+		// b.append(" <td><img src='https://s3-us-west-2.amazonaws.com/" + computeS3BucketName()
+		// + "/remix.jpeg' width='128'/></td>");
+		// b.append(" <td>");
+		// b.append(" <h3>");
+		// b.append(
+		// " We&apos;re currently re-editing and bringing the past 10 years of messages and study materials ");
+		// b.append(" up to date. New content will be added throughout 2017, so check back frequently!");
+		// b.append(" </h3>");
+		// b.append(" </td>");
+		// b.append(" </tr>");
+		// b.append("</table>");
+		//
 		return b.toString();
 	}
 
