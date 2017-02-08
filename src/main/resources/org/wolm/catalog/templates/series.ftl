@@ -1,12 +1,20 @@
-<#if department! == 'CORE'>
-	<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CORELogo-Small.jpg' />
-	<#assign defaultColor = '#840' />
-	<#assign highlightColor = '#5b2d00' />
-<#else>
-	<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XSmall.png' />
-	<#assign defaultColor = '#5a9e5d' />
-	<#assign highlightColor = '#337e37' />
-</#if>
+<#switch ministry>
+	<#case 'TBO'>
+		<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/TBOLogo-Small.png' />
+		<#assign defaultColor = '#424242' />
+		<#assign highlightColor = '#d15541' />
+		<#break>
+	<#case 'CORE'>
+		<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CORELogo-Small.jpg' />
+		<#assign defaultColor = '#840' />
+		<#assign highlightColor = '#5b2d00' />
+		<#break>
+	<#default>
+		<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XSmall.png' />
+		<#assign defaultColor = '#5a9e5d' />
+		<#assign highlightColor = '#337e37' />
+		<#break>
+</#switch>
 
 <style>
 	span.inprogress { color: #999; font-style: italic; }

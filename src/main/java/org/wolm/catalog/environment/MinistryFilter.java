@@ -23,13 +23,13 @@ public class MinistryFilter implements CatalogFilter {
 	private List<String> includedMinistries = new ArrayList<>();
 	private List<String> excludedMinistries = new ArrayList<>();
 
-	public MinistryFilter withMinistry(String... ministries) {
+	public MinistryFilter with(String... ministries) {
 		for (String ministry : ministries)
 			includedMinistries.add(ministry);
 		return this;
 	}
 
-	public MinistryFilter withoutMinistry(String... ministries) {
+	public MinistryFilter without(String... ministries) {
 		for (String ministry : ministries)
 			excludedMinistries.add(ministry);
 		return this;

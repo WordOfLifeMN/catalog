@@ -55,6 +55,14 @@ public abstract class PageRender {
 		addDataToModel("title", title);
 	}
 
+	public String getMinistry() {
+		return (String) getDataFromModel("ministry");
+	}
+
+	public void setMinistry(String ministry) {
+		addDataToModel("ministry", ministry);
+	}
+
 	/**
 	 * Retrieves the current value of a model data element
 	 * 

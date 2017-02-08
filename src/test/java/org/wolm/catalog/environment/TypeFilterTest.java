@@ -12,7 +12,7 @@ import org.wolm.series.Series;
 public class TypeFilterTest {
 
 	public static class SeriesInclusionTests {
-		TypeFilter filterUnderTest = new TypeFilter().withType("Message");
+		TypeFilter filterUnderTest = new TypeFilter().with("Message");
 
 		@Test
 		public void seriesWithNoMessagesShouldNotBeIncluded() {
@@ -61,7 +61,7 @@ public class TypeFilterTest {
 	}
 
 	public static class MessageInclusionTests {
-		TypeFilter filterUnderTest = new TypeFilter().withType("Message");
+		TypeFilter filterUnderTest = new TypeFilter().with("Message");
 
 		@Test
 		public void seriesWithTheRightTypeShouldBeIncluded() {
@@ -85,7 +85,7 @@ public class TypeFilterTest {
 	}
 
 	public static class SeriesExclusionTests {
-		TypeFilter filterUnderTest = new TypeFilter().withoutType("Song", "Testimony");
+		TypeFilter filterUnderTest = new TypeFilter().without("Song", "Testimony");
 
 		@Test
 		public void seriesWithNoMessagesShouldNotBeIncluded() {
@@ -159,7 +159,7 @@ public class TypeFilterTest {
 	}
 
 	public static class MessageExclusionTests {
-		TypeFilter filterUnderTest = new TypeFilter().withoutType("Song");
+		TypeFilter filterUnderTest = new TypeFilter().without("Song");
 
 		@Test
 		public void seriesWithTheRightTypeShouldBeIncluded() {

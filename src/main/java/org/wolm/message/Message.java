@@ -49,8 +49,8 @@ public class Message {
 	private transient boolean validationErrorHasBeenPrinted;
 
 	private static final List<String> MINISTRIES = Arrays.asList("WOL", "TBO", "CORE", "Ask Pastor");
-	private static final List<String> TYPES = Arrays.asList("Ask Pastor", "C.O.R.E.", "Message", "Prayer", "Q&A",
-			"Song", "Special Event", "Testimony", "Training", "Word");
+	private static final List<String> TYPES = Arrays.asList("Message", "Prayer", "Q&A", "Song", "Special Event",
+			"Testimony", "Training", "Word");
 	private static final List<String> SPECIAL_LINKS = Arrays.asList("-", "n/a", "n/e", "abrogated", "source",
 			"in progress", "editing", "edited", "rendering", "rendered", "flash", "uploading");
 

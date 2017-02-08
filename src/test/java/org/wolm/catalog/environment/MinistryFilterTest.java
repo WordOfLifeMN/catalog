@@ -12,7 +12,7 @@ import org.wolm.series.Series;
 public class MinistryFilterTest {
 
 	public static class SeriesInclusionTests {
-		MinistryFilter filterUnderTest = new MinistryFilter().withMinistry("WOL");
+		MinistryFilter filterUnderTest = new MinistryFilter().with("WOL");
 
 		@Test
 		public void seriesWithNoMessagesShouldNotBeIncluded() {
@@ -61,7 +61,7 @@ public class MinistryFilterTest {
 	}
 
 	public static class MessageInclusionTests {
-		MinistryFilter filterUnderTest = new MinistryFilter().withMinistry("WOL");
+		MinistryFilter filterUnderTest = new MinistryFilter().with("WOL");
 
 		@Test
 		public void seriesWithTheRightMinistryShouldBeIncluded() {
@@ -85,7 +85,7 @@ public class MinistryFilterTest {
 	}
 
 	public static class SeriesExclusionTests {
-		MinistryFilter filterUnderTest = new MinistryFilter().withoutMinistry("CORE", "Ask Pastor");
+		MinistryFilter filterUnderTest = new MinistryFilter().without("CORE", "Ask Pastor");
 
 		@Test
 		public void seriesWithNoMessagesShouldNotBeIncluded() {
@@ -159,7 +159,7 @@ public class MinistryFilterTest {
 	}
 
 	public static class MessageExclusionTests {
-		MinistryFilter filterUnderTest = new MinistryFilter().withoutMinistry("CORE");
+		MinistryFilter filterUnderTest = new MinistryFilter().without("CORE");
 
 		@Test
 		public void seriesWithTheRightMinistryShouldBeIncluded() {

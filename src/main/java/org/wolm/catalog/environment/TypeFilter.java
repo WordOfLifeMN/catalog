@@ -23,13 +23,13 @@ public class TypeFilter implements CatalogFilter {
 	private List<String> includedTypes = new ArrayList<>();
 	private List<String> excludedTypes = new ArrayList<>();
 
-	public TypeFilter withType(String... types) {
+	public TypeFilter with(String... types) {
 		for (String type : types)
 			includedTypes.add(type);
 		return this;
 	}
 
-	public TypeFilter withoutType(String... types) {
+	public TypeFilter without(String... types) {
 		for (String type : types)
 			excludedTypes.add(type);
 		return this;

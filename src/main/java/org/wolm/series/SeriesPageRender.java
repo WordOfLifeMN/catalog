@@ -15,14 +15,6 @@ public class SeriesPageRender extends PageRender {
 		setTitle(series.getTitle());
 	}
 
-	public String getDepartment() {
-		return (String) getDataFromModel("department");
-	}
-
-	public void setDepartment(String department) {
-		addDataToModel("department", department);
-	}
-
 	@Override
 	public void render(File pageFile) throws Exception {
 		App.logInfo("Writing page for series '" + series.getTitle() + "' to file " + pageFile.getName() + " ...");

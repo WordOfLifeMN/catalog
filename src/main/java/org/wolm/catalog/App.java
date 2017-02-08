@@ -21,10 +21,10 @@ import org.wolm.catalog.catalog.SeriesIndexWithPromoPageRender;
 import org.wolm.catalog.environment.BookletFilter;
 import org.wolm.catalog.environment.EntirelyWithinYearFilter;
 import org.wolm.catalog.environment.IntersectingWithYearFilter;
+import org.wolm.catalog.environment.MinistryFilter;
 import org.wolm.catalog.environment.RecentFilter;
 import org.wolm.catalog.environment.RenderEnvironment;
 import org.wolm.catalog.environment.StartedWithinYearFilter;
-import org.wolm.catalog.environment.TypeFilter;
 import org.wolm.catalog.environment.VisibilityFilter;
 import org.wolm.message.Message;
 import org.wolm.series.Series;
@@ -54,13 +54,10 @@ public class App {
 	@Parameter(names = { "-u", "--upload" }, description = "Upload final files to S3.")
 	private boolean upload = false;
 
-	@Parameter(names = { "-s", "--site" }, description = "The site to process (WOL or TBO). WOL is default.")
-	private String siteAcronym = "WOL";
-
 	private RenderEnvironment env = RenderEnvironment.instance();
 
 	private String wolS3BucketName = "wordoflife.mn.catalog";
-	private String tboS3BucketName = "thebridgeoutreach.mn.catalog";
+	// private String tboS3BucketName = "thebridgeoutreach.mn.catalog";
 	private String s3ObjectPrefix = null;
 
 	/** Policy to define series inclusion with a date range (like a year) */
@@ -155,14 +152,7 @@ public class App {
 	}
 
 	public String computeS3BucketName() {
-		switch (siteAcronym) {
-		case "WOL":
-			return wolS3BucketName;
-		case "TBO":
-			return tboS3BucketName;
-		default:
-			throw new IllegalStateException("Unknown site '" + siteAcronym + "'");
-		}
+		return wolS3BucketName;
 	}
 
 	public String getS3ObjectPrefix() {
@@ -180,78 +170,95 @@ public class App {
 	 */
 	public void catalog() throws Exception {
 
-		logInfo("Downloading " + siteAcronym + " catalog from Google ...");
-		Catalog catalog = new Catalog(siteAcronym + " Series", siteAcronym + " Messages");
+		logInfo("Downloading catalog from Google ...");
+		Catalog catalog = new Catalog("WOL Series", "WOL Messages");
 		catalog.populateFromGoogleSpreadsheets();
 
-		buildRecentMessages(catalog);
-		buildRecentSeries(catalog);
-		buildSeriesForYear(catalog, 2016, InclusionPolicy.startedWithin);
-		buildSeriesForYear(catalog, 2016, InclusionPolicy.intersectingWith);
-		buildPublicCatalog(catalog);
-		buildHandoutsAndResources(catalog);
-		buildBooklets(catalog);
+		// Word of Life
+		buildRecentMessages("WOL", catalog);
+		buildRecentSeries("WOL", catalog);
+		buildSeriesForYear("WOL", catalog, 2017, InclusionPolicy.startedWithin);
+		buildSeriesForYear("WOL", catalog, 2017, InclusionPolicy.intersectingWith);
+		buildPublicCatalog("WOL", catalog);
+		buildHandoutsAndResources("WOL", catalog);
+		buildBooklets("WOL", catalog);
 
-		buildCovenantPartnerCatalog(catalog);
+		buildCovenantPartnerCatalog("WOL", catalog);
 
-		buildCORECatalog(catalog);
-		buildAskPastorCatalog(catalog);
+		// The Bridge Outreach
+		buildPublicCatalog("TBO", catalog);
+
+		// C.O.R.E.
+		buildPublicCatalog("CORE", catalog);
+
+		// Ask the Pastor
+		buildPublicCatalog("Ask Pastor", catalog);
 
 		logInfo("Catalog file generation is complete");
 	}
 
-	private String computeFileNameForSite(String baseName) {
-		switch (siteAcronym) {
-		case "WOL":
-			return baseName;
-		default:
-			int dot = baseName.lastIndexOf('.');
-			if (dot == -1) return baseName;
-			return baseName.substring(0, dot) + "-" + siteAcronym.toLowerCase() + baseName.substring(dot);
-		}
+	/**
+	 * @param name Basic file name for the page
+	 * @param ministry Ministry this page is for
+	 * @return A version of the file name that is for the specific ministry
+	 */
+	private String computeFileNameForSite(String name, String ministry) {
+		if (ministry.equals("WOL")) return name;
+
+		// make a file-safe version of the ministry
+		ministry = ministry.toLowerCase().replaceAll("[^a-z0-9]+", "");
+
+		int dot = name.lastIndexOf('.');
+		if (dot == -1) return name + ministry;
+		return name.substring(0, dot) + "." + ministry + name.substring(dot);
 	}
 
-	private String computeMinistryName() {
-		switch (siteAcronym) {
+	private String computeMinistryName(String ministry) {
+		switch (ministry) {
 		case "WOL":
 			return "Word of Life Ministries";
 		case "TBO":
 			return "The Bridge Outreach";
+		case "CORE":
+			return "C.O.R.E.";
+		case "Ask Pastor":
+			return "Ask the Pastor";
 		default:
-			throw new IllegalStateException("Unknown site '" + siteAcronym + "'");
+			throw new IllegalStateException("Unknown ministry '" + ministry + "'");
 		}
 	}
 
-	private void buildRecentMessages(Catalog catalog) throws Exception {
-		final String fileName = computeFileNameForSite("recent-messages.html");
+	private void buildRecentMessages(String ministry, Catalog catalog) throws Exception {
+		final String fileName = computeFileNameForSite("recent-messages.html", ministry);
 		logInfo("Writing recent messages to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
-		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+		env.addFilter(new MinistryFilter().with(ministry));
 		env.addFilter(new RecentFilter().withDays(60));
 		env.addFilter(new BookletFilter(false));
 
 		// find messages
 		Series recentMessages = catalog.getFilteredMessagesInASeries();
-		recentMessages.setTitle("Recent Messages from " + computeMinistryName());
+		recentMessages.setTitle("Recent Messages from " + computeMinistryName(ministry));
 		recentMessages.setDescription("Recent messages from the last " + 60 + " days.");
 		recentMessages.sortMessages(Message.byDateDescending);
 
 		PageRender pageRender = new SeriesPageRender(recentMessages);
+		pageRender.setMinistry(ministry);
 		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
-	private void buildRecentSeries(Catalog catalog) throws Exception {
-		final String fileName = computeFileNameForSite("recent-series.html");
+	private void buildRecentSeries(String ministry, Catalog catalog) throws Exception {
+		final String fileName = computeFileNameForSite("recent-series.html", ministry);
 		logInfo("Writing recent series to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
-		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+		env.addFilter(new MinistryFilter().with(ministry));
 		env.addFilter(new RecentFilter().withDays(60));
 		env.addFilter(new BookletFilter(false));
 
@@ -262,8 +269,9 @@ public class App {
 
 		// build the page renderer
 		PageRender pageRender = new SeriesIndexWithPromoPageRender(series);
-		pageRender.setTitle("Recent Series from " + computeMinistryName());
+		pageRender.setTitle("Recent Series from " + computeMinistryName(ministry));
 		addCurrentSeriesPromo(catalog, (SeriesIndexWithPromoPageRender) pageRender);
+		pageRender.setMinistry(ministry);
 		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
@@ -271,19 +279,21 @@ public class App {
 	/**
 	 * Gets series for a specific year.
 	 * 
+	 * @param ministry Name of ministry to build page for
 	 * @param catalog Source catalog
 	 * @param year Year to extract series for
 	 * @param inclusion Determines how to select whether a series is in a year or not
 	 * @throws Exception
 	 */
-	private void buildSeriesForYear(Catalog catalog, int year, InclusionPolicy inclusion) throws Exception {
-		final String fileName = computeFileNameForSite(inclusion.toString() + year + "-series.html");
+	private void buildSeriesForYear(String ministry, Catalog catalog, int year, InclusionPolicy inclusion)
+			throws Exception {
+		final String fileName = computeFileNameForSite(inclusion.toString() + year + "-series.html", ministry);
 		logInfo("Writing " + year + " series to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
-		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+		env.addFilter(new MinistryFilter().with(ministry));
 		switch (inclusion) {
 		case entirelyWithin:
 			env.addFilter(new EntirelyWithinYearFilter(year));
@@ -302,7 +312,8 @@ public class App {
 		Collections.sort(series, Series.byTitle);
 
 		PageRender pageRender = new SeriesIndexWithPromoPageRender(series);
-		pageRender.setTitle("Messages and Series from " + computeMinistryName() + " in " + year);
+		pageRender.setTitle("Messages and Series from " + computeMinistryName(ministry) + " in " + year);
+		pageRender.setMinistry(ministry);
 		if (year == new GregorianCalendar().get(Calendar.YEAR)) {
 			addCurrentSeriesPromo(catalog, (SeriesIndexWithPromoPageRender) pageRender);
 		}
@@ -310,14 +321,14 @@ public class App {
 		pageRender.render(outputFile);
 	}
 
-	private void buildPublicCatalog(Catalog catalog) throws Exception {
-		final String fileName = computeFileNameForSite("catalog.html");
+	private void buildPublicCatalog(String ministry, Catalog catalog) throws Exception {
+		final String fileName = computeFileNameForSite("catalog.html", ministry);
 		logInfo("Writing all public series to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
-		env.addFilter(new TypeFilter().withoutType("C.O.R.E.", "Ask Pastor"));
+		env.addFilter(new MinistryFilter().with(ministry));
 
 		// get all completed and in-progress series plus all stand-alone messages
 		List<Series> catalogSeries = catalog.getCompletedSeries();
@@ -328,52 +339,55 @@ public class App {
 		Collections.sort(catalogSeries, Series.byTitle);
 
 		PageRender pageRender = new SeriesIndexPageRender(catalogSeries);
-		pageRender.setTitle(computeMinistryName() + " Catalog");
+		pageRender.setTitle(computeMinistryName(ministry) + " Catalog");
+		pageRender.setMinistry(ministry);
 		((SeriesIndexPageRender) pageRender).setIndexDescription(getCatalogIndexDescription());
 		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
-	private void buildHandoutsAndResources(Catalog catalog) throws Exception {
-		final String fileName = computeFileNameForSite("resources.html");
+	private void buildHandoutsAndResources(String ministry, Catalog catalog) throws Exception {
+		final String fileName = computeFileNameForSite("resources.html", ministry);
 		logInfo("Writing handouts and resources to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
-		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+		env.addFilter(new MinistryFilter().with(ministry));
 
 		List<NamedLink> resources = catalog.getHandoutsAndResources();
 		PageRender pageRender = new ResourcesPageRender(resources);
 		pageRender.setTitle("Handouts and Resources");
+		pageRender.setMinistry(ministry);
 		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
-	private void buildBooklets(Catalog catalog) throws Exception {
-		final String fileName = computeFileNameForSite("booklets.html");
+	private void buildBooklets(String ministry, Catalog catalog) throws Exception {
+		final String fileName = computeFileNameForSite("booklets.html", ministry);
 		logInfo("Writing booklets to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
-		env.addFilter(new TypeFilter().withoutType("C.O.R.E."));
+		env.addFilter(new MinistryFilter().with());
 
 		List<NamedLink> resources = catalog.getBooklets();
 		PageRender pageRender = new BookletsPageRender(resources);
 		pageRender.setTitle("Booklets");
+		pageRender.setMinistry(ministry);
 		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
-	private void buildCovenantPartnerCatalog(Catalog catalog) throws Exception {
-		final String fileName = computeFileNameForSite("catalog-cpartner.html");
+	private void buildCovenantPartnerCatalog(String ministry, Catalog catalog) throws Exception {
+		final String fileName = computeFileNameForSite("catalog-cpartner.html", ministry);
 		logInfo("Writing all protected series to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PROTECTED));
-		env.addFilter(new TypeFilter().withoutType("C.O.R.E.", "Ask Pastor"));
+		env.addFilter(new MinistryFilter().with(ministry));
 
 		// get all completed and in-progress series
 		List<Series> catalogSeries = catalog.getCompletedSeries();
@@ -384,55 +398,9 @@ public class App {
 		Collections.sort(catalogSeries, Series.byTitle);
 
 		SeriesIndexPageRender pageRender = new SeriesIndexPageRender(catalogSeries);
-		pageRender.setTitle("Covenant Partner Catalog for " + computeMinistryName());
+		pageRender.setTitle("Covenant Partner Catalog for " + computeMinistryName(ministry));
 		pageRender.setIndexDescription(getCovenantPartnerIndexDescription());
-		File outputFile = new File(outputFileDir, fileName);
-		pageRender.render(outputFile);
-	}
-
-	private void buildCORECatalog(Catalog catalog) throws Exception {
-		final String fileName = computeFileNameForSite("core.html");
-		logInfo("Writing all public C.O.R.E. series to '" + fileName + "' ...");
-
-		// prepare environment
-		env.clearFilters();
-		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
-		env.addFilter(new TypeFilter().withType("C.O.R.E."));
-
-		// get all completed and in-progress series
-		List<Series> coreSeries = catalog.getCompletedSeries();
-		coreSeries.addAll(catalog.getInProgressSeries());
-		coreSeries.addAll(catalog.getStandAloneMessagesInSeriesByMessage());
-		coreSeries = SeriesHelper.withoutDuplicates(coreSeries);
-		Collections.sort(coreSeries, Series.byTitle);
-
-		// build the HTML page
-		SeriesIndexPageRender pageRender = new SeriesIndexPageRender(coreSeries);
-		pageRender.setTitle("C.O.R.E. Programs");
-		pageRender.setIndexDescription(getCoreIndexDescription());
-		pageRender.setDepartment("CORE");
-		File outputFile = new File(outputFileDir, fileName);
-		pageRender.render(outputFile);
-	}
-
-	private void buildAskPastorCatalog(Catalog catalog) throws Exception {
-		final String fileName = computeFileNameForSite("askpastor.html");
-		logInfo("Writing all public Ask Pastor series to '" + fileName + "' ...");
-
-		// prepare environment
-		env.clearFilters();
-		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
-		env.addFilter(new TypeFilter().withType("Ask Pastor"));
-
-		// get all completed and in-progress series
-		Series series = catalog.getFilteredMessagesInASeries();
-		series.setTitle("Ask The Pastor");
-		series.setDescription(getAskPastorDescription());
-
-		// build the HTML page
-		SeriesPageRender pageRender = new SeriesPageRender(series);
-		pageRender.setTitle("Ask The Pastor");
-		pageRender.setDepartment("Ask The Pastor");
+		pageRender.setMinistry(ministry);
 		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
@@ -570,7 +538,7 @@ public class App {
 				+ "/Covenant+Partner+Thumb.jpg' width='164'/></td>");
 		b.append("    <td>");
 		b.append(
-				"      <p style=\"color:maroon;font-weight:bold;\">Please do not share access to this page with anyone.</p>");
+				"      <p style=\"color:red;font-weight:bold;\">Please do not share access to this page with anyone.</p>");
 		b.append(
 				"      <p>Any questions about access to this page should be directed to Pastor Vern or Kevin Murray.</p>");
 		b.append("      <p>");
@@ -587,44 +555,4 @@ public class App {
 		return b.toString();
 	}
 
-	private String getCoreIndexDescription() {
-		StringBuilder b = new StringBuilder();
-
-		b.append("<table>");
-		b.append("  <tr>");
-		b.append("    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/" + computeS3BucketName()
-				+ "/corestaff.jpg' width='164'/></td>");
-		b.append("    <td>");
-		b.append("      <p>C.O.R.E.: Center of Our Relationship Experiences</p>");
-		b.append("      <p>");
-		b.append(
-				"        Mary Peltz is a certified counselor with A.A.C.C. and is a Co-Pastor at Word of Life Ministries ");
-		b.append("        which is affiliated and licensed through ");
-		b.append("        <a href=\"http://www.afcminternational.org\" target=\"_blank\">A.F.C.M. International</a>.");
-		b.append("      </p>");
-		b.append("      <p>");
-		b.append("        Mary specializes in communication skills and restoring relationships and families. ");
-		b.append(
-				"        She administrates C.O.R.E. programs which is a \"Freedom From\" program that brings help to ");
-		b.append(
-				"        schools, group homes and staff situations. She is currently facilitating C.O.R.E. Programs at ");
-		b.append("        the jails in the Northern Minnesota areas.");
-		b.append("      </p>");
-		b.append("    </td>");
-		b.append("  </tr>");
-		b.append("</table>");
-
-		return b.toString();
-	}
-
-	private String getAskPastorDescription() {
-		return "<br/><em>Always be prepared to give an answer to everyone who asks you to give the "
-				+ "reason for the hope that you have. (1 Peter 3:15)</em><br/><br/>"
-				+ "Too many times we see things in the world around us or find things in the Word of God that we "
-				+ "don't understand. If you have questions about what you see, read, or hear, these short messages "
-				+ "might have the answers you are looking for. <br/><br/>"
-				+ "Pastor Vern fields questions submitted to him from the congregation or anyone online. "
-				+ "If you have a question for Pastor Vern, please "
-				+ "<a href=\"mailto:wordoflife.mn@gmail.com\">email it to us</a>.<br/><br/>";
-	}
 }

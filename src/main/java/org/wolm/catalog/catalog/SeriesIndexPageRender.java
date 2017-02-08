@@ -14,7 +14,7 @@ import org.wolm.series.SeriesUrlRender;
 public class SeriesIndexPageRender extends PageRender {
 
 	public SeriesIndexPageRender(List<Series> seriesList) {
-		super("series-index-block");
+		super("series-index");
 		setSeriesList(seriesList);
 	}
 
@@ -38,14 +38,6 @@ public class SeriesIndexPageRender extends PageRender {
 		addDataToModel("description", indexDescription);
 	}
 
-	public String getDepartment() {
-		return (String) getDataFromModel("department");
-	}
-
-	public void setDepartment(String department) {
-		addDataToModel("department", department);
-	}
-
 	@Override
 	public void render(File pageFile) throws Exception {
 		App.logInfo("Writing series index to file '" + pageFile.getName() + "' ...");
@@ -63,7 +55,7 @@ public class SeriesIndexPageRender extends PageRender {
 					continue;
 				}
 				SeriesPageRender seriesRender = new SeriesPageRender(series);
-				seriesRender.setDepartment(getDepartment());
+				seriesRender.setMinistry(getMinistry());
 				File seriesFile = new File(pageDirectory, new SeriesUrlRender(series).getFileName());
 				seriesRender.render(seriesFile);
 			}
