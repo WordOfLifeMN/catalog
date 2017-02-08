@@ -535,7 +535,7 @@ public class App {
 		b.append("<table>");
 		b.append("  <tr>");
 		b.append("    <td valign=\"top\"><img src='https://s3-us-west-2.amazonaws.com/" + computeS3BucketName()
-				+ "/Covenant+Partner+Thumb.jpg' width='164'/></td>");
+				+ "/CovenantPartnerThumb.jpg' width='164'/></td>");
 		b.append("    <td>");
 		b.append(
 				"      <p style=\"color:red;font-weight:bold;\">Please do not share access to this page with anyone.</p>");
