@@ -54,8 +54,11 @@ public class App {
 	@Parameter(names = { "-o", "--out" }, description = "Output file directory.")
 	private String outputFileDir = null;
 
-	@Parameter(names = { "-u", "--upload" }, description = "Upload final files to S3.")
-	private boolean upload = false;
+	@Parameter(names = { "--for-upload" }, description = "Prepare files for S3 (use S3 URLs).")
+	private boolean prepareForUpload = false;
+
+	@Parameter(names = { "--do-upload" }, description = "Upload final files to S3.")
+	private boolean uploadToS3 = false;
 
 	private RenderEnvironment env = RenderEnvironment.instance();
 
@@ -120,7 +123,7 @@ public class App {
 	 * 
 	 */
 	private void initRenderFactory() {
-		if (isUpload()) {
+		if (forUpload()) {
 			// uploading to S3: the baseref is the URL to the s3 bucket
 			RenderFactory.setBaseRef("http://s3-us-west-2.amazonaws.com/" + computeS3BucketName()
 					+ (getS3ObjectPrefix() == null ? "" : "/" + getS3ObjectPrefix()));
@@ -147,12 +150,28 @@ public class App {
 		this.verbose = verbose;
 	}
 
-	public boolean isUpload() {
-		return upload;
+	/**
+	 * Determines whether the pages should be built for uploading to S3 or not. This affects the URLs used for
+	 * referencing files
+	 * 
+	 * @return <code>true</code> if we should build pages for uploading to S3. <code>false</code> if the pages should be
+	 * built for file browsing
+	 */
+	public boolean forUpload() {
+		return prepareForUpload;
+	}
+
+	/**
+	 * Determines whether we should actually upload the files to S3
+	 * 
+	 * @return <code>true</code> to upload the files, <code>false</code> to just leave them local
+	 */
+	public boolean doUpload() {
+		return uploadToS3;
 	}
 
 	public void setUpload(boolean upload) {
-		this.upload = upload;
+		this.prepareForUpload = upload;
 	}
 
 	public String computeS3BucketName() {
@@ -460,7 +479,7 @@ public class App {
 	/** Upload all pages that have been created to S3 (if requested) */
 	public void upload() throws Exception {
 		// bail if we're not supposed to upload
-		if (!isUpload()) return;
+		if (!doUpload()) return;
 
 		AwsS3Helper s3Helper = AwsS3Helper.instance();
 		Bucket catalogBucket = s3Helper.getBucket(computeS3BucketName());

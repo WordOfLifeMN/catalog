@@ -138,8 +138,8 @@ public class GoogleWorksheet {
 	 * @throws URISyntaxException
 	 */
 	@Nullable
-	public List<GoogleRow> getRowsOrderedBy(@Nonnull final String columnName) throws AuthenticationException,
-			IOException, ServiceException, URISyntaxException {
+	public List<GoogleRow> getRowsOrderedBy(@Nonnull final String columnName)
+			throws AuthenticationException, IOException, ServiceException, URISyntaxException {
 		return getRowsOrderedBy(columnName, true);
 	}
 

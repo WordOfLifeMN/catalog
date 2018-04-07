@@ -30,6 +30,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
@@ -178,8 +179,11 @@ public class AwsS3Helper {
 	 */
 	@Nullable
 	public S3ObjectSummary getObjectSummary(@Nonnull Bucket bucket, @Nonnull String objectKey) {
-		List<S3ObjectSummary> list = getObjectList(bucket, null, objectKey);
-		return list.isEmpty() ? null : list.get(0);
+		ObjectListing listObjects = getS3Client()
+				.listObjects(new ListObjectsRequest().withBucketName(bucket.getName()).withPrefix(objectKey));
+		for (S3ObjectSummary summary : listObjects.getObjectSummaries())
+			if (summary.getKey().equals(objectKey)) return summary;
+		return null;
 	}
 
 	/**

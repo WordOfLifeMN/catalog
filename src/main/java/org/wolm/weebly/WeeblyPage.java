@@ -194,8 +194,8 @@ public class WeeblyPage {
 	/**
 	 * Adds a new bread-crumb to the title of this page.
 	 * 
-	 * A Weebly page has a title that consists of reverse bread-crumbs. Specifically something like
-	 * "Media Catalog - Word of Life Ministries". This method will add a new bread-crumb prefix to the title
+	 * A Weebly page has a title that consists of reverse bread-crumbs. Specifically something like "Media Catalog -
+	 * Word of Life Ministries". This method will add a new bread-crumb prefix to the title
 	 * 
 	 * @param breadcrumb Bread-crumb to add to the beginning of the title
 	 */
