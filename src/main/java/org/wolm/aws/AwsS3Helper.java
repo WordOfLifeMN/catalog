@@ -1,15 +1,18 @@
 package org.wolm.aws;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,11 +28,12 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
+import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 /**
@@ -73,8 +77,8 @@ public class AwsS3Helper {
 	@Nonnull
 	private AmazonS3 getS3Client() {
 		if (s3Client == null) {
-			s3Client = new AmazonS3Client(new PropertiesFileCredentialsProvider(System.getenv("HOME")
-					+ "/.wolm/aws.s3.properties"));
+			s3Client = new AmazonS3Client(
+					new PropertiesFileCredentialsProvider(System.getenv("HOME") + "/.wolm/aws.s3.properties"));
 			s3Client.setRegion(Region.getRegion(Regions.US_WEST_2));
 		}
 		return s3Client;
@@ -139,9 +143,32 @@ public class AwsS3Helper {
 	@Nonnull
 	private PutObjectResult uploadPublicFile(@Nonnull String bucketName, @Nonnull String objectKey,
 			@Nonnull File fileToUpload) {
-		return getS3Client().putObject(
-				new PutObjectRequest(bucketName, objectKey, fileToUpload)
-						.withCannedAcl(CannedAccessControlList.PublicRead));
+		return getS3Client().putObject(new PutObjectRequest(bucketName, objectKey, fileToUpload)
+				.withCannedAcl(CannedAccessControlList.PublicRead));
+	}
+
+	/**
+	 * Given a bucket, will return a list of the objects in the bucket
+	 * 
+	 * @param bucket Bucket
+	 * @param prefix Optional prefix
+	 * @param regex Optional pattern to match. {@code null} to return everything
+	 * @return List of object summaries
+	 */
+	public List<S3ObjectSummary> getObjectList(@Nonnull Bucket bucket, @Nullable String prefix,
+			@Nullable String regex) {
+		ListObjectsRequest request = new ListObjectsRequest().withBucketName(bucket.getName());
+		if (prefix != null) request.setPrefix(prefix);
+
+		Pattern pattern = null;
+		if (regex != null) pattern = Pattern.compile(regex);
+
+		List<S3ObjectSummary> summaries = new ArrayList<>();
+		for (S3ObjectSummary summary : getS3Client().listObjects(request).getObjectSummaries()) {
+			if (pattern == null || pattern.matcher(summary.getKey()).matches()) summaries.add(summary);
+		}
+
+		return summaries;
 	}
 
 	/**
@@ -151,11 +178,8 @@ public class AwsS3Helper {
 	 */
 	@Nullable
 	public S3ObjectSummary getObjectSummary(@Nonnull Bucket bucket, @Nonnull String objectKey) {
-		ObjectListing listObjects = getS3Client().listObjects(
-				new ListObjectsRequest().withBucketName(bucket.getName()).withPrefix(objectKey));
-		for (S3ObjectSummary summary : listObjects.getObjectSummaries())
-			if (summary.getKey().equals(objectKey)) return summary;
-		return null;
+		List<S3ObjectSummary> list = getObjectList(bucket, null, objectKey);
+		return list.isEmpty() ? null : list.get(0);
 	}
 
 	/**
@@ -208,5 +232,17 @@ public class AwsS3Helper {
 		catch (MalformedURLException | UnsupportedEncodingException e) {
 		}
 		return null;
+	}
+
+	/**
+	 * Gets an input stream for a specific object.
+	 * 
+	 * @param bucketName Bucket
+	 * @param key Object key
+	 * @return Input stream for the object. Caller must close()
+	 */
+	public InputStream getContent(@Nonnull String bucketName, @Nonnull String key) {
+		S3Object object = getS3Client().getObject(new GetObjectRequest(bucketName, key));
+		return object.getObjectContent();
 	}
 }

@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
 
 import org.wolm.aws.AwsS3Helper;
 import org.wolm.catalog.catalog.BookletsPageRender;
-import org.wolm.catalog.catalog.Catalog;
+import org.wolm.catalog.catalog.MediaCatalog;
 import org.wolm.catalog.catalog.ResourcesPageRender;
 import org.wolm.catalog.catalog.SeriesIndexPageRender;
 import org.wolm.catalog.catalog.SeriesIndexWithPromoPageRender;
@@ -27,6 +27,9 @@ import org.wolm.catalog.environment.RenderEnvironment;
 import org.wolm.catalog.environment.StartedWithinYearFilter;
 import org.wolm.catalog.environment.VisibilityFilter;
 import org.wolm.message.Message;
+import org.wolm.prophesy.PropheciesPageRender;
+import org.wolm.prophesy.Prophecy;
+import org.wolm.prophesy.ProphecyCatalog;
 import org.wolm.series.Series;
 import org.wolm.series.SeriesHelper;
 import org.wolm.series.SeriesPageRender;
@@ -102,7 +105,8 @@ public class App {
 
 		app.init();
 
-		app.catalog();
+		app.mediaCatalog();
+		app.prophecyCatalog();
 
 		app.upload();
 	}
@@ -168,10 +172,10 @@ public class App {
 	 * 
 	 * @throws IOException
 	 */
-	public void catalog() throws Exception {
+	public void mediaCatalog() throws Exception {
 
 		logInfo("Downloading catalog from Google ...");
-		Catalog catalog = new Catalog("WOL Series", "WOL Messages");
+		MediaCatalog catalog = new MediaCatalog("WOL Series", "WOL Messages");
 		catalog.populateFromGoogleSpreadsheets();
 
 		// Word of Life
@@ -228,7 +232,7 @@ public class App {
 		}
 	}
 
-	private void buildRecentMessages(String ministry, Catalog catalog) throws Exception {
+	private void buildRecentMessages(String ministry, MediaCatalog catalog) throws Exception {
 		final String fileName = computeFileNameForSite("recent-messages.html", ministry);
 		logInfo("Writing recent messages to '" + fileName + "' ...");
 
@@ -251,7 +255,7 @@ public class App {
 		pageRender.render(outputFile);
 	}
 
-	private void buildRecentSeries(String ministry, Catalog catalog) throws Exception {
+	private void buildRecentSeries(String ministry, MediaCatalog catalog) throws Exception {
 		final String fileName = computeFileNameForSite("recent-series.html", ministry);
 		logInfo("Writing recent series to '" + fileName + "' ...");
 
@@ -285,7 +289,7 @@ public class App {
 	 * @param inclusion Determines how to select whether a series is in a year or not
 	 * @throws Exception
 	 */
-	private void buildSeriesForYear(String ministry, Catalog catalog, int year, InclusionPolicy inclusion)
+	private void buildSeriesForYear(String ministry, MediaCatalog catalog, int year, InclusionPolicy inclusion)
 			throws Exception {
 		final String fileName = computeFileNameForSite(inclusion.toString() + year + "-series.html", ministry);
 		logInfo("Writing " + year + " series to '" + fileName + "' ...");
@@ -321,7 +325,7 @@ public class App {
 		pageRender.render(outputFile);
 	}
 
-	private void buildPublicCatalog(String ministry, Catalog catalog) throws Exception {
+	private void buildPublicCatalog(String ministry, MediaCatalog catalog) throws Exception {
 		final String fileName = computeFileNameForSite("catalog.html", ministry);
 		logInfo("Writing all public series to '" + fileName + "' ...");
 
@@ -346,7 +350,7 @@ public class App {
 		pageRender.render(outputFile);
 	}
 
-	private void buildHandoutsAndResources(String ministry, Catalog catalog) throws Exception {
+	private void buildHandoutsAndResources(String ministry, MediaCatalog catalog) throws Exception {
 		final String fileName = computeFileNameForSite("resources.html", ministry);
 		logInfo("Writing handouts and resources to '" + fileName + "' ...");
 
@@ -363,7 +367,7 @@ public class App {
 		pageRender.render(outputFile);
 	}
 
-	private void buildBooklets(String ministry, Catalog catalog) throws Exception {
+	private void buildBooklets(String ministry, MediaCatalog catalog) throws Exception {
 		final String fileName = computeFileNameForSite("booklets.html", ministry);
 		logInfo("Writing booklets to '" + fileName + "' ...");
 
@@ -380,7 +384,7 @@ public class App {
 		pageRender.render(outputFile);
 	}
 
-	private void buildCovenantPartnerCatalog(String ministry, Catalog catalog) throws Exception {
+	private void buildCovenantPartnerCatalog(String ministry, MediaCatalog catalog) throws Exception {
 		final String fileName = computeFileNameForSite("catalog-cpartner.html", ministry);
 		logInfo("Writing all protected series to '" + fileName + "' ...");
 
@@ -405,7 +409,7 @@ public class App {
 		pageRender.render(outputFile);
 	}
 
-	private void addCurrentSeriesPromo(Catalog catalog, SeriesIndexWithPromoPageRender render) {
+	private void addCurrentSeriesPromo(MediaCatalog catalog, SeriesIndexWithPromoPageRender render) {
 		render.setPromoName("current-series");
 
 		// current promo series is Holy Spirit, so build a series list for it
@@ -416,6 +420,41 @@ public class App {
 			}
 		Collections.sort(promoSeries, Series.byTitle);
 		render.setPromoSeries(promoSeries);
+	}
+
+	/**
+	 * Generates the catalog of Word of Life Ministries prophesies
+	 * 
+	 * @throws IOException
+	 */
+	public void prophecyCatalog() throws Exception {
+
+		logInfo("Downloading prophesies from AWS ...");
+		logIndent();
+		ProphecyCatalog catalog = new ProphecyCatalog("wordoflife.mn.prophecy", null);
+		catalog.populateFromAwsDocuments(computeS3BucketName(), outputFileDir);
+		logOutdent();
+
+		// Word of Life
+		buildProphecies("WOL", catalog);
+
+		logInfo("Prophecy file generation is complete");
+	}
+
+	private void buildProphecies(String ministry, ProphecyCatalog catalog) throws Exception {
+		final String fileName = computeFileNameForSite("prophecies.html", ministry);
+		logInfo("Writing prophecies to '" + fileName + "' ...");
+		logIndent();
+
+		List<Prophecy> prophecies = catalog.getProphecies();
+		Collections.sort(prophecies, Prophecy.byDateDescending);
+		PageRender pageRender = new PropheciesPageRender(prophecies);
+		pageRender.setTitle("Prophecies Given at Word of Life");
+		pageRender.setMinistry(ministry);
+		File outputFile = new File(outputFileDir, fileName);
+		pageRender.render(outputFile);
+
+		logOutdent();
 	}
 
 	/** Upload all pages that have been created to S3 (if requested) */

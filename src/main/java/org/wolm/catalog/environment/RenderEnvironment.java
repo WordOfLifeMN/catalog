@@ -15,14 +15,14 @@ import org.wolm.series.Series;
  * 
  * @author wolm
  */
-public class RenderEnvironment implements CatalogFilter {
+public class RenderEnvironment implements MediaCatalogFilter {
 	static private RenderEnvironment instance;
 
 	/**
 	 * List of filters to use to understand the current environment. Every filter must include a series or message in
 	 * order for the entire environment to include the series or message
 	 */
-	private final List<CatalogFilter> filters = new ArrayList<>();
+	private final List<MediaCatalogFilter> filters = new ArrayList<>();
 
 	// ||| kmurray - delete if not needed
 	//
@@ -42,7 +42,7 @@ public class RenderEnvironment implements CatalogFilter {
 		return instance;
 	}
 
-	public void addFilter(CatalogFilter filter) {
+	public void addFilter(MediaCatalogFilter filter) {
 		filters.add(filter);
 	}
 
@@ -51,19 +51,19 @@ public class RenderEnvironment implements CatalogFilter {
 	}
 
 	public boolean shouldInclude(@Nonnull Series series) {
-		for (CatalogFilter filter : filters)
+		for (MediaCatalogFilter filter : filters)
 			if (!filter.shouldInclude(series)) return false;
 		return true;
 	}
 
 	public boolean shouldInclude(@Nonnull Message message) {
-		for (CatalogFilter filter : filters)
+		for (MediaCatalogFilter filter : filters)
 			if (!filter.shouldInclude(message)) return false;
 		return true;
 	}
 
 	public boolean shouldInclude(@Nonnull Series series, @Nonnull Message message) {
-		for (CatalogFilter filter : filters)
+		for (MediaCatalogFilter filter : filters)
 			if (!filter.shouldInclude(series, message)) return false;
 		return true;
 	}
@@ -73,92 +73,9 @@ public class RenderEnvironment implements CatalogFilter {
 	 */
 	@Nonnull
 	public AccessLevel getVisibility() {
-		for (CatalogFilter filter : filters) {
+		for (MediaCatalogFilter filter : filters) {
 			if (filter instanceof VisibilityFilter) return ((VisibilityFilter) filter).getVisibility();
 		}
 		return AccessLevel.PRIVATE;
 	}
-
-	// ||| kmurray - delete if not needed
-	//
-	// /**
-	// * @return the current visibility level to be rendered
-	// * */
-	// public AccessLevel getMinVisibility() {
-	// return minVisibility;
-	// }
-	//
-	// /**
-	// * Changes the visibility level of the render.
-	// * <p>
-	// * <b>Series</b>: Only series at this visibility will be rendered, all series of a different visibility will not
-	// be
-	// * rendered<br>
-	// * <b>Messages</b>: Messages with a visibility of this level or higher will be displayed
-	// *
-	// * @param minVisibility Minimum visibility to render
-	// */
-	// public void setMinVisibility(AccessLevel minVisibility) {
-	// this.minVisibility = minVisibility;
-	// }
-	//
-	// public boolean shouldRender(Series s) {
-	// return isExactlyVisible(s.getVisibility());
-	// }
-	//
-	// /**
-	// * Determines if the specified item is visible under the current visibility settings
-	// *
-	// * @param itemVisibility Visibility of item in question
-	// * @return <code>true</code> if the item is visible (can be displayed), <code>false</code> if the item should be
-	// * hidden
-	// */
-	// public boolean isAtLeastVisible(AccessLevel itemVisibility) {
-	// AccessLevel effectiveItemVisibility = itemVisibility == null ? AccessLevel.PRIVATE : itemVisibility;
-	//
-	// switch (minVisibility) {
-	// case RAW:
-	// return true;
-	// case PRIVATE:
-	// switch (effectiveItemVisibility) {
-	// case RAW:
-	// return false;
-	// default:
-	// return true;
-	// }
-	// case PROTECTED:
-	// switch (effectiveItemVisibility) {
-	// case RAW:
-	// case PRIVATE:
-	// return false;
-	// default:
-	// return true;
-	// }
-	// case PUBLIC:
-	// switch (effectiveItemVisibility) {
-	// case RAW:
-	// case PRIVATE:
-	// case PROTECTED:
-	// return false;
-	// default:
-	// return true;
-	// }
-	// default:
-	// return false;
-	// }
-	// }
-	//
-	// /**
-	// * Determines if the specified item is visible exactly at the current visibility setting
-	// *
-	// * @param itemVisibility Visibility of item in question
-	// * @return <code>true</code> if the item is visible (can be displayed), <code>false</code> if the item should be
-	// * hidden
-	// */
-	// public boolean isExactlyVisible(AccessLevel itemVisibility) {
-	// AccessLevel effectiveItemVisibility = itemVisibility == null ? AccessLevel.PRIVATE : itemVisibility;
-	//
-	// return effectiveItemVisibility == minVisibility;
-	// }
-
 }

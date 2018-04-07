@@ -41,7 +41,7 @@ import org.wolm.series.Series;
  * @author wolm
  */
 
-public class Catalog {
+public class MediaCatalog {
 	private RenderEnvironment env = RenderEnvironment.instance();
 
 	private final String messageSpreadsheetName;
@@ -50,7 +50,7 @@ public class Catalog {
 	private final String seriesSpreadsheetName;
 	private List<Series> series = new ArrayList<>();
 
-	public Catalog() {
+	public MediaCatalog() {
 		this("WOL Series", "WOL Messages");
 	}
 
@@ -58,7 +58,7 @@ public class Catalog {
 		return messageSpreadsheetName;
 	}
 
-	public Catalog(String seriesSpreadsheetName, String messageSpreadsheetName) {
+	public MediaCatalog(String seriesSpreadsheetName, String messageSpreadsheetName) {
 		super();
 		this.messageSpreadsheetName = messageSpreadsheetName;
 		this.seriesSpreadsheetName = seriesSpreadsheetName;

@@ -21,11 +21,11 @@ import org.wolm.series.Series;
 public class CatalogTest {
 
 	public static class TestSeries {
-		Catalog catalogUnderTest;
+		MediaCatalog catalogUnderTest;
 
 		@Before
 		public void beforeEachTest() {
-			catalogUnderTest = new Catalog();
+			catalogUnderTest = new MediaCatalog();
 			RenderEnvironment.instance().addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
 		}
 
@@ -64,11 +64,11 @@ public class CatalogTest {
 	}
 
 	public static class TestResources {
-		private Catalog catalogUnderTest;
+		private MediaCatalog catalogUnderTest;
 
 		@Before
 		public void beforeEachTest() {
-			catalogUnderTest = new Catalog();
+			catalogUnderTest = new MediaCatalog();
 			RenderEnvironment.instance().addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
 		}
 

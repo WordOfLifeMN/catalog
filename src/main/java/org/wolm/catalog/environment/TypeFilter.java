@@ -19,7 +19,7 @@ import org.wolm.series.Series;
  * 
  * @author wolm
  */
-public class TypeFilter implements CatalogFilter {
+public class TypeFilter implements MediaCatalogFilter {
 	private List<String> includedTypes = new ArrayList<>();
 	private List<String> excludedTypes = new ArrayList<>();
 

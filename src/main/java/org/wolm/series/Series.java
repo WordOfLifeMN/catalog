@@ -396,7 +396,7 @@ public class Series {
 					+ " actual messages");
 		}
 		else {
-			int tmpCount = countOfMessagesWithLessVisibilityThan(getVisibility());
+			int tmpCount = countOfTrackedMessagesWithLessVisibilityThan(getVisibility());
 			if (tmpCount > 0) {
 				reportValidationWarning(s,
 						"has visibility of " + getVisibility() + ", but " + tmpCount + " of "
@@ -414,11 +414,14 @@ public class Series {
 	 * @param visibilityCutoff
 	 * @return Number of messages with less visibility than the {@code visibilityCutoff}
 	 */
-	private int countOfMessagesWithLessVisibilityThan(AccessLevel visibilityCutoff) {
+	private int countOfTrackedMessagesWithLessVisibilityThan(AccessLevel visibilityCutoff) {
 		int count = 0;
 
-		for (Message message : messages)
-			if (AccessLevel.isLevelLessVisibleThanCutoff(message.getVisibility(), getVisibility())) count++;
+		for (Message message : messages) {
+			if (message.getTrackNumber(this.getTitle()) == 0) continue;
+			if (!AccessLevel.isLevelLessVisibleThanCutoff(message.getVisibility(), getVisibility())) continue;
+			count++;
+		}
 
 		return count;
 	}

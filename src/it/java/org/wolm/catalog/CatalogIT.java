@@ -5,7 +5,7 @@ import static org.fest.assertions.Assertions.*;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
-import org.wolm.catalog.catalog.Catalog;
+import org.wolm.catalog.catalog.MediaCatalog;
 
 @RunWith(Enclosed.class)
 public class CatalogIT {
@@ -13,7 +13,7 @@ public class CatalogIT {
 	public static class WolCatalog {
 		@Test
 		public void defaultCatalog() throws Exception {
-			Catalog catalog = new Catalog();
+			MediaCatalog catalog = new MediaCatalog();
 			catalog.populateFromGoogleSpreadsheets();
 
 			assertThat(catalog.getSeries().size()).isGreaterThan(100);
@@ -22,7 +22,7 @@ public class CatalogIT {
 
 		@Test
 		public void explicitCatalog() throws Exception {
-			Catalog catalog = new Catalog("WOL Series", "WOL Messages");
+			MediaCatalog catalog = new MediaCatalog("WOL Series", "WOL Messages");
 			catalog.populateFromGoogleSpreadsheets();
 
 			assertThat(catalog.getSeries().size()).isGreaterThan(100);
@@ -34,7 +34,7 @@ public class CatalogIT {
 
 		@Test
 		public void explicitCatalog() throws Exception {
-			Catalog catalog = new Catalog("TBO Series", "TBO Messages");
+			MediaCatalog catalog = new MediaCatalog("TBO Series", "TBO Messages");
 			catalog.populateFromGoogleSpreadsheets();
 
 			assertThat(catalog.getSeries().size()).isGreaterThan(100);

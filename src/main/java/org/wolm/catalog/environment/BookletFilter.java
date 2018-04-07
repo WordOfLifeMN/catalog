@@ -5,7 +5,7 @@ import javax.annotation.Nonnull;
 import org.wolm.message.Message;
 import org.wolm.series.Series;
 
-public class BookletFilter implements CatalogFilter {
+public class BookletFilter implements MediaCatalogFilter {
 	/** {@code true} to only include booklets, {@code false} to only include non-booklets */
 	private final boolean isBooklet;
 

@@ -15,7 +15,7 @@ import org.wolm.series.Series;
  * 
  * @author wolm
  */
-public class VisibilityFilter implements CatalogFilter {
+public class VisibilityFilter implements MediaCatalogFilter {
 
 	private final AccessLevel visibilityCriteria;
 

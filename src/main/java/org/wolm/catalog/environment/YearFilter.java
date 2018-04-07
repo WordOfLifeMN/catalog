@@ -15,7 +15,7 @@ import org.wolm.series.Series;
  * 
  * @author wolm
  */
-public abstract class YearFilter implements CatalogFilter {
+public abstract class YearFilter implements MediaCatalogFilter {
 	/** Year being filtered on */
 	private final int year;
 

@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 import org.wolm.message.Message;
 import org.wolm.series.Series;
 
-public class RecentFilter implements CatalogFilter {
+public class RecentFilter implements MediaCatalogFilter {
 	/** Earliest date we will accept as qualifying for "recent" */
 	private Date cutoff;
 

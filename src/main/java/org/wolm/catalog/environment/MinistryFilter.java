@@ -19,7 +19,7 @@ import org.wolm.series.Series;
  * 
  * @author wolm
  */
-public class MinistryFilter implements CatalogFilter {
+public class MinistryFilter implements MediaCatalogFilter {
 	private List<String> includedMinistries = new ArrayList<>();
 	private List<String> excludedMinistries = new ArrayList<>();
 

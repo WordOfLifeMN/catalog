@@ -10,7 +10,7 @@ import org.wolm.series.Series;
  * 
  * @author wolm
  */
-public interface CatalogFilter {
+public interface MediaCatalogFilter {
 	/**
 	 * Determines if a series should be included in the current catalog
 	 * 
