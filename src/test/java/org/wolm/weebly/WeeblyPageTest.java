@@ -51,34 +51,24 @@ public class WeeblyPageTest {
 
 		@Test
 		public void linkAndHrefShouldBeOnSameLine() throws Exception {
-			new WeeblyPage(
-					asList(new String[] {
-							"<html>",
-							"<head>",
-							"<link href='//fonts.googleapis.com/css?family=Lato:400,300,300italic,700,400italic,700italic' rel='stylesheet' type='text/css' />",
-							"</head>", "<body>", "</body>", "</html>" }));
+			new WeeblyPage(asList(new String[] { "<html>", "<head>",
+					"<link href='//fonts.googleapis.com/css?family=Lato:400,300,300italic,700,400italic,700italic' rel='stylesheet' type='text/css' />",
+					"</head>", "<body>", "</body>", "</html>" }));
 		}
 
 		@Test(expected = Exception.class)
 		public void linkAndHrefShouldNotBeOnDifferentLines() throws Exception {
-			new WeeblyPage(
-					asList(new String[] {
-							"<html>",
-							"<head>",
-							"<link ",
-							"href='//fonts.googleapis.com/css?family=Lato:400,300,300italic,700,400italic,700italic' rel='stylesheet' type='text/css' />",
-							"</head>", "<body>", "</body>", "</html>" }));
+			new WeeblyPage(asList(new String[] { "<html>", "<head>", "<link ",
+					"href='//fonts.googleapis.com/css?family=Lato:400,300,300italic,700,400italic,700italic' rel='stylesheet' type='text/css' />",
+					"</head>", "<body>", "</body>", "</html>" }));
 		}
 
 		@Test(expected = Exception.class)
 		public void linkAndHrefShouldNotBeOnDifferentLines_Multiple() throws Exception {
-			new WeeblyPage(
-					asList(new String[] {
-							"<html>",
-							"<head>",
-							"<link rel=\"stylesheet\" href=\"//cdn2.editmysite.com/css/sites.css?buildTime=1397689925\" type=\"text/css\" /><link rel='stylesheet' ",
-							"type='text/css' href='//cdn1.editmysite.com/editor/libraries/fancybox/fancybox.css?1397603321' />",
-							"</head>", "<body>", "</body>", "</html>" }));
+			new WeeblyPage(asList(new String[] { "<html>", "<head>",
+					"<link rel=\"stylesheet\" href=\"//cdn2.editmysite.com/css/sites.css?buildTime=1397689925\" type=\"text/css\" /><link rel='stylesheet' ",
+					"type='text/css' href='//cdn1.editmysite.com/editor/libraries/fancybox/fancybox.css?1397603321' />",
+					"</head>", "<body>", "</body>", "</html>" }));
 		}
 	}
 
@@ -101,29 +91,35 @@ public class WeeblyPageTest {
 
 		@Test
 		public void baseHrefShouldBeInsertedInHead() throws Exception {
-			WeeblyPage page = new WeeblyPage(asList(new String[] { "<html>", "<head>", "</head>", "<body>", "</body>",
-					"</html>" }));
+			WeeblyPage page = new WeeblyPage(
+					asList(new String[] { "<html>", "<head>", "</head>", "<body>", "</body>", "</html>" }));
 
 			page.preparePageForRemoteHosting();
 
-			assertThat(page.getLines().size()).isEqualTo(7);
+			assertThat(page.getLines().size()).isEqualTo(6);
 			assertThat(page.getLines().get(1)).contains("<head>");
-			assertThat(page.getLines().get(2)).contains("<base ");
-			assertThat(page.getLines().get(3)).contains("</head>");
+			assertThat(page.getLines().get(1)).contains("<base ");
+			assertThat(page.getLines().get(2)).contains("</head>");
 		}
 
 		@Test
 		public void variablesInHeadShouldBeSuppressed() throws Exception {
-			WeeblyPage page = new WeeblyPage(asList(new String[] { "<html>", "<head>",
-					"<title>Media Catalog - Word of Life Ministries</title>",
-					"<meta property='og:description' content='${Content}' />", "</head>", "<body>",
-					"<div><${Content}</div>", "</body>" }));
+			WeeblyPage page = new WeeblyPage(asList(new String[] { //
+					"<html>", //
+					"  <head>", //
+					"    <title>Media Catalog - Word of Life Ministries</title>", //
+					"    <meta property='og:description' content='${Content}' />", //
+					"  </head>", //
+					"<body>", //
+					"  <div><${Content}</div>", //
+					"</body>" //
+			}));
 
 			page.preparePageForRemoteHosting();
 
-			assertThat(page.getLines().get(4)).doesNotContain("${Content}");
-			assertThat(page.getLines().get(4)).contains("Content");
-			assertThat(page.getLines().get(7)).contains("${Content}");
+			assertThat(page.getLines().get(3)).doesNotContain("${Content}");
+			assertThat(page.getLines().get(3)).contains("Content");
+			assertThat(page.getLines().get(6)).contains("${Content}");
 		}
 	}
 
@@ -144,10 +140,10 @@ public class WeeblyPageTest {
 
 		@Test
 		public void hostHrefShouldResolve() {
-			assertThat(page.convertRelativeLinkHrefToAbsolute("<link href=\"//UNIT.TEST.com\"/>")).isEqualTo(
-					"<link href=\"http://UNIT.TEST.com\"/>");
-			assertThat(page.convertRelativeLinkHrefToAbsolute("<link href='//UNIT.TEST.com'/>")).isEqualTo(
-					"<link href='http://UNIT.TEST.com'/>");
+			assertThat(page.convertRelativeLinkHrefToAbsolute("<link href=\"//UNIT.TEST.com\"/>"))
+					.isEqualTo("<link href=\"http://UNIT.TEST.com\"/>");
+			assertThat(page.convertRelativeLinkHrefToAbsolute("<link href='//UNIT.TEST.com'/>"))
+					.isEqualTo("<link href='http://UNIT.TEST.com'/>");
 		}
 
 		@Test

@@ -176,8 +176,8 @@ public class WeeblyPage {
 			iter.set(convertRelativeLinkHrefToAbsolute(line));
 
 			// add a base href in the header
-			if (line.matches("\\s*<head>\\s*")) {
-				iter.add("<base href=\"http://www.wordoflifemn.org/\" />");
+			if (line.contains("<head>")) {
+				iter.set(line.replaceFirst("<head>", "<head><base href=\\\"http://www.wordoflifemn.org/\\\" />"));
 				inHead = true;
 			}
 
@@ -187,7 +187,7 @@ public class WeeblyPage {
 				if (newLine != line) iter.set(newLine);
 			}
 
-			if (line.matches("\\s*</head>\\s*")) inHead = false;
+			if (line.contains("</head>")) inHead = false;
 		}
 	}
 
@@ -205,11 +205,11 @@ public class WeeblyPage {
 			String line = iter.next();
 
 			// detect when we are entering the head
-			if (line.matches("\\s*<head>\\s*")) inHead = true;
+			if (line.contains("<head>")) inHead = true;
 			if (!inHead) continue;
 
 			// look for the title and insert the new bread-crumb
-			if (!line.matches("\\s*<title>.*")) continue;
+			if (!line.contains("<title>")) continue;
 			iter.set(line.replace("<title>", "<title>" + breadcrumb + " - "));
 			break;
 		}
@@ -258,8 +258,15 @@ public class WeeblyPage {
 		StrSubstitutor substitutor = new StrSubstitutor(map);
 		for (ListIterator<String> iter = lines.listIterator(); iter.hasNext();) {
 			String line = iter.next();
+
+			if (line.contains("<meta ")) {
+				if (line.indexOf("<meta ") < line.indexOf("${")) continue;
+			}
+
 			String updated = substitutor.replace(line);
-			if (!updated.equals(line)) iter.set(updated);
+			if (!updated.equals(line)) {
+				iter.set(updated);
+			}
 		}
 	}
 

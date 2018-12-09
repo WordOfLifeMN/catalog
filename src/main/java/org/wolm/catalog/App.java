@@ -200,8 +200,8 @@ public class App {
 		// Word of Life
 		buildRecentMessages("WOL", catalog);
 		buildRecentSeries("WOL", catalog);
-		buildSeriesForYear("WOL", catalog, 2017, InclusionPolicy.startedWithin);
-		buildSeriesForYear("WOL", catalog, 2017, InclusionPolicy.intersectingWith);
+		// buildSeriesForYear("WOL", catalog, 2017, InclusionPolicy.startedWithin);
+		// buildSeriesForYear("WOL", catalog, 2017, InclusionPolicy.intersectingWith);
 		buildPublicCatalog("WOL", catalog);
 		buildHandoutsAndResources("WOL", catalog);
 		buildBooklets("WOL", catalog);
@@ -308,6 +308,7 @@ public class App {
 	 * @param inclusion Determines how to select whether a series is in a year or not
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unused")
 	private void buildSeriesForYear(String ministry, MediaCatalog catalog, int year, InclusionPolicy inclusion)
 			throws Exception {
 		final String fileName = computeFileNameForSite(inclusion.toString() + year + "-series.html", ministry);
