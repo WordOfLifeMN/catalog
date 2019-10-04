@@ -57,8 +57,17 @@ public class ProphecyCatalog {
 
 		if (bucket == null) throw new RuntimeException("Bucket name is not defined");
 		for (S3ObjectSummary summary : helper.getObjectList(bucket, prophecyDirectoryName, null)) {
-			App.logInfo("Reading " + summary.getKey());
-			prophecyKeys.add(summary.getKey());
+			String key = summary.getKey();
+
+			// ignore non-prophesy files
+			if (!key.matches(".*\\.txt") || key.startsWith("template")) {
+				App.logInfo("Ignoring " + key);
+				continue;
+			}
+
+			// keep prophecy files
+			App.logInfo("Reading " + key);
+			prophecyKeys.add(key);
 		}
 
 		return prophecyKeys;
@@ -70,6 +79,8 @@ public class ProphecyCatalog {
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(helper.getContent(bucketName, key), "UTF-8"))) {
 			Prophecy prophecy = new Prophecy();
+			prophecy.setTitle(key); // file name as default, should get replaced later
+
 			String line;
 			StringBuilder body = null;
 			while ((line = reader.readLine()) != null) {
