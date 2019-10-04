@@ -3,7 +3,8 @@
 recompile=true
 recompile=
 artifactName=wolm-catalog
-outputDir=/Users/kmurray/wolm/catalog
+outputDir=/Users/kmurray/.wolm/catalog
+graphicsDir="$(dirname "$0")/src/grafart/S3"
 s3Dir=s3://wordoflife.mn.catalog/
 
 realpath() {
@@ -52,11 +53,20 @@ jar=$(findJar "$self")
 # start tracking time for later reporting
 startTime=$(date +%s)
 
+# prepare the output directory
+[ "$outputDir" ] && {
+	rm -rf "$outputDir"
+	mkdir -p "$outputDir"
+}
+
 # run the package, passing through parameters
 java -jar "$jar" --for-upload --out=$outputDir "$@"
 
 # sync the catalog files with S3
-aws s3 sync --acl=public-read $outputDir/ $s3Dir
+echo "Syncing the files to S3 ..."
+aws --profile=wolm s3 sync --size-only --acl=public-read $graphicsDir/ $s3Dir &
+aws --profile=wolm s3 sync --size-only --acl=public-read $outputDir/ $s3Dir &
+wait
 
 echo "Completed in $(( $(date +%s) - $startTime )) seconds"
 #sleep 5
