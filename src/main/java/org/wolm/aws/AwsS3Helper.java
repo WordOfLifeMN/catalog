@@ -192,7 +192,7 @@ public class AwsS3Helper {
 	 * @return A pre-signed URL for this object
 	 */
 	public URL getSignedUrl(@Nonnull Bucket bucket, @Nonnull String objectKey, Disposition disposition) {
-		Date expiration = new Date(System.currentTimeMillis() + 3 * DateUtils.MILLIS_PER_DAY);
+		Date expiration = new Date(System.currentTimeMillis() + 7 * DateUtils.MILLIS_PER_DAY);
 
 		GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket.getName(), objectKey);
 		request.setExpiration(expiration);
