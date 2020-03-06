@@ -25,7 +25,6 @@
 	.seriesItem {
 		border: 1px ${defaultColor} solid;
 		border-radius: 4px;
-		height: 128px;
 		padding: 4px;
 		margin-bottom: 4px;
 	}
@@ -51,17 +50,22 @@
 	}
 	.seriesItem span.label {
 		display: inline-block;
-		width: 80px;
+		width: 12%;
 		text-align: left;
 		vertical-align: top;
+	}
+	.seriesItem span.text {
+		width: 85%
 	}
 	.seriesItem span.longtext {
 		display: inline-block;
 		/*white-space: nowrap;*/
 		overflow: hidden;
-		width: 432px;
-		height: 30px;
-		font-size: 10px;
+		width: 85%;
+		margin-top: 10px;
+		height: 2em;
+		line-height: 1.0;
+		font-size: smaller;
 	}
 	.seriesItem p.clear { clear: both; }
 </style>
@@ -70,26 +74,31 @@
 	<div class="seriesItem" data-date="${series.startDate?date?iso_utc}" data-title="${series.titleSortKey}">
 		<#local artLink = series.coverArtLink!defaultCover />
 		<div class="coverArt">
-			<a class="title" href="${baseRef}/${series.id}.html"><img src="${artLink}" /></a>
+			<a href="${baseRef}/${series.id}.html"><img src="${artLink}" /></a>
 		</div>
 		<p>
 			<a class="title" href="${baseRef}/${series.id}.html">${series.title}</a>
 			<br/>
-			<span class="label">Messages:</span> ${series.messageCount}
+			<span class="label">Messages:</span> 
+			<span class="text">${series.messageCount}</span>
 			<br/>
 			<span class="label">Presented:</span>
 			<#if series.startDate??>
-				<#if !(series.endDate??)>Started</#if> <#-- still in progress -->
-				${series.startDate?date}
-				<#if series.endDate?? && series.endDate?date != series.startDate?date>
-					- ${series.endDate?date}
-				</#if>
+				<span class="text">
+					<#if !(series.endDate??)>Started</#if> <#-- still in progress -->
+					${series.startDate?date}
+					<#if series.endDate?? && series.endDate?date != series.startDate?date>
+						- ${series.endDate?date}
+					</#if>
+				</span>
 				<#if !(series.endDate??)><span class="inprogress"> -more to come!</span></#if>
 			</#if>
 			<#if series.speakers?size &gt; 0>
 				<br/>
 				<span class="label">Speaker<#if series.speakers?size &gt; 1>s</#if>:</span> 
-				<#list series.speakers as speaker>${speaker}<#if speaker?has_next>, </#if></#list>
+				<span class="text">
+					<#list series.speakers as speaker>${speaker}<#if speaker?has_next>, </#if></#list>
+				</span>
 			</#if>
 			<#if series.description??>
 				<br/>
