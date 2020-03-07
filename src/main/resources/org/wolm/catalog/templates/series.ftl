@@ -18,61 +18,7 @@
 
 <style>
 	span.inprogress { color: #999; font-style: italic; }
-</style>
-
-<h1>${series.title}</h1>
-<table>
-	<#-- cover art and description -->
-	<#assign artLink = series.coverArtLink!defaultCover />
-	<tr>
-		<#if artLink??>
-			<td valign="top"><img src="${artLink}" width="128"/></td>
-		</#if>
-		<td valign="top" <#if !series.coverArtLink??>colspan="2"</#if>>
-			<b>${series.title}</b>
-			
-			<#if series.speakers?size &gt; 0 || series.StartDate??><br/></#if>
-
-			<#-- speaker -->
-			<#if series.speakers?size &gt; 0>
-				<#list series.speakers as speaker>${speaker}<#if speaker_has_next>, </#if></#list>
-			</#if>
-			
-			<#if (series.speakers?size &gt; 0) && (series.startDate??)>/</#if>
-
-			<#-- dates -->
-			<#if series.startDate??>
-				<#if !(series.endDate??)>Started</#if> <#-- still in progress -->
-				${series.startDate?date}
-				<#if series.endDate?? && series.endDate?date != series.startDate?date>
-					- ${series.endDate?date}
-				</#if>
-			</#if>
-			(${series.messageCount} <#if series.messageCount == 1>message<#else>messages</#if>)
-			
-			<br/>
-			${series.description!}
-		</td>
-	</tr>
 	
-</table>
-
-<script type="text/javascript">
-//<![CDATA[
-	function togglePlayer(element) {
-		jQuery('.player').not(element.children('.player')).hide('puff');
-		element.children('.player').toggle('puff');
-	}
-	function mouseEnterMessage(element) {
-		element.addClass('highlight');
-	}
-	function mouseExitMessage(element) {
-		element.removeClass('highlight');
-	}
-//]]>
-</script>
-
-<style>
 	td.message {
 		border: 2px solid #528d54;
 		border-radius: 5px;
@@ -107,6 +53,62 @@
 	}
 </style>
 
+
+<h1>${series.title}</h1>
+<p/>
+<table>
+	<#-- cover art and description -->
+	<#assign artLink = series.coverArtLink!defaultCover />
+	<tr>
+		<#if artLink??>
+			<td valign="top"><img src="${artLink}" width="128"/></td>
+		</#if>
+		<td valign="top" <#if !series.coverArtLink??>colspan="2"</#if>>
+			<p>
+				<!-- 
+					<b>${series.title}</b>
+					<#if series.speakers?size &gt; 0 || series.StartDate??><br/></#if>
+				-->
+	
+				<#-- speaker -->
+				<#if series.speakers?size &gt; 0>
+					<#list series.speakers as speaker>${speaker}<#if speaker_has_next>, </#if></#list>
+				</#if>
+				
+				<#if (series.speakers?size &gt; 0) && (series.startDate??)>/</#if>
+	
+				<#-- dates -->
+				<#if series.startDate??>
+					<#if !(series.endDate??)>Started</#if> <#-- still in progress -->
+					${series.startDate?date}
+					<#if series.endDate?? && series.endDate?date != series.startDate?date>
+						- ${series.endDate?date}
+					</#if>
+				</#if>
+				(${series.messageCount} <#if series.messageCount == 1>message<#else>messages</#if>)
+			</p>
+			
+			<p>${series.description!}<p>
+		</td>
+	</tr>
+	
+</table>
+
+<script type="text/javascript">
+//<![CDATA[
+	function togglePlayer(element) {
+		jQuery('.player').not(element.children('.player')).hide('puff');
+		element.children('.player').toggle('puff');
+	}
+	function mouseEnterMessage(element) {
+		element.addClass('highlight');
+	}
+	function mouseExitMessage(element) {
+		element.removeClass('highlight');
+	}
+//]]>
+</script>
+
 <table width="100%">	
 	<#-- messages -->
 	<#list series.filteredMessages as message>
@@ -126,14 +128,7 @@
 					<p>${message.description!}</p>
 					<table width="100%">
 						<tr>
-							<#if message.videoLink??>
-								<td width="50px" valign="top" align="left">
-									<a href="${message.videoLink}" target="wolmVideo">
-										<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24"/>
-									</a>
-								</td>
-							</#if>
-							<td valign="top">
+							<td width="100%" valign="top" colspan="2">
 								<#if message.audioLink??>
 									<audio controls style="width:100%;">
 										<source src="${message.audioLink}" type="audio/mpeg" />
@@ -142,15 +137,27 @@
 									no audio is available for this message
 								</#if>
 							</td>
-							<#assign audioDownloadLink = message.audioLinkForDownload! />
-							<#if audioDownloadLink?has_content>
-								<td width="88px" valign="top" align="right">
-									<a href="${audioDownloadLink}">
-										<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/download.png" height="24px"/>
-									</a>
-								</td>
-							</#if>
 						</tr>
+						<#assign audioDownloadLink = message.audioLinkForDownload! />
+						<#if message.videoLink?? || audioDownloadLink?has_content>
+							<tr>
+								<#if message.videoLink??>
+									<td width="50%" valign="top" align="center">
+										<a href="${message.videoLink}" target="wolmVideo">
+											<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24"/>
+										</a>
+									</td>
+								</#if>
+	
+								<#if audioDownloadLink?has_content>
+									<td width="50%" valign="top" align="center">
+										<a href="${audioDownloadLink}">
+											<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/download.png" height="24px"/>
+										</a>
+									</td>
+								</#if>
+							</tr>
+						</#if>
 					</table>
 					<#if message.resources?has_content>
 						<div class="message-resource">

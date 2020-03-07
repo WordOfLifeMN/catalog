@@ -50,63 +50,76 @@
 	}
 	.seriesItem span.label {
 		display: inline-block;
-		width: 12%;
+		width: 15%;
 		text-align: left;
 		vertical-align: top;
 	}
 	.seriesItem span.text {
-		width: 85%
+		width: 82%
 	}
 	.seriesItem span.longtext {
 		display: inline-block;
 		/*white-space: nowrap;*/
 		overflow: hidden;
-		width: 85%;
+		width: 82%;
 		margin-top: 10px;
 		height: 2em;
 		line-height: 1.0;
 		font-size: smaller;
 	}
+	
 	.seriesItem p.clear { clear: both; }
+	
+	.seriesItem td.coverArt {
+		width: 10%;
+	}
+	.seriesItem td.info {
+		width: 90%;
+	}
 </style>
 
 <#macro seriesSummaryItem series>
 	<div class="seriesItem" data-date="${series.startDate?date?iso_utc}" data-title="${series.titleSortKey}">
-		<#local artLink = series.coverArtLink!defaultCover />
-		<div class="coverArt">
-			<a href="${baseRef}/${series.id}.html"><img src="${artLink}" /></a>
-		</div>
-		<p>
-			<a class="title" href="${baseRef}/${series.id}.html">${series.title}</a>
-			<br/>
-			<span class="label">Messages:</span> 
-			<span class="text">${series.messageCount}</span>
-			<br/>
-			<span class="label">Presented:</span>
-			<#if series.startDate??>
-				<span class="text">
-					<#if !(series.endDate??)>Started</#if> <#-- still in progress -->
-					${series.startDate?date}
-					<#if series.endDate?? && series.endDate?date != series.startDate?date>
-						- ${series.endDate?date}
+		<table>
+			<tr>
+				<td class="coverArt">
+					<#local artLink = series.coverArtLink!defaultCover />
+					<div class="coverArt">
+						<a href="${baseRef}/${series.id}.html"><img src="${artLink}" /></a>
+					</div>
+				</td>
+				<td class="info">
+					<a class="title" href="${baseRef}/${series.id}.html">${series.title}</a>
+					<br/>
+					<span class="label">Messages:</span> 
+					<span class="text">${series.messageCount}</span>
+					<br/>
+					<span class="label">Presented:</span>
+					<#if series.startDate??>
+						<span class="text">
+							<#if !(series.endDate??)>Started</#if> <#-- still in progress -->
+							${series.startDate?date}
+							<#if series.endDate?? && series.endDate?date != series.startDate?date>
+								- ${series.endDate?date}
+							</#if>
+						</span>
+						<#if !(series.endDate??)><span class="inprogress"> -more to come!</span></#if>
 					</#if>
-				</span>
-				<#if !(series.endDate??)><span class="inprogress"> -more to come!</span></#if>
-			</#if>
-			<#if series.speakers?size &gt; 0>
-				<br/>
-				<span class="label">Speaker<#if series.speakers?size &gt; 1>s</#if>:</span> 
-				<span class="text">
-					<#list series.speakers as speaker>${speaker}<#if speaker?has_next>, </#if></#list>
-				</span>
-			</#if>
-			<#if series.description??>
-				<br/>
-				<span class="label">Description:</span> 
-				<span class="longtext" title="${series.description?html}">${series.description}</span>
-			</#if>
-		</p>
-		
+					<#if series.speakers?size &gt; 0>
+						<br/>
+						<span class="label">Speaker<#if series.speakers?size &gt; 1>s</#if>:</span> 
+						<span class="text">
+							<#list series.speakers as speaker>${speaker}<#if speaker?has_next>, </#if></#list>
+						</span>
+					</#if>
+					<#if series.description??>
+						<br/>
+						<span class="label">Description:</span> 
+						<span class="longtext" title="${series.description?html}">${series.description}</span>
+					</#if>
+				</td>
+			</tr>
+		</table>
 		<#-- (${series.startDate?date?string.iso} - ${series.endDate?date?string.iso}) -->
 		<span class="filterKey" style="display:none;"><#list series.keywords.keywordList as k>${k} </#list><span>
 
