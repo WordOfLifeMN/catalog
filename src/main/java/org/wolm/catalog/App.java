@@ -198,8 +198,8 @@ public class App {
 		catalog.populateFromGoogleSpreadsheets();
 
 		// Word of Life
-		buildRecentMessages("WOL", catalog);
-		buildRecentSeries("WOL", catalog);
+		buildRecentMessages(catalog, "WOL", "Ask Pastor");
+		buildRecentSeries(catalog, "WOL");
 		// buildSeriesForYear("WOL", catalog, 2017, InclusionPolicy.startedWithin);
 		// buildSeriesForYear("WOL", catalog, 2017, InclusionPolicy.intersectingWith);
 		buildPublicCatalog("WOL", catalog);
@@ -251,37 +251,55 @@ public class App {
 		}
 	}
 
-	private void buildRecentMessages(String ministry, MediaCatalog catalog) throws Exception {
-		final String fileName = computeFileNameForSite("recent-messages.html", ministry);
+	/**
+	 * Build recent Series from a set of ministries
+	 * 
+	 * @param catalog Which catalog to build from
+	 * @param ministries The list of ministries to build the recent messages from. The first ministry in this list is
+	 * the primary one (the one used for naming things), and the rest are included. Intended for use like "WOL", "Ask
+	 * Pastor" to include the "Ask the Pastor" messages in the recent list.
+	 * @throws Exception
+	 */
+	private void buildRecentMessages(MediaCatalog catalog, String... ministries) throws Exception {
+		final String fileName = computeFileNameForSite("recent-messages.html", ministries[0]);
 		logInfo("Writing recent messages to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
-		env.addFilter(new MinistryFilter().with(ministry));
+		env.addFilter(new MinistryFilter().with(ministries));
 		env.addFilter(new RecentFilter().withDays(60));
 		env.addFilter(new BookletFilter(false));
 
 		// find messages
 		Series recentMessages = catalog.getFilteredMessagesInASeries();
-		recentMessages.setTitle("Recent Messages from " + computeMinistryName(ministry));
+		recentMessages.setTitle("Recent Messages from " + computeMinistryName(ministries[0]));
 		recentMessages.setDescription("Recent messages from the last " + 60 + " days.");
 		recentMessages.sortMessages(Message.byDateDescending);
 
 		PageRender pageRender = new SeriesPageRender(recentMessages);
-		pageRender.setMinistry(ministry);
+		pageRender.setMinistry(ministries[0]);
 		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
 
-	private void buildRecentSeries(String ministry, MediaCatalog catalog) throws Exception {
-		final String fileName = computeFileNameForSite("recent-series.html", ministry);
+	/**
+	 * Build recent Series from a set of ministries
+	 * 
+	 * @param catalog Which catalog to build from
+	 * @param ministries The list of ministries to build the recent series from. The first ministry in this list is the
+	 * primary one (the one used for naming things), and the rest are included. Intended for use like "WOL", "Ask
+	 * Pastor" to include the "Ask the Pastor" messages in the recent list.
+	 * @throws Exception
+	 */
+	private void buildRecentSeries(MediaCatalog catalog, String... ministries) throws Exception {
+		final String fileName = computeFileNameForSite("recent-series.html", ministries[0]);
 		logInfo("Writing recent series to '" + fileName + "' ...");
 
 		// prepare environment
 		env.clearFilters();
 		env.addFilter(new VisibilityFilter(AccessLevel.PUBLIC));
-		env.addFilter(new MinistryFilter().with(ministry));
+		env.addFilter(new MinistryFilter().with(ministries));
 		env.addFilter(new RecentFilter().withDays(60));
 		env.addFilter(new BookletFilter(false));
 
@@ -292,9 +310,9 @@ public class App {
 
 		// build the page renderer
 		PageRender pageRender = new SeriesIndexWithPromoPageRender(series);
-		pageRender.setTitle("Recent Series from " + computeMinistryName(ministry));
+		pageRender.setTitle("Recent Series from " + computeMinistryName(ministries[0]));
 		addCurrentSeriesPromo(catalog, (SeriesIndexWithPromoPageRender) pageRender);
-		pageRender.setMinistry(ministry);
+		pageRender.setMinistry(ministries[0]);
 		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);
 	}
