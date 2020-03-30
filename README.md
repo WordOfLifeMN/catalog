@@ -34,8 +34,11 @@ AWS Access Key ID: ****************S76Q
 AWS Secret Access Key:****************GufJ 
 Default region name: us-west-2
 Default output format: json 
-
 ```
+
+## Build
+
+`mvn clean package`
 
 ## Run
 

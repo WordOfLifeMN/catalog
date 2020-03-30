@@ -30,12 +30,13 @@
 	}
 	.seriesItem .title {
 		font-size: 20px;
+		font-weight: bold;
 	}
 	.seriesItem .coverArt {
 		float: left;
-		margin-right: 10px;
-		width: 132px;
-		height: 128px;
+		margin-right: 3px;
+		width: 72px;
+		height: 128px; 
 		position: relative;
 	}
 	.seriesItem div.coverArt img {
@@ -50,25 +51,29 @@
 	}
 	.seriesItem span.label {
 		display: inline-block;
-		width: 15%;
-		text-align: left;
+		/* width: 15%; */
+		/* text-align: left; */
+		font-weight: bolder;
 		vertical-align: top;
 	}
 	.seriesItem span.text {
-		width: 82%
+		/* width: 82% */
 	}
 	.seriesItem span.longtext {
 		display: inline-block;
 		/*white-space: nowrap;*/
 		overflow: hidden;
-		width: 82%;
+		/* width: 82%; */
 		margin-top: 10px;
-		height: 2em;
+		height: 3em;
 		line-height: 1.0;
 		font-size: smaller;
 	}
 	
-	.seriesItem p.clear { clear: both; }
+	.seriesItem p.clear { 
+		clear: both;
+		display: none; 
+	}
 	
 	.seriesItem td.coverArt {
 		width: 10%;
@@ -85,7 +90,7 @@
 				<td class="coverArt">
 					<#local artLink = series.coverArtLink!defaultCover />
 					<div class="coverArt">
-						<a href="${baseRef}/${series.id}.html"><img src="${artLink}" /></a>
+						<a href="${baseRef}/${series.id}.html"><img src="${artLink}" alt="Series cover"/></a>
 					</div>
 				</td>
 				<td class="info">
@@ -94,7 +99,7 @@
 					<span class="label">Messages:</span> 
 					<span class="text">${series.messageCount}</span>
 					<br/>
-					<span class="label">Presented:</span>
+					<span class="label">Date:</span>
 					<#if series.startDate??>
 						<span class="text">
 							<#if !(series.endDate??)>Started</#if> <#-- still in progress -->
@@ -112,18 +117,18 @@
 							<#list series.speakers as speaker>${speaker}<#if speaker?has_next>, </#if></#list>
 						</span>
 					</#if>
-					<#if series.description??>
-						<br/>
-						<span class="label">Description:</span> 
-						<span class="longtext" title="${series.description?html}">${series.description}</span>
-					</#if>
 				</td>
 			</tr>
 		</table>
 		<#-- (${series.startDate?date?string.iso} - ${series.endDate?date?string.iso}) -->
-		<span class="filterKey" style="display:none;"><#list series.keywords.keywordList as k>${k} </#list><span>
+		<span class="filterKey" style="display:none;"><#list series.keywords.keywordList as k>${k} </#list></span>
 
 		<p class="clear">&nbsp;</p>
+		<#if series.description??>
+			<!-- <span class="label">Description:</span> --> 
+			<span class="longtext" title="${series.description?html}">${series.description}</span>
+		</#if>
+
 	</div>
 </#macro>
 
@@ -142,7 +147,7 @@
 		<table>
 			<tr>
 				<td valign="top">
-					<img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/corestaff.jpg' width='164'/>
+					<img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/corestaff.jpg' width='164' alt='staff photo'/>
 				</td>
 				<td>
 					<p>C.O.R.E.: Center of Our Relationship Experiences</p>
@@ -193,8 +198,8 @@
 <form action="javascript:noop();" class="filterForm" style="float:left;">
 	Filter on: <input type="text" class="filterInput" title="Enter words to search titles and speaker names for. Will search all messages in the series."/>
 </form>
-<div style="clear:right"/>
-<p/>
+<div style="clear:right"></div>
+<p></p>
 <div class="seriesList">
 	<#list seriesList as series>
 		<@seriesSummaryItem series=series />

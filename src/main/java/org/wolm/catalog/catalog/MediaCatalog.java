@@ -366,7 +366,7 @@ public class MediaCatalog {
 			if (message.getDate() == null) break; // nulls are sorted to end
 
 			// skip if already in a series
-			if (!message.getSeries().isEmpty()) continue;
+			if (!message.isStandAlone()) continue;
 
 			// skip if not visible
 			if (!env.shouldInclude(message)) continue;
@@ -525,7 +525,7 @@ public class MediaCatalog {
 		// remove those that are booklets
 		resources.removeAll(getBooklets());
 
-		Collections.sort(resources, NamedLink.byTitleName);
+		Collections.sort(resources, NamedLink.byTitleNameWithoutDate);
 		return resources;
 	}
 

@@ -58,7 +58,7 @@
 			</span>
 		</p>
 		
-		<span class="filterKey" style="display:none;"><#list prophecy.keywords.keywordList as k>${k} </#list><span>
+		<span class="filterKey" style="display:none;"><#list prophecy.keywords.keywordList as k>${k} </#list></span>
 
 		<p class="clear">&nbsp;</p>
 	</div>

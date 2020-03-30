@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.Comparator;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * POJO for storing a link URL with a human readable name
  * 
@@ -55,12 +57,24 @@ public class NamedLink {
 		}
 		else {
 			link = new URL(normalize(s));
-			name = link.getPath().replaceFirst(".*/", "").replace("%20", " ").replaceFirst("\\.[^\\.]*$", "");
+			String myName = StringUtils.stripEnd(link.getPath(), "/").replaceFirst(".*/", "").replace("%20", " ")
+					.replaceFirst("\\.[^\\.]*$", "");
+			if (StringUtils.isBlank(myName)) myName = StringUtils.stripEnd(link.toString(), "/");
+			name = myName;
 		}
 	}
 
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * Returns the name of this link without a date prefix
+	 */
+	public String getNameWithDateTrimmed() {
+		if (!name.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d .*")) return name;
+
+		return name.substring("yyyy-mm-dd ".length());
 	}
 
 	public URL getLink() {
@@ -163,6 +177,14 @@ public class NamedLink {
 		public int compare(NamedLink link1, NamedLink link2) {
 			String title1 = link1.getName().replaceFirst("^(A|The) ", "");
 			String title2 = link2.getName().replaceFirst("^(A|The) ", "");
+			return title1.compareToIgnoreCase(title2);
+		}
+	};
+	/** Sorts by name, but ignoring leading "A" or "The" and dates */
+	public static Comparator<NamedLink> byTitleNameWithoutDate = new Comparator<NamedLink>() {
+		public int compare(NamedLink link1, NamedLink link2) {
+			String title1 = link1.getName().replaceFirst("^(A|The|\\d\\d\\d\\d-\\d\\d-\\d\\d) ", "");
+			String title2 = link2.getName().replaceFirst("^(A|The|\\d\\d\\d\\d-\\d\\d-\\d\\d) ", "");
 			return title1.compareToIgnoreCase(title2);
 		}
 	};

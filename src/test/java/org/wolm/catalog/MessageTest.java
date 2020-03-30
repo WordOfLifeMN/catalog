@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 
 import org.junit.After;
@@ -19,22 +20,22 @@ import org.wolm.message.Message;
 public class MessageTest {
 
 	public static class Validation {
-		private Message messageUnderTest = null;
+		private Message sut = null;
 		private ByteArrayOutputStream validationMessage = null;
 		private PrintStream outStream = null;
 
 		@Before
 		public void beforeEachTest() throws Exception {
-			messageUnderTest = new Message();
-			messageUnderTest.setTitle("UNIT TEST");
-			messageUnderTest.setDate(new Date());
-			messageUnderTest.setSeries(Arrays.asList(new String[] { "ONE", "TWO" }));
-			messageUnderTest.setTrackNumbers(Arrays.asList(new Integer[] { 1, 2 }));
-			messageUnderTest.setMinistry("WOL");
-			messageUnderTest.setType("Message");
-			messageUnderTest.setVisibilityAsString("Private");
-			messageUnderTest.setAudioLink(new URL("http://audio.com/link.wav"));
-			messageUnderTest.setVideoLink(new URL("http://video.com/link.mov"));
+			sut = new Message();
+			sut.setTitle("UNIT TEST");
+			sut.setDate(new Date());
+			sut.setSeries(Arrays.asList(new String[] { "ONE", "TWO" }));
+			sut.setTrackNumbers(Arrays.asList(new Integer[] { 1, 2 }));
+			sut.setMinistry("WOL");
+			sut.setType("Message");
+			sut.setVisibilityAsString("Private");
+			sut.setAudioLink(new URL("http://audio.com/link.wav"));
+			sut.setVideoLink(new URL("http://video.com/link.mov"));
 
 			validationMessage = new ByteArrayOutputStream();
 			outStream = new PrintStream(validationMessage);
@@ -42,7 +43,7 @@ public class MessageTest {
 
 		@After
 		public void afterEachTest() {
-			messageUnderTest = null;
+			sut = null;
 			outStream.close();
 			validationMessage = null;
 			outStream = null;
@@ -50,108 +51,166 @@ public class MessageTest {
 
 		@Test
 		public void shouldBeValid() {
-			assertThat(messageUnderTest.isValid(outStream)).isTrue();
+			assertThat(sut.isValid(outStream)).isTrue();
 			assertThat(validationMessage.toString()).isEmpty();
 		}
 
 		@Test
 		public void shouldHaveTitle() {
-			messageUnderTest.setTitle(null);
-			assertThat(messageUnderTest.isValid(outStream)).isFalse();
+			sut.setTitle(null);
+			assertThat(sut.isValid(outStream)).isFalse();
 			assertThat(validationMessage.toString()).contains("has no title");
 		}
 
 		@Test
 		public void shouldHaveDate() {
-			messageUnderTest.setDate(null);
-			assertThat(messageUnderTest.isValid(outStream)).isFalse();
+			sut.setDate(null);
+			assertThat(sut.isValid(outStream)).isFalse();
 			assertThat(validationMessage.toString()).contains("has no date");
 		}
 
 		@Test
 		public void ministryIsMissing() {
-			messageUnderTest.setMinistry(null);
-			assertThat(messageUnderTest.isValid(outStream)).isFalse();
+			sut.setMinistry(null);
+			assertThat(sut.isValid(outStream)).isFalse();
 			assertThat(validationMessage.toString()).contains("has no ministry");
 		}
 
 		@Test
 		public void ministryIsInvalid() {
-			messageUnderTest.setMinistry("TESTING");
-			assertThat(messageUnderTest.isValid(outStream)).isFalse();
+			sut.setMinistry("TESTING");
+			assertThat(sut.isValid(outStream)).isFalse();
 			assertThat(validationMessage.toString()).contains("unrecognized ministry");
 		}
 
 		@Test
 		public void shouldHaveTracksToMatchSeries() {
-			messageUnderTest.setSeries(null);
-			messageUnderTest.setTrackNumbers(Arrays.asList(new Integer[] { 1 }));
-			assertThat(messageUnderTest.isValid(outStream)).isFalse();
+			sut.setSeries(null);
+			sut.setTrackNumbers(Arrays.asList(new Integer[] { 1 }));
+			assertThat(sut.isValid(outStream)).isFalse();
 			assertThat(validationMessage.toString()).contains("0 series, but has track data for 1");
 
-			messageUnderTest.setSeries(Arrays.asList(new String[] { "ONE", "TWO" }));
-			messageUnderTest.setTrackNumbers(Arrays.asList(new Integer[] { 1 }));
-			assertThat(messageUnderTest.isValid(outStream)).isFalse();
+			sut.setSeries(Arrays.asList(new String[] { "ONE", "TWO" }));
+			sut.setTrackNumbers(Arrays.asList(new Integer[] { 1 }));
+			assertThat(sut.isValid(outStream)).isFalse();
 			assertThat(validationMessage.toString()).contains("2 series, but has track data for 1");
 		}
 
 		@Test
 		public void hyphenSeriesShouldValidateWithoutTrack() {
-			messageUnderTest.setSeries(Arrays.asList(new String[] { "-" }));
-			messageUnderTest.setTrackNumbers(null);
-			assertThat(messageUnderTest.isValid(outStream)).isTrue();
+			sut.setSeries(Arrays.asList(new String[] { "-" }));
+			sut.setTrackNumbers(null);
+			assertThat(sut.isValid(outStream)).isTrue();
 		}
 
 		@Test
 		public void shouldHaveValidType() {
-			messageUnderTest.setType("TESTING");
-			assertThat(messageUnderTest.isValid(outStream)).isTrue(); // bad type is a warning, not an error
+			sut.setType("TESTING");
+			assertThat(sut.isValid(outStream)).isTrue(); // bad type is a warning, not an error
 			assertThat(validationMessage.toString()).contains("unknown type");
 		}
 
 		@Test
 		public void shouldHaveValidVisibility() {
-			messageUnderTest.setVisibilityAsString("VISIBLE");
-			assertThat(messageUnderTest.isValid(outStream)).isFalse();
+			sut.setVisibilityAsString("VISIBLE");
+			assertThat(sut.isValid(outStream)).isFalse();
 			assertThat(validationMessage.toString()).contains("unknown visibility");
 		}
 
 		@Test
 		public void shouldHaveValidAudioLink() {
-			messageUnderTest.setAudioLinkAsString("NOT A URL");
-			assertThat(messageUnderTest.isValid(outStream)).isFalse();
+			sut.setAudioLinkAsString("NOT A URL");
+			assertThat(sut.isValid(outStream)).isFalse();
 			assertThat(validationMessage.toString()).contains("no protocol");
 		}
 
 		@Test
 		public void shouldAcceptSpecialLinks() {
-			messageUnderTest.setAudioLinkAsString("-");
-			assertThat(messageUnderTest.isValid(outStream)).isTrue();
+			sut.setAudioLinkAsString("-");
+			assertThat(sut.isValid(outStream)).isTrue();
 
-			messageUnderTest.setAudioLinkAsString("n/a");
-			assertThat(messageUnderTest.isValid(outStream)).isTrue();
+			sut.setAudioLinkAsString("n/a");
+			assertThat(sut.isValid(outStream)).isTrue();
 
-			messageUnderTest.setAudioLinkAsString("n/e");
-			assertThat(messageUnderTest.isValid(outStream)).isTrue();
+			sut.setAudioLinkAsString("n/e");
+			assertThat(sut.isValid(outStream)).isTrue();
 
-			messageUnderTest.setAudioLinkAsString("abrogated");
-			assertThat(messageUnderTest.isValid(outStream)).isTrue();
+			sut.setAudioLinkAsString("abrogated");
+			assertThat(sut.isValid(outStream)).isTrue();
 
-			messageUnderTest.setAudioLinkAsString("rendering");
-			assertThat(messageUnderTest.isValid(outStream)).isTrue();
+			sut.setAudioLinkAsString("rendering");
+			assertThat(sut.isValid(outStream)).isTrue();
 
-			messageUnderTest.setAudioLinkAsString("flash");
-			assertThat(messageUnderTest.isValid(outStream)).isTrue();
+			sut.setAudioLinkAsString("flash");
+			assertThat(sut.isValid(outStream)).isTrue();
 
 		}
 
 		@Test
 		public void shouldHaveValidVideoLink() {
-			messageUnderTest.setVideoLinkAsString("NOT A URL");
-			assertThat(messageUnderTest.isValid(outStream)).isFalse();
+			sut.setVideoLinkAsString("NOT A URL");
+			assertThat(sut.isValid(outStream)).isFalse();
 			assertThat(validationMessage.toString()).contains("no protocol");
 		}
 
+	}
+
+	public static class StandAlone {
+		private Message sut = null;
+
+		@Before
+		public void beforeEachTest() throws Exception {
+			sut = new Message();
+			sut.setTitle("UNIT TEST");
+			sut.setDate(new Date());
+			sut.setSeries(Arrays.asList(new String[] { "ONE", "TWO" }));
+			sut.setTrackNumbers(Arrays.asList(new Integer[] { 1, 2 }));
+			sut.setMinistry("WOL");
+			sut.setType("Message");
+			sut.setVisibilityAsString("Private");
+			sut.setAudioLink(new URL("http://audio.com/link.wav"));
+			sut.setVideoLink(new URL("http://video.com/link.mov"));
+		}
+
+		@After
+		public void afterEachTest() {
+			sut = null;
+		}
+
+		@Test
+		public void messageWithoutSeriesIsStandAlone() {
+			sut.setSeries(Collections.<String> emptyList());
+			assertThat(sut.isStandAlone()).isTrue();
+		}
+
+		@Test
+		public void messageWithSeriesIsNotStandAlone() {
+			assertThat(sut.isStandAlone()).isFalse();
+		}
+
+		@Test
+		public void messageWith_SAM_IsStandAlone() {
+			sut.setSeries(Arrays.asList(new String[] { "ONE", "SAM" }));
+			assertThat(sut.isStandAlone()).isTrue();
+
+			sut.setSeries(Arrays.asList(new String[] { "ONE", "Stand Alone" }));
+			assertThat(sut.isStandAlone()).isTrue();
+
+			sut.setSeries(Arrays.asList(new String[] { "ONE", "Stand Alone Message" }));
+			assertThat(sut.isStandAlone()).isTrue();
+		}
+
+		@Test
+		public void standAloneIsCaseInsensitive() {
+			sut.setSeries(Arrays.asList(new String[] { "ONE", "sam" }));
+			assertThat(sut.isStandAlone()).isTrue();
+
+			sut.setSeries(Arrays.asList(new String[] { "ONE", "StAnd AlOnE" }));
+			assertThat(sut.isStandAlone()).isTrue();
+
+			sut.setSeries(Arrays.asList(new String[] { "ONE", "STaND ALoNe MeSSaGe" }));
+			assertThat(sut.isStandAlone()).isTrue();
+		}
 	}
 
 }

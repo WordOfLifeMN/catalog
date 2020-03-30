@@ -9,11 +9,11 @@
 <p>
 	<b>Key:</b><br/>
 	&nbsp;&nbsp;&nbsp;
-	<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XXSmall.png" />
+	<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XXSmall.png" alt="Word of Life Logo"/>
 	Indicates a booklet associated with a series. Click on this icon to see the series.
 	<br/>
 	&nbsp;&nbsp;&nbsp;
-	<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CombBound-XXSmall.gif" />
+	<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CombBound-XXSmall.gif"  alt="Booklet Logo"/>
 	Indicates a booklet not currently associated with a series.
 </p>
 

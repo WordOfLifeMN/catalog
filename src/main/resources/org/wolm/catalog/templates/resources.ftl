@@ -31,7 +31,7 @@
 				<#if resource.fileName??>
 					<span class="filename">(${resource.fileName})</span>
 				</#if>
-				<a href="${resource.link}" target="wolmGuide">${resource.name}</a>
+				<a href="${resource.link}" target="wolmGuide">${resource.nameWithDateTrimmed}</a>
 				<span style="float:clear;" />
 
 				<#if (resource.sourceSeries.id)?? || resource.sourceMessage??>

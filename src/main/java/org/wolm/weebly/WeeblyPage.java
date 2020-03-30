@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
+import org.wolm.aws.AwsS3Helper;
 
 /**
  * Manages a page hosted by the Weebly site. Given a URL to a page, can
@@ -97,8 +98,44 @@ public class WeeblyPage {
 		}
 
 		// no page cached, read from Weebly
-		downloadEmptyPageFromWeebly();
+		if (!downloadEmptyPageFromS3()) downloadEmptyPageFromWeebly();
 		emptyPageCache.put(url, new ArrayList<>(lines));
+	}
+
+	/**
+	 * Reads a copy of the page source from S3. This helps ensure that if Weebly makes changes to their page, that we
+	 * have a backup. We can also avoid hitting their site too often
+	 * 
+	 * @return true if a file that matches the URL name was found
+	 * @throws Exception
+	 */
+	private boolean downloadEmptyPageFromS3() throws Exception {
+		AwsS3Helper helper = AwsS3Helper.instance();
+
+		// get the key as "catalog" plus the last element of the URL path
+		String key = url.getPath();
+		if (key.contains("/")) key = key.substring(key.lastIndexOf("/") + 1);
+		key = "catalog/" + key;
+
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(helper.getContent("wordoflife.mn.documents", key), "UTF-8"))) {
+
+			lines = new ArrayList<>(1_000); // empty Weebly page is ~1000 lines
+			String line;
+			while ((line = reader.readLine()) != null) {
+				lines.add(line);
+			}
+
+			// validate our assumptions about what a Weebly page looks like
+			validatePage();
+
+			return true;
+		}
+		catch (Exception e) {
+			// ignore
+		}
+
+		return false;
 	}
 
 	/**
@@ -107,7 +144,7 @@ public class WeeblyPage {
 	 * @throws IOException
 	 */
 	private void downloadEmptyPageFromWeebly() throws Exception {
-		lines = new ArrayList<>(400); // empty Weebly page is about 220 lines
+		lines = new ArrayList<>(1_000); // empty Weebly page is ~1000 lines
 
 		// create a connection for the page
 		URLConnection connection = url.openConnection();

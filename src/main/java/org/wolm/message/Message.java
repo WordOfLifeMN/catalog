@@ -90,6 +90,17 @@ public class Message {
 		}
 	}
 
+	public boolean isStandAlone() {
+		if (series == null) return true;
+		if (series.isEmpty()) return true;
+		for (String seriesName : series) {
+			if (seriesName.equalsIgnoreCase("SAM")) return true;
+			if (seriesName.equalsIgnoreCase("Stand Alone Message")) return true;
+			if (seriesName.equalsIgnoreCase("Stand Alone")) return true;
+		}
+		return false;
+	}
+
 	public List<Integer> getTrackNumbers() {
 		return trackNumbers;
 	}

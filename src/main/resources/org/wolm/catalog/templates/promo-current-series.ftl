@@ -1,4 +1,4 @@
-<img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/dove.jpg' width='96' style='float:left;padding-right:12px;'/>
+<img src='https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/dove.jpg' width='96' style='float:left;padding-right:12px;' alt='Holy Spirit dove'/>
 <p>
 	If you are just joining us, we are in a long-running series on the Holy Spirit.  
 	This series is intended to be an In-Depth study of the Holy Spirit.  Pastor is moving through topics slowly 

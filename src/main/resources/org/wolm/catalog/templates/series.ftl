@@ -61,7 +61,7 @@
 	<#assign artLink = series.coverArtLink!defaultCover />
 	<tr>
 		<#if artLink??>
-			<td valign="top"><img src="${artLink}" width="128"/></td>
+			<td valign="top"><img src="${artLink}" width="128" alt="Series cover"/></td>
 		</#if>
 		<td valign="top" <#if !series.coverArtLink??>colspan="2"</#if>>
 			<p>
@@ -144,7 +144,7 @@
 								<#if message.videoLink??>
 									<td width="50%" valign="top" align="center">
 										<a href="${message.videoLink}" target="wolmVideo">
-											<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24"/>
+											<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24" alt="YouTube"/>
 										</a>
 									</td>
 								</#if>
@@ -152,7 +152,7 @@
 								<#if audioDownloadLink?has_content>
 									<td width="50%" valign="top" align="center">
 										<a href="${audioDownloadLink}">
-											<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/download.png" height="24px"/>
+											<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/download.png" height="24px" alt="Download audio"/>
 										</a>
 									</td>
 								</#if>
