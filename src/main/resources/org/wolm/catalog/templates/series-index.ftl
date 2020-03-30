@@ -185,8 +185,7 @@
 <#if description??><p>${description}</p></#if>
 
 <#-- sorting options -->
-<div style="float:right;">
-	&nbsp;&nbsp;&nbsp;
+<div>
 	Sort by: 
 	<select class="sortingSelect">
 		<option value="sortByTitle">Title</option>
@@ -195,10 +194,9 @@
 	</select>
 </div>
 <#-- filter options -->
-<form action="javascript:noop();" class="filterForm" style="float:left;">
+<form action="javascript:noop();" class="filterForm" >
 	Filter on: <input type="text" class="filterInput" title="Enter words to search titles and speaker names for. Will search all messages in the series."/>
 </form>
-<div style="clear:right"></div>
 <p></p>
 <div class="seriesList">
 	<#list seriesList as series>
