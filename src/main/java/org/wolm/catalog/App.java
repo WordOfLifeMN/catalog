@@ -125,7 +125,7 @@ public class App {
 	private void initRenderFactory() {
 		if (forUpload()) {
 			// uploading to S3: the baseref is the URL to the s3 bucket
-			RenderFactory.setBaseRef("http://s3-us-west-2.amazonaws.com/" + computeS3BucketName()
+			RenderFactory.setBaseRef("https://s3-us-west-2.amazonaws.com/" + computeS3BucketName()
 					+ (getS3ObjectPrefix() == null ? "" : "/" + getS3ObjectPrefix()));
 		}
 		else {

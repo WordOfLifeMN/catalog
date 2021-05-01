@@ -230,7 +230,7 @@ public class AwsS3Helper {
 			key = URLDecoder.decode(key, "UTF-8");
 
 			URL signedUrl = getSignedUrl(bucket, key, disposition);
-			signedUrl = new URL(signedUrl.toString().replace("https:", "http:"));
+			signedUrl = new URL(signedUrl.toString());
 			return signedUrl;
 		}
 		catch (MalformedURLException | UnsupportedEncodingException e) {
