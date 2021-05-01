@@ -25,8 +25,6 @@
 	}
 	td.message div.title {
 		padding:1px;
-	}
-	td.message div.title.highlight {	
 		border: 0px solid;
 		border-radius: 3px;
 		background-color: #3e713f;
@@ -94,25 +92,12 @@
 	
 </table>
 
-<script type="text/javascript">
-//<![CDATA[
-	function mouseEnterMessage(element) {
-		element.addClass('highlight');
-	}
-	function mouseExitMessage(element) {
-		element.removeClass('highlight');
-	}
-//]]>
-</script>
-
 <table width="100%">	
 	<#-- messages -->
 	<#list series.filteredMessages as message>
 		<tr>
 			<td class="message">
-				<div class="title" title="${message.description!}"
-						onclick="togglePlayer(jQuery(this).parent());"
-						onmouseover="mouseEnterMessage(jQuery(this));" onmouseout="mouseExitMessage(jQuery(this));">
+				<div class="title" title="${message.description!}">
 					${message_index + 1}.
 					<b>${message.title}</b>
 					<#if message.speakers??>
@@ -130,6 +115,8 @@
 										<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24" alt="YouTube"/>
 									</a>
 								</td>
+							<#else>
+								<td width="15px">&nbsp;</td>
 							</#if>
 							<td valign="top">
 								<#if message.audioLink??>
