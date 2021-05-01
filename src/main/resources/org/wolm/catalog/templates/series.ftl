@@ -96,10 +96,6 @@
 
 <script type="text/javascript">
 //<![CDATA[
-	function togglePlayer(element) {
-		jQuery('.player').not(element.children('.player')).hide('puff');
-		element.children('.player').toggle('puff');
-	}
 	function mouseEnterMessage(element) {
 		element.addClass('highlight');
 	}
@@ -124,11 +120,18 @@
 					</#if>
 					<#if message.date??>(${message.date?date?string.full})</#if>
 				</div>
-				<div class="player" style="display:none;">
+				<div class="player">
 					<p>${message.description!}</p>
 					<table width="100%">
 						<tr>
-							<td width="100%" valign="top" colspan="2">
+							<#if message.videoLink??>
+								<td width="70px" valign="middle" align="center">
+									<a href="${message.videoLink}" target="wolmVideo">
+										<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24" alt="YouTube"/>
+									</a>
+								</td>
+							</#if>
+							<td valign="top">
 								<#if message.audioLink??>
 									<audio controls style="width:100%;">
 										<source src="${message.audioLink}" type="audio/mpeg" />
@@ -137,27 +140,8 @@
 									no audio is available for this message
 								</#if>
 							</td>
+							<td width="15px">&nbsp;</td>
 						</tr>
-						<#assign audioDownloadLink = message.audioLinkForDownload! />
-						<#if message.videoLink?? || audioDownloadLink?has_content>
-							<tr>
-								<#if message.videoLink??>
-									<td width="50%" valign="top" align="center">
-										<a href="${message.videoLink}" target="wolmVideo">
-											<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24" alt="YouTube"/>
-										</a>
-									</td>
-								</#if>
-	
-								<#if audioDownloadLink?has_content>
-									<td width="50%" valign="top" align="center">
-										<a href="${audioDownloadLink}">
-											<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/download.png" height="24px" alt="Download audio"/>
-										</a>
-									</td>
-								</#if>
-							</tr>
-						</#if>
 					</table>
 					<#if message.resources?has_content>
 						<div class="message-resource">
