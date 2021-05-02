@@ -98,6 +98,20 @@ public class Prophecy {
 		return keywords;
 	}
 
+	public static final Comparator<Prophecy> byDate = new Comparator<Prophecy>() {
+		public int compare(Prophecy o1, Prophecy o2) {
+			Date d1 = o1.getDate();
+			Date d2 = o2.getDate();
+			if (d1 == null) {
+				if (d2 == null) return 0;
+				return 1;
+			}
+
+			if (d2 == null) return -1;
+			return d1.compareTo(d2);
+		}
+	};
+
 	public static final Comparator<Prophecy> byDateDescending = new Comparator<Prophecy>() {
 		public int compare(Prophecy o1, Prophecy o2) {
 			Date d1 = o1.getDate();
