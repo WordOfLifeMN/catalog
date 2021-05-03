@@ -145,7 +145,6 @@ public class NamedLink {
 	 * Given a string, will examine it and make any corrections necessary to make it more friendly or consistent for
 	 * display.
 	 * <ul>
-	 * <li>If this is an Amazon string, convert https:// to http://
 	 * <li>If this is an Amazon string, covert '+' to '%20' for friendlier downloads. This allows "Names+of+God.pdf" to
 	 * download as "Names of God.pdf" instead of "Names+of+God.pdf"
 	 * </ul>
@@ -155,7 +154,6 @@ public class NamedLink {
 	 */
 	private String normalize(String s) {
 		if (s.contains("amazonaws")) {
-			if (s.startsWith("https://")) s = "http://" + s.substring("https://".length());
 			s = s.replace("+", "%20");
 		}
 		return s;

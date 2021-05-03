@@ -9,35 +9,58 @@
 </p>
 
 <style>
-	td.resource .filename {
-		color: #bf9c03;
-		float: right;
+	table {
+	  border-collapse: collapse;
 	}
-	span.source {
-		padding-left: 24px;
-		color: #777;
+	tr.reference {
+		border-bottom: 1px solid #121;
+	}
+	td {
+		vertical-align: middle;
+	}
+	td.resource {
+		color: #bf9c03;
+		text-align: left;
+	}
+	td.filename {
+		color: #bf9c03;
+		text-align:right;
+	}
+	div.source {
+		padding-left: 36px;
+		padding-right: 36px;
+		color: #666;
 		font-style: italic;
 		font-size: 85%;
 	}
-	span.source a {
-		color: #797;
+	span.source {
+		color: #999;
+		font-size: 85%;
+	}
+	div.source a {
+		color: #575;
 	}
 </style>
 
+<hr />
+
 <table class="resources" width="100%">
 	<#list resourceList as resource>
-		<tr>
-			<td class="resource">
-				<#if resource.fileName??>
-					<span class="filename">(${resource.fileName})</span>
-				</#if>
+		<tr class="resource">
+			<td class="resource" width="60%">
 				<a href="${resource.link}" target="wolmGuide">${resource.nameWithDateTrimmed}</a>
-				<span style="float:clear;" />
-
+			</td>
+			<td class="filename" width="40%">
+				<#if resource.fileName??>
+					<span class="source">(${resource.fileName})</span>
+				</#if>
+			</td>
+		</tr>
+		<tr class="reference">
+			<td colspan="2">
 				<#if (resource.sourceSeries.id)?? || resource.sourceMessage??>
 					<#-- source of the resource -->
-					<br/>
-					<span class="source">
+					<div class="source">
 						<#-- series and/or message names -->
 						From 
 						<#if (resource.sourceSeries.id)??>
@@ -54,9 +77,8 @@
 						<#elseif resource.sourceSeries??>
 							<#if resource.sourceSeries.startDate??>(${resource.sourceSeries.startDate?date})</#if>
 						</#if>
-					</span>
+					</div>
 				</#if>
-				<#-- <hr/> -->
 			</td>
 		</tr>
 	</#list>

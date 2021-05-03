@@ -19,21 +19,20 @@
 <style>
 	span.inprogress { color: #999; font-style: italic; }
 	
-	td.message {
+	div.message {
 		border: 2px solid #528d54;
 		border-radius: 5px;
+		margin-bottom: 8px;
 	}
-	td.message div.title {
+	div.message div.title {
 		padding:1px;
-	}
-	td.message div.title.highlight {	
 		border: 0px solid;
 		border-radius: 3px;
 		background-color: #3e713f;
 		color: white;	
 	}
-	td.message { border: 2px solid ${defaultColor}; }
-	td.message div.title.highlight { background-color: ${highlightColor}; }
+	div.message { border: 2px solid ${defaultColor}; }
+	div.message div.title.highlight { background-color: ${highlightColor}; }
 
 	td.resources {
 		border: 2px solid #bf9c03;
@@ -94,87 +93,58 @@
 	
 </table>
 
-<script type="text/javascript">
-//<![CDATA[
-	function togglePlayer(element) {
-		jQuery('.player').not(element.children('.player')).hide('puff');
-		element.children('.player').toggle('puff');
-	}
-	function mouseEnterMessage(element) {
-		element.addClass('highlight');
-	}
-	function mouseExitMessage(element) {
-		element.removeClass('highlight');
-	}
-//]]>
-</script>
-
-<table width="100%">	
+<div>	
 	<#-- messages -->
 	<#list series.filteredMessages as message>
-		<tr>
-			<td class="message">
-				<div class="title" title="${message.description!}"
-						onclick="togglePlayer(jQuery(this).parent());"
-						onmouseover="mouseEnterMessage(jQuery(this));" onmouseout="mouseExitMessage(jQuery(this));">
-					${message_index + 1}.
-					<b>${message.title}</b>
-					<#if message.speakers??>
-						- <#list message.speakers as speaker>${speaker}<#if speaker_has_next>, </#if></#list>
-					</#if>
-					<#if message.date??>(${message.date?date?string.full})</#if>
-				</div>
-				<div class="player" style="display:none;">
-					<p>${message.description!}</p>
-					<table width="100%">
-						<tr>
-							<td width="100%" valign="top" colspan="2">
-								<#if message.audioLink??>
-									<audio controls style="width:100%;">
-										<source src="${message.audioLink}" type="audio/mpeg" />
-									</audio>
-								<#else>
-									no audio is available for this message
-								</#if>
+		<div class="message">
+			<div class="title" title="${message.description!}">
+				${message_index + 1}.
+				<b>${message.title}</b>
+				<#if message.speakers??>
+					- <#list message.speakers as speaker>${speaker}<#if speaker_has_next>, </#if></#list>
+				</#if>
+				<#if message.date??>(${message.date?date?string.full})</#if>
+			</div>
+			<div class="player">
+				<p>${message.description!}</p>
+				<table width="100%">
+					<tr>
+						<#if message.videoLink??>
+							<td width="70px" valign="middle" align="center">
+								<a href="${message.videoLink}" target="wolmVideo">
+									<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24" alt="YouTube"/>
+								</a>
 							</td>
-						</tr>
-						<#assign audioDownloadLink = message.audioLinkForDownload! />
-						<#if message.videoLink?? || audioDownloadLink?has_content>
-							<tr>
-								<#if message.videoLink??>
-									<td width="50%" valign="top" align="center">
-										<a href="${message.videoLink}" target="wolmVideo">
-											<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24" alt="YouTube"/>
-										</a>
-									</td>
-								</#if>
-	
-								<#if audioDownloadLink?has_content>
-									<td width="50%" valign="top" align="center">
-										<a href="${audioDownloadLink}">
-											<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/download.png" height="24px" alt="Download audio"/>
-										</a>
-									</td>
-								</#if>
-							</tr>
+						<#else>
+							<td width="15px">&nbsp;</td>
 						</#if>
-					</table>
-					<#if message.resources?has_content>
-						<div class="message-resource">
-							<#list message.resources as resource>
-								<div>
-									<#if resource.fileName??>
-										<span class="filename">(${resource.fileName!})</span>
-									</#if>
-									<a href="${resource.link}" target="wolmGuide" style="padding-left:4px;">${resource.name}</a>
-									<span style="float:clear;" />
-								</div>
-							</#list>
-						</div>
-					</#if>
-				</div>
-			</td>
-		</tr>
+						<td valign="top">
+							<#if message.audioLink??>
+								<audio controls style="width:100%;">
+									<source src="${message.audioLink}" type="audio/mpeg" />
+								</audio>
+							<#else>
+								no audio is available for this message
+							</#if>
+						</td>
+						<td width="15px">&nbsp;</td>
+					</tr>
+				</table>
+				<#if message.resources?has_content>
+					<div class="message-resource">
+						<#list message.resources as resource>
+							<div>
+								<#if resource.fileName??>
+									<span class="filename">(${resource.fileName!})</span>
+								</#if>
+								<a href="${resource.link}" target="wolmGuide" style="padding-left:4px;">${resource.name}</a>
+								<span style="float:clear;" />
+							</div>
+						</#list>
+					</div>
+				</#if>
+			</div>
+		</div>
 	</#list>
 	
 	<#if series.startDate?? && !(series.endDate??)>
@@ -210,5 +180,4 @@
 			</td>
 		</tr>
 	</#if>
-	
-</table>
+</div>
