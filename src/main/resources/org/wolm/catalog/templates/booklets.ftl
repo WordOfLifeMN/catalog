@@ -18,9 +18,21 @@
 </p>
 
 <style>
-	td.resource .filename {
+	table {
+	  border-collapse: collapse;
+	}
+	tr.booklet {
+		border-bottom: 1px solid #121;
+	}
+	td {
+		vertical-align: middle;
+	}
+	td.resource {
 		color: #bf9c03;
-		float: right;
+	}
+	td.filename {
+		color: #bf9c03;
+		text-align: right;
 	}
 	span.source {
 		padding-left: 24px;
@@ -36,8 +48,8 @@
 <hr />
 <table class="resources" width="100%">
 	<#list resourceList as resource>
-		<tr>
-			<td class="resource">
+		<tr class="booklet">
+			<td class="icon">
 				<#if (resource.sourceSeries.id)?? || resource.sourceMessage??>
 					<#assign alt= 'From ' />
 					<#if (resource.sourceSeries.id)??><#assign alt = alt + resource.sourceSeries.title /></#if>
@@ -60,12 +72,16 @@
 					<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CombBound-XXSmall.gif" 
 						alt="${alt}" title="${alt}"/>
 				</#if>
-				<#if resource.fileName??>
-					<span class="filename">(${resource.fileName})</span>
-				</#if>
+			</td>
+			<td class="resource">
 				<a href="${resource.link}" target="wolmGuide">${resource.name}</a>
-				<span style="float:clear;" />
-				<#-- <hr/> -->
+			</td>
+			<td class="filename">
+				<#if resource.fileName??>
+					<span class="source">(${resource.fileName})</span>
+				<#else>
+					&nbsp;
+				</#if>
 			</td>
 		</tr>
 	</#list>

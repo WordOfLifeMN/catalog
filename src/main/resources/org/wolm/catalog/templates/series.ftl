@@ -19,19 +19,20 @@
 <style>
 	span.inprogress { color: #999; font-style: italic; }
 	
-	td.message {
+	div.message {
 		border: 2px solid #528d54;
 		border-radius: 5px;
+		margin-bottom: 8px;
 	}
-	td.message div.title {
+	div.message div.title {
 		padding:1px;
 		border: 0px solid;
 		border-radius: 3px;
 		background-color: #3e713f;
 		color: white;	
 	}
-	td.message { border: 2px solid ${defaultColor}; }
-	td.message div.title.highlight { background-color: ${highlightColor}; }
+	div.message { border: 2px solid ${defaultColor}; }
+	div.message div.title.highlight { background-color: ${highlightColor}; }
 
 	td.resources {
 		border: 2px solid #bf9c03;
@@ -92,60 +93,58 @@
 	
 </table>
 
-<table width="100%">	
+<div>	
 	<#-- messages -->
 	<#list series.filteredMessages as message>
-		<tr>
-			<td class="message">
-				<div class="title" title="${message.description!}">
-					${message_index + 1}.
-					<b>${message.title}</b>
-					<#if message.speakers??>
-						- <#list message.speakers as speaker>${speaker}<#if speaker_has_next>, </#if></#list>
-					</#if>
-					<#if message.date??>(${message.date?date?string.full})</#if>
-				</div>
-				<div class="player">
-					<p>${message.description!}</p>
-					<table width="100%">
-						<tr>
-							<#if message.videoLink??>
-								<td width="70px" valign="middle" align="center">
-									<a href="${message.videoLink}" target="wolmVideo">
-										<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24" alt="YouTube"/>
-									</a>
-								</td>
-							<#else>
-								<td width="15px">&nbsp;</td>
-							</#if>
-							<td valign="top">
-								<#if message.audioLink??>
-									<audio controls style="width:100%;">
-										<source src="${message.audioLink}" type="audio/mpeg" />
-									</audio>
-								<#else>
-									no audio is available for this message
-								</#if>
+		<div class="message">
+			<div class="title" title="${message.description!}">
+				${message_index + 1}.
+				<b>${message.title}</b>
+				<#if message.speakers??>
+					- <#list message.speakers as speaker>${speaker}<#if speaker_has_next>, </#if></#list>
+				</#if>
+				<#if message.date??>(${message.date?date?string.full})</#if>
+			</div>
+			<div class="player">
+				<p>${message.description!}</p>
+				<table width="100%">
+					<tr>
+						<#if message.videoLink??>
+							<td width="70px" valign="middle" align="center">
+								<a href="${message.videoLink}" target="wolmVideo">
+									<img src="https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/YouTubeIcon.jpg" height="24" alt="YouTube"/>
+								</a>
 							</td>
+						<#else>
 							<td width="15px">&nbsp;</td>
-						</tr>
-					</table>
-					<#if message.resources?has_content>
-						<div class="message-resource">
-							<#list message.resources as resource>
-								<div>
-									<#if resource.fileName??>
-										<span class="filename">(${resource.fileName!})</span>
-									</#if>
-									<a href="${resource.link}" target="wolmGuide" style="padding-left:4px;">${resource.name}</a>
-									<span style="float:clear;" />
-								</div>
-							</#list>
-						</div>
-					</#if>
-				</div>
-			</td>
-		</tr>
+						</#if>
+						<td valign="top">
+							<#if message.audioLink??>
+								<audio controls style="width:100%;">
+									<source src="${message.audioLink}" type="audio/mpeg" />
+								</audio>
+							<#else>
+								no audio is available for this message
+							</#if>
+						</td>
+						<td width="15px">&nbsp;</td>
+					</tr>
+				</table>
+				<#if message.resources?has_content>
+					<div class="message-resource">
+						<#list message.resources as resource>
+							<div>
+								<#if resource.fileName??>
+									<span class="filename">(${resource.fileName!})</span>
+								</#if>
+								<a href="${resource.link}" target="wolmGuide" style="padding-left:4px;">${resource.name}</a>
+								<span style="float:clear;" />
+							</div>
+						</#list>
+					</div>
+				</#if>
+			</div>
+		</div>
 	</#list>
 	
 	<#if series.startDate?? && !(series.endDate??)>
@@ -181,5 +180,4 @@
 			</td>
 		</tr>
 	</#if>
-	
-</table>
+</div>
