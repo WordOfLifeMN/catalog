@@ -68,10 +68,12 @@ java -jar "$jar" --for-upload --out=$outputDir "$@"
 #       signed for 7 days, so we need to run this script every week, and upload
 #       all files to ensure that they are signed for the next week.
 #       Note that the signature of the URLs is required so that we can set the
-#       Content-Disposition to 'attachment' (even though the file is public)
+#       Content-Disposition to 'attachment' (even though the file is public).
+# UPDATE: Since then, I have removed the download link, so the signatures are no
+# longer required.
 echo "Syncing the files to S3 ..."
-aws --profile=wolm s3 sync --acl=public-read $graphicsDir/ $s3Dir &
-aws --profile=wolm s3 sync --acl=public-read $outputDir/ $s3Dir &
+aws --profile=wolm s3 sync --size-only --acl=public-read $graphicsDir/ $s3Dir &
+aws --profile=wolm s3 sync --size-only --acl=public-read $outputDir/ $s3Dir &
 wait
 
 echo "Completed in $(( $(date +%s) - $startTime )) seconds"
