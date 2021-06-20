@@ -44,3 +44,9 @@ Default output format: json
 
 1. `cd` to project directory (the one containing this README)
 2. `./generate-public-catalog.command`
+
+## Test locally
+
+```
+./generate-public-catalog.command --local
+```

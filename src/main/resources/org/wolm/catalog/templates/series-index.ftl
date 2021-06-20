@@ -28,6 +28,13 @@
 		padding: 4px;
 		margin-bottom: 8px;
 	}
+
+	.seriesItem.CORE a { color: #840; }
+	.seriesItem.CORE a:hover { color: #5b2d00; }
+	.seriesItem.CORE {
+		border: 1px #840 solid;
+	}
+
 	.seriesItem .title {
 		font-size: 20px;
 		font-weight: bold;
@@ -84,11 +91,19 @@
 </style>
 
 <#macro seriesSummaryItem series>
-	<div class="seriesItem" data-date="${series.startDate?date?iso_utc}" data-title="${series.titleSortKey}">
+	<#assign seriesMinistry = series.messages[0].ministry />
+	<div class="seriesItem ${seriesMinistry}" data-date="${series.startDate?date?iso_utc}" data-title="${series.titleSortKey}">
 		<table>
 			<tr>
 				<td class="coverArt">
-					<#local artLink = series.coverArtLink!defaultCover />
+					<#switch seriesMinistry>
+						<#case 'CORE'>
+							<#local artLink = series.coverArtLink!'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CORELogo-Small.jpg' />
+							<#break>
+						<#default>
+							<#local artLink = series.coverArtLink!defaultCover />
+							<#break>
+					</#switch>
 					<div class="coverArt">
 						<a href="${baseRef}/${series.id}.html"><img src="${artLink}" alt="Series cover"/></a>
 					</div>

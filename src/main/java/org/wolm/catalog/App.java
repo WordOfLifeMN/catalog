@@ -198,8 +198,8 @@ public class App {
 		catalog.populateFromGoogleSpreadsheets();
 
 		// Word of Life
-		buildRecentMessages(catalog, "WOL", "Ask Pastor");
-		buildRecentSeries(catalog, "WOL");
+		buildRecentMessages(catalog, "WOL", "Ask Pastor", "CORE");
+		buildRecentSeries(catalog, "WOL", "CORE");
 		// buildSeriesForYear("WOL", catalog, 2017, InclusionPolicy.startedWithin);
 		// buildSeriesForYear("WOL", catalog, 2017, InclusionPolicy.intersectingWith);
 		buildPublicCatalog("WOL", catalog);
@@ -311,7 +311,7 @@ public class App {
 		// build the page renderer
 		PageRender pageRender = new SeriesIndexWithPromoPageRender(series);
 		pageRender.setTitle("Recent Series from " + computeMinistryName(ministries[0]));
-		addCurrentSeriesPromo(catalog, (SeriesIndexWithPromoPageRender) pageRender);
+		//addCurrentSeriesPromo(catalog, (SeriesIndexWithPromoPageRender) pageRender);
 		pageRender.setMinistry(ministries[0]);
 		File outputFile = new File(outputFileDir, fileName);
 		pageRender.render(outputFile);

@@ -3,16 +3,19 @@
 		<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/TBOLogo-Small.png' />
 		<#assign defaultColor = '#424242' />
 		<#assign highlightColor = '#d15541' />
+		<#assign titleBackgroundColor = '#222222' />
 		<#break>
 	<#case 'CORE'>
 		<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CORELogo-Small.jpg' />
 		<#assign defaultColor = '#840' />
 		<#assign highlightColor = '#5b2d00' />
+		<#assign titleBackgroundColor = '#452209' />
 		<#break>
 	<#default>
 		<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XSmall.png' />
 		<#assign defaultColor = '#5a9e5d' />
 		<#assign highlightColor = '#337e37' />
+		<#assign titleBackgroundColor = '#3e713f' />
 		<#break>
 </#switch>
 
@@ -28,11 +31,25 @@
 		padding:1px;
 		border: 0px solid;
 		border-radius: 3px;
-		background-color: #3e713f;
+		background-color: ${titleBackgroundColor};
 		color: white;	
 	}
-	div.message { border: 2px solid ${defaultColor}; }
-	div.message div.title.highlight { background-color: ${highlightColor}; }
+	div.message { 
+		border: 2px solid ${defaultColor}; 
+	}
+	div.message div.title.highlight { 
+		background-color: ${highlightColor}; 
+	}
+
+	div.message.CORE { 
+		border: 2px solid #840; 
+	}
+	div.message.CORE div.title { 
+		background-color: #452209;
+	}
+	div.message.CORE div.title.highlight { 
+		background-color: #5b2d00; 
+	}
 
 	td.resources {
 		border: 2px solid #bf9c03;
@@ -46,9 +63,18 @@
 	td.resources a {
 		padding-left: 24px;
 	}
-	td.resources .source {
+	div.message-resource {
+		padding-bottom: 4px;
+	}
+	div.message-resource .source {
 		color: #777;
-		font-size: 85%;
+		font-size: 75%;
+	}
+	div.message-resource .title {
+		padding-top: 12px;
+	}
+	td.seriesHeader {
+		padding-left: 15px;
 	}
 </style>
 
@@ -62,7 +88,7 @@
 		<#if artLink??>
 			<td valign="top"><img src="${artLink}" width="128" alt="Series cover"/></td>
 		</#if>
-		<td valign="top" <#if !series.coverArtLink??>colspan="2"</#if>>
+		<td class="seriesHeader" valign="top" <#if !series.coverArtLink??>colspan="2"</#if>>
 			<p>
 				<!-- 
 					<b>${series.title}</b>
@@ -96,7 +122,7 @@
 <div>	
 	<#-- messages -->
 	<#list series.filteredMessages as message>
-		<div class="message">
+		<div class="message ${message.ministry}">
 			<div class="title" title="${message.description!}">
 				${message_index + 1}.
 				<b>${message.title}</b>
@@ -148,24 +174,23 @@
 	</#list>
 	
 	<#if series.startDate?? && !(series.endDate??)>
-		<tr><td>
-			<span class="inprogress">- there is still more to come in this series!</span>
-		</td></tr>
+		<div>
+			<p><span class="inprogress">- there is still more to come in this series!</span></p>
+		</div>
 	</#if>
 	
 	<#if series.resources?has_content>
-		<tr>
-			<td>&nbsp;</td>
-		</tr>
-		<tr>
-			<td class="resources">
-				<b>Booklets &amp; Resources</b>
-				<#list series.resources as resource>
-					<br/>
+		<div class="message-resource">
+			<p class="title">
+				<b><u>Booklets &amp; Resources</u></b>
+			</p>
+			<#list series.resources as resource>
+				<div>
 					<#if resource.fileName??>
 						<span class="filename">(${resource.fileName!})</span>
 					</#if>
-					<a href="${resource.link}" target="wolmGuide">${resource.name}</a>
+					<a href="${resource.link}" target="wolmGuide" style="padding-left:4px;">${resource.name}</a>
+					<span style="float:clear;" />
 					<#if resource.sourceMessage??>
 						<span class="source">
 							from 
@@ -175,9 +200,8 @@
 							<i>${resource.sourceMessage.title}</i>
 						</span>
 					</#if>
-					<span style="float:clear;" />
-				</#list>
-			</td>
-		</tr>
+				</div>
+			</#list>
+		</div>
 	</#if>
 </div>
