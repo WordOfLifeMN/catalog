@@ -9,6 +9,11 @@
 		<#assign defaultColor = '#840' />
 		<#assign highlightColor = '#5b2d00' />
 		<#break>
+	<#case 'Faith-Freedom'>
+		<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/CORELogo-Small.jpg' />
+		<#assign defaultColor = '#800' />
+		<#assign highlightColor = '#ff4444' />
+		<#break>
 	<#default>
 		<#assign defaultCover = 'https://s3-us-west-2.amazonaws.com/wordoflife.mn.catalog/WordofLifeLogo-XSmall.png' />
 		<#assign defaultColor = '#5a9e5d' />

@@ -217,6 +217,9 @@ public class App {
 		// Ask the Pastor
 		buildPublicCatalog("Ask Pastor", catalog);
 
+		// Faith & Freedom
+		buildPublicCatalog("Faith-Freedom", catalog);
+
 		logInfo("Catalog file generation is complete");
 	}
 
@@ -246,6 +249,8 @@ public class App {
 			return "C.O.R.E.";
 		case "Ask Pastor":
 			return "Ask the Pastor";
+		case "Faith-Freedom":
+			return "Faith and Freedom";
 		default:
 			throw new IllegalStateException("Unknown ministry '" + ministry + "'");
 		}
