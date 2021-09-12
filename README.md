@@ -1,5 +1,12 @@
 # Word of Life Catalog Factory
 
+## Status
+> This repo is archived because the Google authentication is not working in Java any more. 
+  At the time of writing, even Google's sample code won't authenticate correctly, so I'm
+  moving this project to GoLang under the project WordOfLifeMN/online
+
+
+
 Utility to construct and update the web pages that comprise the message catalog Word of Life Ministries of Minnesota.
 Builds and uploads all the pages that http://www.wordoflifemn.org/messages-online.html points to.
 
